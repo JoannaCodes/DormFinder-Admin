@@ -70,7 +70,7 @@ class sdm_query
 	          <td class='align-middle'>" . $out[$i]['doc_1'] . "</td>
 	          <td class='align-middle'>" . $doc_status . "</td>
 	          <td class='align-middle'>
-	          	<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/all_photos/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-link text-primary p-0 btn-lg type='button'><i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
+	          	<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/uploads/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-link text-primary p-0 btn-lg type='button'><i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
 	          	<button class='btn btn-link text-primary p-0 btn-lg' data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='" . $doc_tooltip . "' data-docvalue='" . $doc_value . "' onclick='verify_document(this)' data-id='" . $out[$i]['id'] . "'>" . $doc_icon . "</button>
 	          </td>
 	        </tr>";
