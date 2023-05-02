@@ -213,19 +213,36 @@ class sdm_query
 		$currdate = date("Y-m-d H:i:s");
 		return $this->QuickLook("SELECT *, UNIX_TIMESTAMP(scheduled) as unix_time FROM tbl_notifications WHERE scheduled>?", [$currdate]);
 	}
-	public function update_account($id, $loginCredential)
+	public function get_account($id)
 	{
-		if ($this->QuickFire(
-			"UPDATE tbl_users SET identifier=? updated_at=now() WHERE id=?;",
-			[$loginCredential, $id]
-		)) {
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
+		if (count($out) == 1) {
+			return json_encode(json_encode($out[0]['identifier']));
+		}
+	}
+	public function update_account($id, $identifier)
+	{
+		if ($this->QuickFire("UPDATE tbl_users SET identifier=?, updated_at=now() WHERE id=?", [$identifier, $id])) {
 			return "1";
 		}
 	}
 	public function delete_account($id)
 	{
-		if ($this->QuickFire("DELETE FROM tbl_users WHERE id=?;", [$id])) {
+		if ($this->QuickFire("DELETE FROM tbl_users WHERE id=?", [$id])) {
 			return "1";
+		}
+	}
+	public function change_password($id, $currentpassword, $newpassword)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
+		if ($out[0]['password'] == $currentpassword) {
+			if ($this->QuickFire("UPDATE tbl_users SET password=?, updated_at=now() WHERE id=?", [$newpassword, $id])) {
+				return 'Password updated';
+			} else {
+				return 'Cannot change password. Please try again';
+			}
+		} else {
+			return 'Incorrect Password';
 		}
 	}
 
