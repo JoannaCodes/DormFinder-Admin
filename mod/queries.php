@@ -6,13 +6,12 @@ class sdm_query
 	{
 		$this->c = $db;
 	}
-	public function send_document($fileName)
+	public function send_document($target_file,$target_file2)
 	{
-		if ($this->QuickFire(
-			"INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",
-			[$fileName, "0", "1122"]
-		)) {
-			return "1";
+		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", "1122"])) {
+			if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file2, "0", "1122"])) {
+				return "1";
+			}
 		}
 	}
 	public function login_dormfinder($email, $password)
@@ -83,7 +82,6 @@ class sdm_query
 		$thiday = date("Y-m-d H:i:s");
 		$tofetch = "";
 		$allid = explode(",", $idstoftech);
-
 		$cleanedallid = array();
 
 
@@ -134,16 +132,12 @@ class sdm_query
 		user_ref=? AND
 		scheduled <= ? ORDER BY scheduled DESC LIMIT 8", [$userref, $thiday]), true), true);
 
-
-
 		for ($i = 0; $i < count($out); $i++) {
-
 			$out[$i]["scheduled"] = $this->DateExplainer($out[$i]["scheduled"])   . ";" . date("F d, Y g:i a", strtotime($out[$i]["scheduled"]));
 		}
 
 		return json_encode(json_encode($out));
 	}
-
 	public function DateExplainer($thedate)
 	{
 		$future = strtotime($thedate); //Future date.
