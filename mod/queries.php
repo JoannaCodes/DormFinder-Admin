@@ -245,6 +245,22 @@ class sdm_query
 			return 'Incorrect Password';
 		}
 	}
+	public function get_dorms($userref)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
+		return json_encode(json_encode($out));
+	}
+	public function get_dorm_details($dormref, $userref)
+	{
+		$out = json_decode(json_decode($this->QuickLook(
+			"SELECT * FROM tbl_dorms 
+			INNER JOIN tbl_houserules ON tbl_dorms.id=tbl_houserules.dormref
+			INNER JOIN tbl_pdterms ON tbl_dorms.id=tbl_pdterms.dormref
+			WHERE tbl_dorms.id=? AND tbl_dorms.userref=?",
+			[$dormref, $userref]
+		), true), true);
+		return json_encode(json_encode($out[0]));
+	}
 
 	public function QuickLook($q, $par = array())
 	{
