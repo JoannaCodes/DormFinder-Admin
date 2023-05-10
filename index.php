@@ -124,6 +124,12 @@ $target_dir = "uploads/user/";
 		$newpassword = $_POST['newpassword'];
 		echo sdmq()->change_password($_POST["userref"], $currentpassword, $newpassword);
 		break;
+	case 'get_dorms':
+		echo sdmq()->get_dorms($_GET["userref"]);
+		break;
+	case 'get_dorm_details':
+		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
+		break;
 }
 function sdmq()
 {
