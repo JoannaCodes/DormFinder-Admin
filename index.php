@@ -27,7 +27,7 @@ $target_dir = "uploads/user/";
 
   // Check if user folder exists, create it if it doesn't
   if (!file_exists($target_dir)) {
-    mkdir($target_dir, 0777, true);
+  	mkdir($target_dir, 0777, true);
   }
 
   // Check if file already exists

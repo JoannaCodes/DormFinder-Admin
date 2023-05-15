@@ -67,14 +67,14 @@
 <script>
 function logout() {
 	localStorage.clear();
-	window.location.href="http://localhost/dormfinder_php/dormfinder_admin.php";
+	window.location.href="http://localhost/DormFinder-Admin/dormfinder_admin.php";
 }
 check_cookies();
 function check_cookies() {
 	if("id" in localStorage) {
 
 	} else {
-		window.location.href="http://localhost/dormfinder_php/dormfinder_admin.php";
+		window.location.href="http://localhost/DormFinder-Admin/dormfinder_admin.php";
 	}
 }
 // Initialize DataTable
@@ -82,7 +82,7 @@ function verify_document(obj) {
 	var id = $(obj).data('id');
 	var docvalue = $(obj).data('docvalue');
 	$.ajax({
-		url: "http://localhost/dormfinder_php/index.php",
+		url: "http://localhost/DormFinder-Admin/index.php",
 		type: "POST",
 		data: {
 			_token: "{{ csrf_token() }}",
@@ -100,7 +100,7 @@ function verify_document(obj) {
 
 $(document).ready(function() {
 	$.ajax({
-		url: "http://localhost/dormfinder_php/index.php",
+		url: "http://localhost/DormFinder-Admin/index.php",
 		type: "GET",
 		data: {
 			_token: "{{ csrf_token() }}",
