@@ -100,8 +100,11 @@ $target_dir = "uploads/user/";
 	case "getnotificationspast":
 		echo sdmq()->look_passednotifications($_GET["userref"]);
 		break;
+	case "get_account":
+		echo sdmq()->get_account($_GET["userref"]);
+		break;
 	case "update_account":
-		$out = sdmq()->update_account($_POST["userref"], $_POST["loginCredential"]);
+		$out = sdmq()->update_account($_POST["userref"], $_POST["identifier"]);
 		if ($out == "1") {
 			echo 'Account Updated';
 		} else {
@@ -115,6 +118,17 @@ $target_dir = "uploads/user/";
 		} else {
 			echo 'Cannot Delete Account. Pleass Try Again';
 		}
+		break;
+	case 'change_password':
+		$currentpassword = $_POST['currentpassword'];
+		$newpassword = $_POST['newpassword'];
+		echo sdmq()->change_password($_POST["userref"], $currentpassword, $newpassword);
+		break;
+	case 'get_dorms':
+		echo sdmq()->get_dorms($_GET["userref"]);
+		break;
+	case 'get_dorm_details':
+		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
 		break;
 }
 function sdmq()
