@@ -16,6 +16,15 @@ if (isset($_POST["tag"])) {
 }
 
 switch ($tag) {
+	case 'clearallnotif':
+		echo sdmq()->clearallnotif($_GET["userref"]);
+	break;
+	case 'change_status':
+		echo sdmq()->change_status($_POST["btn_value"]);
+	break;
+	case 'open_document':
+		echo sdmq()->open_document($_POST["user_id"]);
+	break;
 	case 'send_document':
 $target_dir = "uploads/user/";
   $target_file = $target_dir . basename($_FILES["document1"]["name"]);
@@ -96,7 +105,7 @@ $target_dir = "uploads/user/";
 		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
-		break;
+	break;
 	case "getnotificationspast":
 		echo sdmq()->look_passednotifications($_GET["userref"]);
 		break;
@@ -126,10 +135,10 @@ $target_dir = "uploads/user/";
 		break;
 	case 'get_dorms':
 		echo sdmq()->get_dorms($_GET["userref"]);
-		break;
+	break;
 	case 'get_dorm_details':
 		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
-		break;
+	break;
 }
 function sdmq()
 {
