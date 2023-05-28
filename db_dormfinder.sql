@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2023 at 12:22 PM
+-- Generation Time: May 28, 2023 at 10:54 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -61,8 +61,8 @@ INSERT INTO `tbl_bookmarks` (`id`, `dormref`, `userref`) VALUES
 (1, 'i1QjNuLJTMZIB', 'qzPHvK8kHTy3i'),
 (2, 'BFHSJXnnAUkI2', 'LhVQ3FMv6d6lW'),
 (3, 'Npqap0xFEsMlT', 'tyFmSQJWc9HwZ'),
-(4, 'KKtGjBpTq9VAI', 'qzPHvK8kHTy3i'),
-(5, 'lABWe6poOzMcM', 'LhVQ3FMv6d6lW'),
+(4, 'Npqap0xFEsMlT', 'qzPHvK8kHTy3i'),
+(5, 'lABWe6poOzMcM', 'qzPHvK8kHTy3i'),
 (6, 'i1QjNuLJTMZIB', 'tyFmSQJWc9HwZ'),
 (7, 'lABWe6poOzMcM', 'tyFmSQJWc9HwZ'),
 (8, 'BFHSJXnnAUkI2', 'qzPHvK8kHTy3i'),
@@ -133,7 +133,7 @@ CREATE TABLE `tbl_dorms` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `price` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `slots` int(255) DEFAULT NULL,
+  `slots` int(11) DEFAULT 0,
   `desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `hei` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `amenities` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -147,11 +147,11 @@ CREATE TABLE `tbl_dorms` (
 --
 
 INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `price`, `slots`, `desc`, `hei`, `amenities`, `images`, `createdAt`, `updatedAt`) VALUES
-('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '07 Katie Terrace', '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'dolor, consectetuer, ipsum, proin, elit, adipiscing, interdum, lorem, sit, amet', 'http://dummyimage.com/207x100.png/dddddd/000000, http://dummyimage.com/180x100.png/dddddd/000000', '2022-09-21', '2023-06-01'),
-('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '4837 Spohn Junction', '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'et, dis, magnis, natoque, penatibus', 'http://dummyimage.com/207x100.png/dddddd/000000, http://dummyimage.com/180x100.png/dddddd/000000', '2022-02-14', '2023-10-24'),
-('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '2739 Tony Park', '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'aliquet, massa, convallis, id, lobortis, tortor', 'http://dummyimage.com/207x100.png/dddddd/000000, http://dummyimage.com/180x100.png/dddddd/000000', '2022-06-14', '2023-05-02'),
-('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '7780 Crescent Oaks Trail', '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'at, maecenas, tincidunt, lacus, vivamus, vel, velit', 'http://dummyimage.com/207x100.png/dddddd/000000, http://dummyimage.com/180x100.png/dddddd/000000', '2021-04-04', '2023-09-09'),
-('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '3305 Susan Alley', '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'vivamus, ante, duis, tortor, mattis, sed', 'http://dummyimage.com/207x100.png/dddddd/000000, http://dummyimage.com/180x100.png/dddddd/000000', '2022-03-19', '2023-03-05');
+('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '07 Katie Terrace', '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'Air Conditioning, Elevator, Beddings, Kitchen, Wi-Fi', 'adam-winger-5zX1KAjPl4o-unsplash.jpg,alen-rojnic-GfvHuhw2Iqg-unsplash.jpg,alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,blake-woolwine-lz9W775oDyI-unsplash.jpg,chino-rocha-LDhXIvAqRJw-unsplash.jpg', '2022-09-21', '2023-06-01'),
+('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '4837 Spohn Junction', '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'Lounge, Parking, Security, Study Room', 'daria-shevtsova-RP4mtXJM7es-unsplash.jpg,fred-kleber-gTbaxaVLvsg-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,lissete-laverde-9XdCMuK8zlQ-unsplash.jpg,marcus-loke-WQJvWU_HZFo-unsplash.jpg', '2022-02-14', '2023-10-24'),
+('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '2739 Tony Park', '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'Laundry, Lounge, Parking, Wi-Fi', 'nguyen-dang-hoang-nhu-HHs_PrvxSQk-unsplash.jpg,rnaol-oKHHspCSWHQ-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,shashi-chaturvedula-UlHN7wFhtvU-unsplash.jpg,shashi-chaturvedula-xdY1s1I6J8U-unsplash.jpg', '2022-06-14', '2023-05-02'),
+('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '7780 Crescent Oaks Trail', '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'Lounge, Security, Study Room', 'shche_-team-PFi1uWHh2dQ-unsplash.jpg,sigmund-CwTfKH5edSk-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg,spacejoy-vOa-PSimwg4-unsplash.jpg,taiga-ishii-mukO8Po_LZ8-unsplash.jpg', '2021-04-04', '2023-09-09'),
+('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '3305 Susan Alley', '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'Beddings, Parking, Wi-Fi', 'alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg', '2022-03-19', '2023-03-05');
 
 -- --------------------------------------------------------
 
@@ -162,9 +162,9 @@ INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `price`, `slots`, `
 CREATE TABLE `tbl_houserules` (
   `id` int(11) NOT NULL,
   `dormref` varchar(13) DEFAULT NULL,
-  `visitors` int(11) DEFAULT NULL,
-  `pets` int(11) DEFAULT NULL,
-  `curfew` int(11) DEFAULT NULL
+  `visitors` int(11) DEFAULT 0,
+  `pets` int(11) DEFAULT 0,
+  `curfew` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -212,11 +212,11 @@ INSERT INTO `tbl_notifications` (`id`, `user_ref`, `title`, `ndesc`, `created`, 
 
 CREATE TABLE `tbl_pdterms` (
   `id` int(11) NOT NULL,
-  `dormref` varchar(13) DEFAULT NULL,
-  `advance_deposit` varchar(100) DEFAULT NULL,
-  `security_deposit` varchar(100) DEFAULT NULL,
-  `utilities` varchar(100) DEFAULT NULL,
-  `minimum_stay` varchar(100) DEFAULT NULL
+  `dormref` varchar(13) NOT NULL,
+  `advance_deposit` varchar(255) NOT NULL,
+  `security_deposit` varchar(255) NOT NULL,
+  `utilities` varchar(255) NOT NULL,
+  `minimum_stay` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -252,9 +252,9 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `username`, `identifier`, `imageUrl`, `is_verified`, `password`, `created_at`, `updated_at`) VALUES
-('LhVQ3FMv6d6lW', 'Alyda Meyer', '7576161975', 'http://dummyimage.com/185x100.png/5fa2dd/ffffff', 1, 'bgc78ZD', '2022-04-01', '2023-04-01'),
-('qzPHvK8kHTy3i', 'Willis Standing', '3627735926', 'http://dummyimage.com/141x100.png/ff4444/ffffff', 1, 'KtnA5CW6', '2022-03-02', '2023-10-17'),
-('tyFmSQJWc9HwZ', 'Giacobo Ziemke', 'gziemke2@tamu.edu', 'http://dummyimage.com/243x100.png/dddddd/000000', 0, 'c1nM8r1JBEu6', '2022-04-29', '2023-10-30');
+('LhVQ3FMv6d6lW', 'Juan Dela Cruz', '09123456789', 'rn_image_picker_lib_temp_92e4599a-cf13-47fc-aced-a4cdd8b50f47.jpg', 1, 'bgc78ZD', '2022-04-01', '2023-05-28'),
+('qzPHvK8kHTy3i', 'Willis Standing', '09024680123', '7.jpg', 1, 'KtnA5CW6', '2022-03-02', '2023-05-27'),
+('tyFmSQJWc9HwZ', 'Giacobo Ziemke', 'gziemke2@tamu.edu', '5.jpg', 0, 'c1nM8r1JBEu6', '2022-04-29', '2023-10-30');
 
 --
 -- Indexes for dumped tables

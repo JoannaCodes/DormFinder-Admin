@@ -17,54 +17,54 @@ if (isset($_POST["tag"])) {
 
 switch ($tag) {
 	case 'send_document':
-$target_dir = "uploads/user/";
-  $target_file = $target_dir . basename($_FILES["document1"]["name"]);
-  $target_file2 = $target_dir . basename($_FILES["document2"]["name"]);
-  $filename1 = basename($_FILES["document1"]["name"]);
-  $filename2 = basename($_FILES["document2"]["name"]);
-  $uploadOk = 1;
-  $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+		$target_dir = "uploads/user/";
+		$target_file = $target_dir . basename($_FILES["document1"]["name"]);
+		$target_file2 = $target_dir . basename($_FILES["document2"]["name"]);
+		$filename1 = basename($_FILES["document1"]["name"]);
+		$filename2 = basename($_FILES["document2"]["name"]);
+		$uploadOk = 1;
+		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-  // Check if user folder exists, create it if it doesn't
-  if (!file_exists($target_dir)) {
-    mkdir($target_dir, 0777, true);
-  }
+		// Check if user folder exists, create it if it doesn't
+		if (!file_exists($target_dir)) {
+			mkdir($target_dir, 0777, true);
+		}
 
-  // Check if file already exists
-  if (file_exists($target_file)) {
-    echo "Sorry, file already exists.";
-    $uploadOk = 0;
-  }
+		// Check if file already exists
+		if (file_exists($target_file)) {
+			echo "Sorry, file already exists.";
+			$uploadOk = 0;
+		}
 
-  // Check file size
-  if ($_FILES["document1"]["size"] > 5000000) {
-    echo "Sorry, your file is too large.";
-    $uploadOk = 0;
-  }
+		// Check file size
+		if ($_FILES["document1"]["size"] > 5000000) {
+			echo "Sorry, your file is too large.";
+			$uploadOk = 0;
+		}
 
-  // Allow certain file formats
-  if($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
-    echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
-    $uploadOk = 0;
-  }
+		// Allow certain file formats
+		if($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
+			echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
+			$uploadOk = 0;
+		}
 
-  // Check if $uploadOk is set to 0 by an error
-  if ($uploadOk == 0) {
-    echo "Sorry, your file was not uploaded.";
-  // If everything is ok, try to upload file
-  } else {
-  	$out = sdmq()->send_document($filename1,$filename2);
-  	if ($out == "1") {
-		if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
+		// Check if $uploadOk is set to 0 by an error
+		if ($uploadOk == 0) {
+			echo "Sorry, your file was not uploaded.";
+			// If everything is ok, try to upload file
+		} else {
+			$out = sdmq()->send_document($filename1,$filename2);
+			if ($out == "1") {
+				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
 	      echo "The file ". htmlspecialchars( basename( $_FILES["document1"]["name"])). " and ". htmlspecialchars( basename( $_FILES["document2"]["name"])). " has been uploaded.";
-	    } else {
-	      echo "Sorry, there was an error uploading your file.";
-	    }
-	} else {
-		echo "Query failed.";
-	}
-  }
-	break;
+				} else {
+					echo "Sorry, there was an error uploading your file.";
+				}
+			} else {
+				echo "Query failed.";
+			}
+		}
+		break;
 	case 'upload_image':
 		$document = $_FILES['document'];
 		$uploadDir = './uploads/';
@@ -106,17 +106,17 @@ $target_dir = "uploads/user/";
 	case "update_account":
 		$out = sdmq()->update_account($_POST["userref"], $_POST["identifier"]);
 		if ($out == "1") {
-			echo 'Account Updated';
+			echo 'Account updated';
 		} else {
-			echo 'Cannot Update Account. Please Try Again';
+			echo 'Cannot update account. Please try again';
 		}
 		break;
 	case 'delete_account':
 		$out = sdmq()->delete_account($_POST["userref"]);
 		if ($out == "1") {
-			echo 'Account Deleted';
+			echo 'Account deleted';
 		} else {
-			echo 'Cannot Delete Account. Pleass Try Again';
+			echo 'Cannot delete account. Please try again';
 		}
 		break;
 	case 'change_password':
@@ -129,6 +129,31 @@ $target_dir = "uploads/user/";
 		break;
 	case 'get_dorm_details':
 		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
+		break;
+	case 'get_bookmarks':
+		echo sdmq()->get_bookmarks($_GET["userref"]);
+		break;
+	case "update_profile":
+		$image = $_FILES['image'];
+		$userref = $_POST["userref"];
+		$username = $_POST["username"];
+		$uploadDir = './uploads/userImages/' . $userref . '/';
+		$uploadFile = $uploadDir . basename($image['name']);
+		$fileName = basename($image['name']);
+
+		// Check if the folder already exists
+		if (!file_exists($uploadDir)) {
+			mkdir($uploadDir, 0777, true);
+		}
+
+		$out = sdmq()->update_profile($userref, $username, $fileName);
+		if ($out == "1") {
+			if (move_uploaded_file($image['tmp_name'], $uploadFile)) {
+				echo 'Profile updated';
+			} else {
+				echo 'Cannot update profile. Please try again';
+			}
+		}
 		break;
 }
 function sdmq()

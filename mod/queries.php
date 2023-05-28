@@ -211,7 +211,7 @@ class sdm_query
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
 		if (count($out) == 1) {
-			return json_encode(json_encode($out[0]['identifier']));
+			return json_encode(json_encode($out[0]));
 		}
 	}
 	public function update_account($id, $identifier)
@@ -254,6 +254,17 @@ class sdm_query
 			[$dormref, $userref]
 		), true), true);
 		return json_encode(json_encode($out[0]));
+	}
+	public function get_bookmarks($userref)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
+		return json_encode(json_encode($out));
+	}
+	public function update_profile($userref, $username, $filename)
+	{
+		if ($this->QuickFire("UPDATE tbl_users SET username=?, imageUrl=?, updated_at=now() WHERE id=?", [$username, $filename, $userref])) {
+			return "1";
+		}
 	}
 
 	public function QuickLook($q, $par = array())
