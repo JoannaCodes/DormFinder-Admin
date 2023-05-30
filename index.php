@@ -108,7 +108,7 @@ switch ($tag) {
 		if ($out == "1") {
 			echo 'Account updated';
 		} else {
-			echo 'Cannot update account. Please try again';
+			echo 'Cannot update account. Please try again.';
 		}
 		break;
 	case 'delete_account':
@@ -116,7 +116,7 @@ switch ($tag) {
 		if ($out == "1") {
 			echo 'Account deleted';
 		} else {
-			echo 'Cannot delete account. Please try again';
+			echo 'Cannot delete account. Please try again.';
 		}
 		break;
 	case 'change_password':
@@ -153,6 +153,33 @@ switch ($tag) {
 			} else {
 				echo 'Cannot update profile. Please try again';
 			}
+		}
+		break;
+	case 'delete_bookmark':
+		$out = sdmq()->delete_bookmark($_POST["dormref"], $_POST["userref"]);
+		if ($out == "1") {
+			echo 'Bookmark removed';
+		} else {
+			echo 'Cannot remove bookmark. Please try again.';
+		}
+		break;
+	case 'post_review':
+		$out = sdmq()->post_review($_POST["dormref"], $_POST["userref"], $_POST["rating"], $_POST["comment"], );
+		if ($out == "1") {
+			echo 'Review Submitted';
+		} else {
+			echo 'Cannot delete account. Please try again';
+		}
+		break;
+	case 'get_reviews':
+		echo sdmq()->get_reviews($_GET["dormref"]);
+		break;
+	case 'delete_dorm':
+		$out = sdmq()->delete_dorm($_POST["dormref"], $_POST["userref"]);
+		if ($out == "1") {
+			echo 'Dorm listing removed';
+		} else {
+			echo 'Cannot remove bookmark. Please try again.';
 		}
 		break;
 }

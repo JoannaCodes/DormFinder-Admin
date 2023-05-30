@@ -266,6 +266,29 @@ class sdm_query
 			return "1";
 		}
 	}
+	public function delete_bookmark($dormref, $userref)
+	{
+		if ($this->QuickFire("DELETE FROM `tbl_bookmarks` WHERE dormref=? AND userref=?", [$dormref, $userref])) {
+			return "1";
+		}
+	}
+	public function post_review($dormref, $userref, $rating, $comment)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_dormreviews SET dormref=?, userref=?, rating=?, comment=?, createdAt=now()", [$dormref, $userref, $rating, $comment])) {
+			return "1";
+		}
+	}
+	public function get_reviews($dormref)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT u.id, u.username, u.imageUrl, r.rating, r.comment, r.createdAt FROM tbl_users u INNER JOIN tbl_dormreviews r ON u.id = r.userref WHERE dormref=?", [$dormref]), true), true);
+		return json_encode(json_encode($out));
+	}
+	public function delete_dorm($dormref, $userref)
+	{
+		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=? AND userref=?", [$dormref, $userref])) {
+			return "1";
+		}
+	}
 
 	public function QuickLook($q, $par = array())
 	{
