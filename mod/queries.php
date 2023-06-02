@@ -6,6 +6,51 @@ class sdm_query
 	{
 		$this->c = $db;
 	}
+	public function clearallnotif($userref) {
+		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
+			return "0";
+		}
+	}
+	public function change_status($btn_value) {
+		if($btn_value == "1") {
+			$vtitle = "DormFinder";
+			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
+			$vreferencestarter = "1";
+			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+			$current_time = date('Y-m-d H:i:s');
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			)) {
+				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id='1122'",[$btn_value])) {
+					return "1";
+				}
+			}
+		} else if ($btn_value == "2") {
+			$vtitle = "DormFinder";
+			$vdesc = "Your documents have not been verified! Please upload a new document.";
+			$vreferencestarter = "1";
+			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+			$current_time = date('Y-m-d H:i:s');
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			)) {
+				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id='1122'",[])) {
+					return "0";
+				}
+			}
+			
+		}
+	}
+	public function open_document($user_id) {
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id", [$user_id]), true), true);
+		$toecho = "";
+		$doc_status = "";
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho.="<div class='d-flex mb-3'>
+						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
+						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/uploads/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
+					</div>";
+		}
+		return $toecho;
+	}
 	public function send_document($target_file,$target_file2)
 	{
 		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", "1122"])) {
@@ -47,34 +92,24 @@ class sdm_query
 	}
 	public function get_submitdocuments()
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents", []), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents GROUP BY user_id", []), true), true);
 		$toecho = "";
 		$doc_status = "";
 		for ($i = 0; $i < count($out); $i++) {
 			switch ($out[$i]['doc1_status']) {
 				case '0':
 					$doc_status = "Unverified";
-					$doc_tooltip = "Verify";
-					$doc_value = "1";
-					$doc_icon = "<i class='fa-light fa-file-check fa-fw fa-lg'></i>";
-					break;
+				break;
 				case '1':
 					$doc_status = "Verified";
-					$doc_tooltip = "Unverify";
-					$doc_value = "0";
-					$doc_icon = "<i class='fa-light fa-file-xmark fa-fw fa-lg'></i>";
-					break;
+				break;
 			}
 			$toecho .= "<tr>
-	          <td class='align-middle'>" . $out[$i]['doc_1'] . "</td>
-	          <td class='align-middle'>" . $doc_status . "</td>
-	          <td class='align-middle'>
-	          	<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/uploads/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-link text-primary p-0 btn-lg type='button'><i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
-	          	<button class='btn btn-link text-primary p-0 btn-lg' data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='" . $doc_tooltip . "' data-docvalue='" . $doc_value . "' onclick='verify_document(this)' data-id='" . $out[$i]['id'] . "'>" . $doc_icon . "</button>
-	          </td>
+				<td class='align-middle'><button class='btn btn-link text-primary' data-user_id='".$out[$i]['user_id']."' data-doc_status='".$out[$i]['doc1_status']."' onclick='open_userdoc(this)'>" . $out[$i]['user_id'] . "</button></td>
+				<td class='align-middle'>" . $doc_status . "</td>
+				<td width='25%' class='align-middle'>".$out[$i]['date_added']."</td>
 	        </tr>";
 		}
-
 		return $toecho;
 	}
 	public function look_morepastnotif($userref, $idstoftech)

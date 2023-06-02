@@ -58,7 +58,7 @@
 	check_cookies();
 	function check_cookies() {
 		if("id" in localStorage) {
-			window.location.href="http://localhost/dormfinder_php/dormfinder_home.php";
+			window.location.href="http://localhost/DormFinder-Admin/dormfinder_home.php";
 		}
 	}
 	$(document).ready(function() {
@@ -75,14 +75,14 @@
 			// send the form data using AJAX
 			$.ajax({
 				type: 'POST',
-				url: 'http://localhost/dormfinder_php/index.php', // the PHP script that handles the login request
+				url: 'http://localhost/DormFinder-Admin/index.php', // the PHP script that handles the login request
 				data: formData,
 				dataType: 'json',
 				encode: true
 			}).done(function(data) {
 				if(data['status'] == "true") {
 					localStorage.setItem('id', data['id']);
-					window.location.href="http://localhost/dormfinder_php/dormfinder_home.php";
+					window.location.href="http://localhost/DormFinder-Admin/dormfinder_home.php";
 				} else {
 					alert("email/password is not correct");
 				}

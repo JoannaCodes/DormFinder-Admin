@@ -14,7 +14,9 @@
 		<!-- DataTables JS -->
 		<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-1.11.3/datatables.min.js"></script>
 		<!-- Font Awesome 6 Pro -->
-		<link href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro-v6@44659d9/css/all.min.css" rel="stylesheet" type="text/css" />
+		<link href="https://cdn.jsdelivr.net/gh/duyplus/fontawesome-pro/css/all.min.css" rel="stylesheet" type="text/css" />
+		<!-- sweetalert 2 -->
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	</head>
 	<body>
 		<!-- Navbar -->
@@ -51,9 +53,9 @@
 			<table class="table table-striped table-bordered" id="sampleTable">
 				<thead>
 					<tr>
-						<th>Document</th>
+						<th>User ID</th>
 						<th>Status</th>
-						<th width="10">Action</th>
+						<th>Date Submitted</th>
 					</tr>
 				</thead>
 				<tbody id="table1">
@@ -63,18 +65,91 @@
 	</body>
 </html>
 
+<!-- Modal -->
+<div class="modal fade" id="open_userdocumodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">DormFinder</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<input type='hidden' id="status_value" />
+				<p>User <span class='userid_data'></span>:</p>
+				<div class="fill_data w-100">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-value='2' onclick="change_status(this)">Unverify</button>
+				<button type="button" class="btn btn-success" data-value='1' onclick="change_status(this)">Verify</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
+function change_status(obj) {
+	var doc1_statusval = $('#status_value').val();
+	var btn_value = $(obj).data('value');
+
+	Swal.fire({
+		title: 'Do you want to save the changes?',
+		showDenyButton: true,
+		showCancelButton: false,
+		confirmButtonText: 'Yes',
+		denyButtonText: `No`,
+	}).then((result) => {
+		/* Read more about isConfirmed, isDenied below */
+		if (result.isConfirmed) {
+			$.ajax({
+				url: "http://localhost/DormFinder-Admin/index.php",
+				type: "POST",
+				data: {
+					_token: "{{ csrf_token() }}",
+					tag: "change_status",
+					btn_value: btn_value
+				},
+				complete:function(response) {
+					Swal.fire('Changes are saved!', '', 'success')
+					get_userdoc();
+					$('#open_userdocumodal').modal('hide');
+				}
+			})
+		} else if (result.isDenied) {
+			Swal.fire('Changes are not saved', '', 'info')
+			$('#open_userdocumodal').modal('hide');
+		}
+	})
+}
+function open_userdoc(obj) {
+	var user_id = $(obj).data('user_id');
+	var status_val = $(obj).data('doc_status');
+	$('.userid_data').text(user_id);
+	$('#status_value').val(status_val);
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "POST",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "open_document",
+			user_id: user_id
+		},
+		complete:function(response) {
+			$('.fill_data').html(response.responseText);
+			 $('#open_userdocumodal').modal('show');
+		}
+	})
+}
 function logout() {
 	localStorage.clear();
-	window.location.href="http://localhost/dormfinder_php/dormfinder_admin.php";
+	window.location.href="http://localhost/DormFinder-Admin/dormfinder_admin.php";
 }
 check_cookies();
 function check_cookies() {
 	if("id" in localStorage) {
 
 	} else {
-		window.location.href="http://localhost/dormfinder_php/dormfinder_admin.php";
+		window.location.href="http://localhost/DormFinder-Admin/dormfinder_admin.php";
 	}
 }
 // Initialize DataTable
@@ -82,7 +157,7 @@ function verify_document(obj) {
 	var id = $(obj).data('id');
 	var docvalue = $(obj).data('docvalue');
 	$.ajax({
-		url: "http://localhost/dormfinder_php/index.php",
+		url: "http://localhost/DormFinder-Admin/index.php",
 		type: "POST",
 		data: {
 			_token: "{{ csrf_token() }}",
@@ -99,8 +174,12 @@ function verify_document(obj) {
 }
 
 $(document).ready(function() {
+	get_userdoc();
+});
+
+function get_userdoc() {
 	$.ajax({
-		url: "http://localhost/dormfinder_php/index.php",
+		url: "http://localhost/DormFinder-Admin/index.php",
 		type: "GET",
 		data: {
 			_token: "{{ csrf_token() }}",
@@ -116,5 +195,5 @@ $(document).ready(function() {
 			})
 		}
 	})
-});
+}
 </script>

@@ -16,6 +16,15 @@ if (isset($_POST["tag"])) {
 }
 
 switch ($tag) {
+	case 'clearallnotif':
+		echo sdmq()->clearallnotif($_GET["userref"]);
+	break;
+	case 'change_status':
+		echo sdmq()->change_status($_POST["btn_value"]);
+	break;
+	case 'open_document':
+		echo sdmq()->open_document($_POST["user_id"]);
+	break;
 	case 'send_document':
 		$target_dir = "uploads/user/";
 		$target_file = $target_dir . basename($_FILES["document1"]["name"]);
@@ -25,10 +34,10 @@ switch ($tag) {
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-		// Check if user folder exists, create it if it doesn't
-		if (!file_exists($target_dir)) {
-			mkdir($target_dir, 0777, true);
-		}
+  // Check if user folder exists, create it if it doesn't
+  if (!file_exists($target_dir)) {
+  	mkdir($target_dir, 0777, true);
+  }
 
 		// Check if file already exists
 		if (file_exists($target_file)) {
@@ -96,7 +105,7 @@ switch ($tag) {
 		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
-		break;
+	break;
 	case "getnotificationspast":
 		echo sdmq()->look_passednotifications($_GET["userref"]);
 		break;
@@ -126,7 +135,7 @@ switch ($tag) {
 		break;
 	case 'get_dorms':
 		echo sdmq()->get_dorms($_GET["userref"]);
-		break;
+	break;
 	case 'get_dorm_details':
 		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
 		break;
@@ -181,7 +190,7 @@ switch ($tag) {
 		} else {
 			echo 'Cannot remove bookmark. Please try again.';
 		}
-		break;
+	break;
 }
 function sdmq()
 {
