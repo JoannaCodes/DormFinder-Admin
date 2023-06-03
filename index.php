@@ -115,17 +115,17 @@ switch ($tag) {
 	case "update_account":
 		$out = sdmq()->update_account($_POST["userref"], $_POST["identifier"]);
 		if ($out == "1") {
-			echo 'Account updated';
+			echo 'success';
 		} else {
-			echo 'Cannot update account. Please try again.';
+			echo 'failed';
 		}
 		break;
 	case 'delete_account':
 		$out = sdmq()->delete_account($_POST["userref"]);
 		if ($out == "1") {
-			echo 'Account deleted';
+			echo 'success';
 		} else {
-			echo 'Cannot delete account. Please try again.';
+			echo 'failed';
 		}
 		break;
 	case 'change_password':
@@ -137,7 +137,7 @@ switch ($tag) {
 		echo sdmq()->get_dorms($_GET["userref"]);
 	break;
 	case 'get_dorm_details':
-		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
+		echo sdmq()->get_dorm_details($_GET["dormref"]);
 		break;
 	case 'get_bookmarks':
 		echo sdmq()->get_bookmarks($_GET["userref"]);
@@ -155,29 +155,31 @@ switch ($tag) {
 			mkdir($uploadDir, 0777, true);
 		}
 
-		$out = sdmq()->update_profile($userref, $username, $fileName);
-		if ($out == "1") {
-			if (move_uploaded_file($image['tmp_name'], $uploadFile)) {
-				echo 'Profile updated';
+		if (move_uploaded_file($image['tmp_name'], $uploadFile)) {
+			$out = sdmq()->update_profile($userref, $username, $fileName);
+			if ($out == "1") {
+				echo 'success';
 			} else {
-				echo 'Cannot update profile. Please try again';
+				echo 'failed';
 			}
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'delete_bookmark':
 		$out = sdmq()->delete_bookmark($_POST["dormref"], $_POST["userref"]);
 		if ($out == "1") {
-			echo 'Bookmark removed';
+			echo 'success';
 		} else {
-			echo 'Cannot remove bookmark. Please try again.';
+			echo 'failed';
 		}
 		break;
 	case 'post_review':
 		$out = sdmq()->post_review($_POST["dormref"], $_POST["userref"], $_POST["rating"], $_POST["comment"], );
 		if ($out == "1") {
-			echo 'Review Submitted';
+			echo 'success';
 		} else {
-			echo 'Cannot delete account. Please try again';
+			echo 'failed';
 		}
 		break;
 	case 'get_reviews':
@@ -186,9 +188,9 @@ switch ($tag) {
 	case 'delete_dorm':
 		$out = sdmq()->delete_dorm($_POST["dormref"], $_POST["userref"]);
 		if ($out == "1") {
-			echo 'Dorm listing removed';
+			echo 'success';
 		} else {
-			echo 'Cannot remove bookmark. Please try again.';
+			echo 'failed';
 		}
 	break;
 }

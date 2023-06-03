@@ -266,12 +266,10 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
 		if ($out[0]['password'] == $currentpassword) {
 			if ($this->QuickFire("UPDATE tbl_users SET password=?, updated_at=now() WHERE id=?", [$newpassword, $id])) {
-				return 'Password updated';
-			} else {
-				return 'Cannot change password. Please try again';
+				return 'success';
 			}
 		} else {
-			return 'Incorrect Password';
+			return 'incorrect';
 		}
 	}
 	public function get_dorms($userref)
@@ -279,15 +277,9 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
-	public function get_dorm_details($dormref, $userref)
+	public function get_dorm_details($dormref)
 	{
-		$out = json_decode(json_decode($this->QuickLook(
-			"SELECT * FROM tbl_dorms 
-			INNER JOIN tbl_houserules ON tbl_dorms.id=tbl_houserules.dormref
-			INNER JOIN tbl_pdterms ON tbl_dorms.id=tbl_pdterms.dormref
-			WHERE tbl_dorms.id=? AND tbl_dorms.userref=?",
-			[$dormref, $userref]
-		), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id = ?", [$dormref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 	public function get_bookmarks($userref)
