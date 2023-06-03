@@ -116,16 +116,12 @@ switch ($tag) {
 		$out = sdmq()->update_account($_POST["userref"], $_POST["identifier"]);
 		if ($out == "1") {
 			echo 'success';
-		} else {
-			echo 'failed';
 		}
 		break;
 	case 'delete_account':
 		$out = sdmq()->delete_account($_POST["userref"]);
 		if ($out == "1") {
 			echo 'success';
-		} else {
-			echo 'failed';
 		}
 		break;
 	case 'change_password':
@@ -162,24 +158,18 @@ switch ($tag) {
 			} else {
 				echo 'failed';
 			}
-		} else {
-			echo 'failed';
 		}
 		break;
 	case 'delete_bookmark':
 		$out = sdmq()->delete_bookmark($_POST["dormref"], $_POST["userref"]);
 		if ($out == "1") {
 			echo 'success';
-		} else {
-			echo 'failed';
 		}
 		break;
 	case 'post_review':
 		$out = sdmq()->post_review($_POST["dormref"], $_POST["userref"], $_POST["rating"], $_POST["comment"], );
 		if ($out == "1") {
 			echo 'success';
-		} else {
-			echo 'failed';
 		}
 		break;
 	case 'get_reviews':
@@ -189,8 +179,6 @@ switch ($tag) {
 		$out = sdmq()->delete_dorm($_POST["dormref"], $_POST["userref"]);
 		if ($out == "1") {
 			echo 'success';
-		} else {
-			echo 'failed';
 		}
 	break;
 }
