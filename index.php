@@ -146,7 +146,7 @@ switch ($tag) {
 		$image = $_FILES['image'];
 		$userref = $_POST["userref"];
 		$username = $_POST["username"];
-		$uploadDir = './uploads/userImages/' . $userref . '/';
+		$uploadDir = 'uploads/userImages/' . $userref . '/';
 		$uploadFile = $uploadDir . basename($image['name']);
 		$fileName = basename($image['name']);
 
