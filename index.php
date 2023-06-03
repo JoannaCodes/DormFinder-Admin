@@ -155,8 +155,8 @@ switch ($tag) {
 			mkdir($uploadDir, 0777, true);
 		}
 
-		if (move_uploaded_file($image['tmp_name'], $uploadFile)) {
-			$out = sdmq()->update_profile($userref, $username, $fileName);
+		$out = sdmq()->update_profile($userref, $username, $fileName);
+		if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out) {
 			if ($out == "1") {
 				echo 'success';
 			} else {
