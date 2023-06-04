@@ -71,6 +71,25 @@ class sdm_query
 			}
 		}
 	}
+	public function login_app($username, $password)
+	{
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND password=?", [$username, $password], true));
+		$outx = json_decode($out, true);
+		if (count($outx) == 1) {
+			if ($outx[0]['password'] == $password) {
+				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => "true"]);
+			} else {
+				echo json_encode(["username" => "none", "id" => "none", "status" => "false"]);
+			}
+		}
+	}
+	public function signup_app($email, $username, $password)
+	{
+		$id = uniqid();
+		if ($this->QuickFire("INSERT INTO tbl_users SET id=? , identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) {
+			return "1";
+		}
+	}
 	public function verify_document($id, $docvalue)
 	{
 		$vtitle = "DormFinder";
@@ -323,6 +342,22 @@ class sdm_query
 		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=? AND userref=?", [$dormref, $userref])) {
 			return "1";
 		}
+	}
+
+	public function popular_dorm()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE rating>=4", []), true), true);
+		return json_encode(json_encode($out));
+	}
+	public function latest_dorm()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * ORDER BY createdAt DESC LIMIT 50", []), true), true);
+		return json_encode(json_encode($out));
+	}
+	public function nearest_dorm()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE rating>=4", []), true), true);
+		return json_encode(json_encode($out));
 	}
 
 	public function QuickLook($q, $par = array())
