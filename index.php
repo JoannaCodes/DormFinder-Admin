@@ -94,6 +94,12 @@ switch ($tag) {
 	case 'login':
 		echo sdmq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
+	case 'login_app':
+		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
+			break;
+	case 'signup_app':
+		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
+			break;	
 	case 'verify_document':
 		echo sdmq()->verify_document($_POST['id'], $_POST['docvalue']);
 		break;
