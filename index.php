@@ -144,7 +144,8 @@ switch ($tag) {
 		$username = $_POST["username"];
 		$uploadDir = 'uploads/userImages/' . $userref . '/';
 		$uploadFile = $uploadDir . basename($image['name']);
-		$fileName = basename($image['name']);
+		// change domain to web hosts domain
+		$fileName = 'http:/192.168.0.24/DormFinder-Admin/uploads/userImages/' . $userref . '/' . basename($image['name']);
 
 		// Check if the folder already exists
 		if (!file_exists($uploadDir)) {
