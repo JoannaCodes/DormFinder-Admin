@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 28, 2023 at 10:54 AM
--- Server version: 10.4.27-MariaDB
--- PHP Version: 8.2.0
+-- Host: localhost
+-- Generation Time: Jun 05, 2023 at 05:59 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -66,8 +66,7 @@ INSERT INTO `tbl_bookmarks` (`id`, `dormref`, `userref`) VALUES
 (6, 'i1QjNuLJTMZIB', 'tyFmSQJWc9HwZ'),
 (7, 'lABWe6poOzMcM', 'tyFmSQJWc9HwZ'),
 (8, 'BFHSJXnnAUkI2', 'qzPHvK8kHTy3i'),
-(9, 'Npqap0xFEsMlT', 'LhVQ3FMv6d6lW'),
-(10, 'KKtGjBpTq9VAI', 'qzPHvK8kHTy3i');
+(9, 'Npqap0xFEsMlT', 'LhVQ3FMv6d6lW');
 
 -- --------------------------------------------------------
 
@@ -113,12 +112,10 @@ INSERT INTO `tbl_dormreviews` (`id`, `userref`, `dormref`, `rating`, `comment`, 
 (1, 'tyFmSQJWc9HwZ', 'i1QjNuLJTMZIB', 3, 'Donec posuere metus vitae ipsum.', '2022-12-12'),
 (2, 'LhVQ3FMv6d6lW', 'Npqap0xFEsMlT', 2, 'Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus.', '2022-04-05'),
 (3, 'qzPHvK8kHTy3i', 'lABWe6poOzMcM', 5, 'Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan felis. Ut at dolor quis odio consequat varius.', '2022-05-25'),
-(4, 'qzPHvK8kHTy3i', 'KKtGjBpTq9VAI', 2, 'Fusce congue, diam id ornare imperdiet, sapien urna pretium nisl, ut volutpat sapien arcu sed augue. Aliquam erat volutpat. In congue.', '2022-04-02'),
 (5, 'tyFmSQJWc9HwZ', 'BFHSJXnnAUkI2', 3, 'Vestibulum sed magna at nunc commodo placerat. Praesent blandit.', '2022-02-18'),
 (6, 'LhVQ3FMv6d6lW', 'lABWe6poOzMcM', 1, 'Curabitur in libero ut massa volutpat convallis.', '2022-08-19'),
 (7, 'LhVQ3FMv6d6lW', 'BFHSJXnnAUkI2', 3, 'Aliquam erat volutpat. In congue.', '2022-04-16'),
 (8, 'qzPHvK8kHTy3i', 'i1QjNuLJTMZIB', 1, 'In eleifend quam a odio. In hac habitasse platea dictumst.', '2022-12-06'),
-(9, 'tyFmSQJWc9HwZ', 'KKtGjBpTq9VAI', 3, 'In congue. Etiam justo.', '2022-04-22'),
 (10, 'LhVQ3FMv6d6lW', 'Npqap0xFEsMlT', 1, 'In hac habitasse platea dictumst.', '2022-03-12');
 
 -- --------------------------------------------------------
@@ -132,6 +129,8 @@ CREATE TABLE `tbl_dorms` (
   `userref` varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `longitude` float(9,6) NOT NULL,
+  `latitude` float(9,6) NOT NULL,
   `price` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `slots` int(11) DEFAULT 0,
   `desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -146,12 +145,12 @@ CREATE TABLE `tbl_dorms` (
 -- Dumping data for table `tbl_dorms`
 --
 
-INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `price`, `slots`, `desc`, `hei`, `amenities`, `images`, `createdAt`, `updatedAt`) VALUES
-('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '07 Katie Terrace', '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'Air Conditioning, Elevator, Beddings, Kitchen, Wi-Fi', 'adam-winger-5zX1KAjPl4o-unsplash.jpg,alen-rojnic-GfvHuhw2Iqg-unsplash.jpg,alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,blake-woolwine-lz9W775oDyI-unsplash.jpg,chino-rocha-LDhXIvAqRJw-unsplash.jpg', '2022-09-21', '2023-06-01'),
-('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '4837 Spohn Junction', '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'Lounge, Parking, Security, Study Room', 'daria-shevtsova-RP4mtXJM7es-unsplash.jpg,fred-kleber-gTbaxaVLvsg-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,lissete-laverde-9XdCMuK8zlQ-unsplash.jpg,marcus-loke-WQJvWU_HZFo-unsplash.jpg', '2022-02-14', '2023-10-24'),
-('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '2739 Tony Park', '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'Laundry, Lounge, Parking, Wi-Fi', 'nguyen-dang-hoang-nhu-HHs_PrvxSQk-unsplash.jpg,rnaol-oKHHspCSWHQ-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,shashi-chaturvedula-UlHN7wFhtvU-unsplash.jpg,shashi-chaturvedula-xdY1s1I6J8U-unsplash.jpg', '2022-06-14', '2023-05-02'),
-('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '7780 Crescent Oaks Trail', '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'Lounge, Security, Study Room', 'shche_-team-PFi1uWHh2dQ-unsplash.jpg,sigmund-CwTfKH5edSk-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg,spacejoy-vOa-PSimwg4-unsplash.jpg,taiga-ishii-mukO8Po_LZ8-unsplash.jpg', '2021-04-04', '2023-09-09'),
-('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '3305 Susan Alley', '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'Beddings, Parking, Wi-Fi', 'alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg', '2022-03-19', '2023-03-05');
+INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `longitude`, `latitude`, `price`, `slots`, `desc`, `hei`, `amenities`, `images`, `createdAt`, `updatedAt`) VALUES
+('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '07 Katie Terrace', 114.938683, 24.442181, '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'Air Conditioning, Elevator, Beddings, Kitchen, Wi-Fi', 'adam-winger-5zX1KAjPl4o-unsplash.jpg,alen-rojnic-GfvHuhw2Iqg-unsplash.jpg,alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,blake-woolwine-lz9W775oDyI-unsplash.jpg,chino-rocha-LDhXIvAqRJw-unsplash.jpg', '2022-09-21', '2023-06-01'),
+('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '4837 Spohn Junction', -8.473295, 40.276379, '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'Lounge, Parking, Security, Study Room', 'daria-shevtsova-RP4mtXJM7es-unsplash.jpg,fred-kleber-gTbaxaVLvsg-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,lissete-laverde-9XdCMuK8zlQ-unsplash.jpg,marcus-loke-WQJvWU_HZFo-unsplash.jpg', '2022-02-14', '2023-10-24'),
+('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '2739 Tony Park', -35.269779, -5.686115, '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'Laundry, Lounge, Parking, Wi-Fi', 'nguyen-dang-hoang-nhu-HHs_PrvxSQk-unsplash.jpg,rnaol-oKHHspCSWHQ-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,shashi-chaturvedula-UlHN7wFhtvU-unsplash.jpg,shashi-chaturvedula-xdY1s1I6J8U-unsplash.jpg', '2022-06-14', '2023-05-02'),
+('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '7780 Crescent Oaks Trail', -8.264878, 41.528942, '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'Lounge, Security, Study Room', 'shche_-team-PFi1uWHh2dQ-unsplash.jpg,sigmund-CwTfKH5edSk-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg,spacejoy-vOa-PSimwg4-unsplash.jpg,taiga-ishii-mukO8Po_LZ8-unsplash.jpg', '2021-04-04', '2023-09-09'),
+('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '3305 Susan Alley', 4.892595, 52.371693, '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'Beddings, Parking, Wi-Fi', 'alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg', '2022-03-19', '2023-03-05');
 
 -- --------------------------------------------------------
 
@@ -173,7 +172,6 @@ CREATE TABLE `tbl_houserules` (
 
 INSERT INTO `tbl_houserules` (`id`, `dormref`, `visitors`, `pets`, `curfew`) VALUES
 (1, 'BFHSJXnnAUkI2', 0, 0, 0),
-(2, 'KKtGjBpTq9VAI', 1, 0, 0),
 (3, 'i1QjNuLJTMZIB', 1, 0, 0),
 (4, 'Npqap0xFEsMlT', 0, 0, 0),
 (5, 'lABWe6poOzMcM', 1, 1, 0);
@@ -225,7 +223,6 @@ CREATE TABLE `tbl_pdterms` (
 
 INSERT INTO `tbl_pdterms` (`id`, `dormref`, `advance_deposit`, `security_deposit`, `utilities`, `minimum_stay`) VALUES
 (1, 'BFHSJXnnAUkI2', '1 Month/s', '2 Month/s', '2 Month/s', '7 Month/s'),
-(2, 'KKtGjBpTq9VAI', '2 Month/s', '2 Month/s', '1 Month/s', '9 Month/s'),
 (3, 'i1QjNuLJTMZIB', '2 Month/s', '1 Month/s', '1 Month/s', '5 Month/s'),
 (4, 'Npqap0xFEsMlT', '2 Month/s', '1 Month/s', '2 Month/s', '11 Month/s'),
 (5, 'lABWe6poOzMcM', '2 Month/s', '1 Month/s', '1 Month/s', '5 Month/s');
@@ -252,9 +249,9 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `username`, `identifier`, `imageUrl`, `is_verified`, `password`, `created_at`, `updated_at`) VALUES
-('LhVQ3FMv6d6lW', 'Juan Dela Cruz', '09123456789', 'rn_image_picker_lib_temp_92e4599a-cf13-47fc-aced-a4cdd8b50f47.jpg', 1, 'bgc78ZD', '2022-04-01', '2023-05-28'),
-('qzPHvK8kHTy3i', 'Willis Standing', '09024680123', '7.jpg', 1, 'KtnA5CW6', '2022-03-02', '2023-05-27'),
-('tyFmSQJWc9HwZ', 'Giacobo Ziemke', 'gziemke2@tamu.edu', '5.jpg', 0, 'c1nM8r1JBEu6', '2022-04-29', '2023-10-30');
+('LhVQ3FMv6d6lW', 'Juan dela Cruz', 'juandlc@gmail.com', 'http:/192.168.0.24/DormFinder-Admin/uploads/userImages/LhVQ3FMv6d6lW/1.jpg', 1, '09876543', '2022-04-01', '2023-06-04'),
+('qzPHvK8kHTy3i', 'Willis Standing', '09024680123', 'http:/192.168.0.24/DormFinder-Admin/uploads/userImages/qzPHvK8kHTy3i/7.jpg', 1, 'KtnA5CW6', '2022-03-02', '2023-05-27'),
+('tyFmSQJWc9HwZ', 'Giacobo Ziemke', 'gziemke2@tamu.edu', 'http:/192.168.0.24/DormFinder-Admin/uploads/userImages/tyFmSQJWc9HwZ/5.jpg', 0, 'c1nM8r1JBEu6', '2022-04-29', '2023-10-30');
 
 --
 -- Indexes for dumped tables
@@ -341,7 +338,7 @@ ALTER TABLE `tbl_bookmarks`
 -- AUTO_INCREMENT for table `tbl_documents`
 --
 ALTER TABLE `tbl_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `tbl_dormreviews`
