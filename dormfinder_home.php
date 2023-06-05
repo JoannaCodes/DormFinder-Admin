@@ -54,8 +54,8 @@
 				<div class="col-9 me-auto">
 					<div class="rounded shadow p-3">
 						<h4>Dorm Listing</h4>
-						<div style="overflow:auto;height:450px;width: 100%;">
-							<table class="table table-striped table-bordered table-responsive" id="dormsTable">
+						<div style="height: fit-content;">
+							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="dormsTable">
 								<thead style="background-color: white;">
 									<tr>
 										<th>Dorm ID</th>
@@ -96,7 +96,7 @@
 						<form>
 							<div class="form-group">
 								<label for="userref">Email</label>
-								<input type="text" class="form-control" id="userref" placeholder="Enter Admin Email Address">
+								<input type="text" class="form-control" id="admin" placeholder="Enter Admin Email Address">
 							</div>
 							<div class="d-grid gap-2 mt-4">
 								<button type="submit" class="btn btn-primary">Add</button>
@@ -110,8 +110,8 @@
 				<div class="col-6">
 					<div class="rounded shadow p-3">
 						<h4>Users</h4>
-						<div style="overflow:auto;height:250px;width: 100%;">
-							<table class="table table-striped table-bordered table-responsive" id="usersTable">
+						<div style="height: fit-content;">
+							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="usersTable">
 								<thead>
 									<tr>
 										<th scope="col">User ID</th>
@@ -128,13 +128,12 @@
 				<div class="col-6">
 					<div class="rounded shadow p-3">
 						<h4>Document Verifier</h4>
-						<div style="overflow:auto;height:250px;width: 100%;">
-							<table class="table table-striped table-bordered table-responsive" id="sampleTable">
+						<div style="height: fit-content;">
+							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="sampleTable">
 								<thead>
 									<tr>
 										<th>User ID</th>
 										<th>Status</th>
-										<th>Date Submitted</th>
 									</tr>
 								</thead>
 								<tbody id="table1">

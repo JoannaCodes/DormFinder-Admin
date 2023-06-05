@@ -104,7 +104,6 @@ class sdm_query
 			$toecho .= "<tr>
 				<td class='align-middle'><button class='btn btn-link text-primary' data-user_id='".$out[$i]['user_id']."' data-doc_status='".$out[$i]['doc1_status']."' onclick='open_userdoc(this)'>" . $out[$i]['user_id'] . "</button></td>
 				<td class='align-middle'>" . $doc_status . "</td>
-				<td width='25%' class='align-middle'>".$out[$i]['date_added']."</td>
 	        </tr>";
 		}
 		return $toecho;
