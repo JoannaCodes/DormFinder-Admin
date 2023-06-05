@@ -37,7 +37,7 @@ class sdm_query
 		}
 	}
 	public function open_document($user_id) {
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id", [$user_id]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id]), true), true);
 		$toecho = "";
 		$doc_status = "";
 		for ($i = 0; $i < count($out); $i++) {
