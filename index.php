@@ -4,8 +4,9 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
+include_once "mod/app_queries.php";
 
-
+$domain = 'http:/192.168.0.24/DormFinder-Admin/';
 
 if (isset($_POST["tag"])) {
 	//POST
@@ -109,9 +110,15 @@ switch ($tag) {
 	case 'get_submitdocuments':
 		echo sdmq()->get_submitdocuments();
 		break;
+	case 'get_dormlisting':
+		echo sdmq()->get_dormlisting();
+		break;
+	case 'get_users':
+		echo sdmq()->get_users();
+		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
-	break;
+		break;
 	case "getnotificationspast":
 		echo sdmq()->look_passednotifications($_GET["userref"]);
 		break;
@@ -137,9 +144,9 @@ switch ($tag) {
 		break;
 	case 'get_dorms':
 		echo sdmq()->get_dorms($_GET["userref"]);
-	break;
+		break;
 	case 'get_dorm_details':
-		echo sdmq()->get_dorm_details($_GET["dormref"]);
+		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
 		break;
 	case 'get_bookmarks':
 		echo sdmq()->get_bookmarks($_GET["userref"]);
@@ -151,7 +158,7 @@ switch ($tag) {
 		$uploadDir = 'uploads/userImages/' . $userref . '/';
 		$uploadFile = $uploadDir . basename($image['name']);
 		// change domain to web hosts domain
-		$fileName = 'http:/192.168.0.24/DormFinder-Admin/uploads/userImages/' . $userref . '/' . basename($image['name']);
+		$fileName = $domain . $uploadDir . basename($image['name']);
 
 		// Check if the folder already exists
 		if (!file_exists($uploadDir)) {
@@ -162,9 +169,9 @@ switch ($tag) {
 		if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out) {
 			if ($out == "1") {
 				echo 'success';
-			} else {
-				echo 'failed';
 			}
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'delete_bookmark':
@@ -187,7 +194,101 @@ switch ($tag) {
 		if ($out == "1") {
 			echo 'success';
 		}
-	break;
+		break;
+	case 'post_dorm':
+		$id = uniqid();
+		$userref = $_POST["name"];
+		$address = $_POST["address"];
+		$advdep = $_POST["advance_deposit"];
+		$amenities = $_POST["amenities"];
+		$curfew = $_POST["curfew"];
+		$desc = $_POST["desc"];
+		$hei = $_POST["hei"];
+		$images = $_FILES["images[]"];
+		$minstay = $_POST["minimum_stay"];
+		$name = $_POST["name"];
+		$pets = $_POST["pets"];
+		$secdep = $_POST["security_deposit"];
+		$util = $_POST["utilities"];
+		$visitors = $_POST["visitors"];
+
+		$filenames = [];
+
+		foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+			$image = $_FILES['images']['name'][$key];
+			$uploadDir = 'uploads/dormImages/' . $id . '/';
+			$uploadFile = $uploadDir . basename($image);
+			
+			// Change domain to web host's domain
+			$fileName = $domain . $uploadDir . basename($image);
+			
+			// Check if the folder already exists
+			if (!file_exists($uploadDir)) {
+					mkdir($uploadDir, 0777, true);
+			}
+			
+			if (move_uploaded_file($tmp_name, $uploadFile)) {
+				// $filenames[] = $fileName;
+				echo 'success';
+			} else {
+				echo 'failed';
+				exit;
+			}
+		}
+
+		// $images = implode(',', $uploadedFilenames);
+		// $out = sdmq()->post_dorm($advdep, $amenities, $curfew, $desc, $hei, $id, $images, $minstay, $name, $pets, $secdep, $userref, $util, $visitors);
+		// if ($out == "1") {
+		// 	echo 'success';
+		// }
+		break;
+	case 'update_dorm':
+		$id = uniqid();
+		$userref = $_POST["name"];
+		$address = $_POST["address"];
+		$advdep = $_POST["advance_deposit"];
+		$amenities = $_POST["amenities"];
+		$curfew = $_POST["curfew"];
+		$desc = $_POST["desc"];
+		$hei = $_POST["hei"];
+		$images = $_FILES["images[]"];
+		$minstay = $_POST["minimum_stay"];
+		$name = $_POST["name"];
+		$pets = $_POST["pets"];
+		$secdep = $_POST["security_deposit"];
+		$util = $_POST["utilities"];
+		$visitors = $_POST["visitors"];
+
+		$filenames = [];
+
+		foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+			$image = $_FILES['images']['name'][$key];
+			$uploadDir = 'uploads/dormImages/' . $id . '/';
+			$uploadFile = $uploadDir . basename($image);
+			
+			// Change domain to web host's domain
+			$fileName = $domain . $uploadDir . basename($image);
+			
+			// Check if the folder already exists
+			if (!file_exists($uploadDir)) {
+					mkdir($uploadDir, 0777, true);
+			}
+			
+			if (move_uploaded_file($tmp_name, $uploadFile)) {
+				// $filenames[] = $fileName;
+				echo 'success';
+			} else {
+				echo 'failed';
+				exit;
+			}
+		}
+
+		// $images = implode(',', $uploadedFilenames);
+		// $out = sdmq()->update_dorm($advdep, $amenities, $curfew, $desc, $hei, $id, $images, $minstay, $name, $pets, $secdep, $userref, $util, $visitors);
+		// if ($out == "1") {
+		// 	echo 'success';
+		// }
+		break;
 }
 function sdmq()
 {

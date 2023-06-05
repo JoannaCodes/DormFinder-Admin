@@ -49,18 +49,101 @@
 			</div>
 		</div>
 		<!-- Sample table -->
-		<div class="container mt-4 mx-auto ps-5 pe-5 w-50">
-			<table class="table table-striped table-bordered" id="sampleTable">
-				<thead>
-					<tr>
-						<th>User ID</th>
-						<th>Status</th>
-						<th>Date Submitted</th>
-					</tr>
-				</thead>
-				<tbody id="table1">
-				</tbody>
-			</table>
+		<div class="container-fluid mt-4 mx-auto ps-5 pe-5">
+			<div class="row mb-4">
+				<div class="col-9 me-auto">
+					<div class="rounded shadow p-3">
+						<h4>Dorm Listing</h4>
+						<div style="overflow:auto;height:450px;width: 100%;">
+							<table class="table table-striped table-bordered table-responsive" id="dormsTable">
+								<thead style="background-color: white;">
+									<tr>
+										<th>Dorm ID</th>
+										<th>User ID</th>
+										<th>Name</th>
+										<th>Address</th>
+										<th>Date Created</th>
+										<th>Date Updated</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody id="dorms">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div style="display:flex;flex-direction:column;justify-content:space-between;" class="col-3">
+					<div class="rounded shadow p-3">
+						<h4>Notification Form</h4>
+						<form>
+							<div class="form-group">
+								<label for="userref">User ID</label>
+								<input type="text" class="form-control" id="userref" placeholder="Enter User ID">
+							</div>
+							<div class="form-group">
+								<label for="notifMessage">Notification Message</label>
+								<textarea style="resize: none;" class="form-control" id="notifMessage" rows="3" placeholder="Enter Notification Message"></textarea>
+							</div>
+							<div class="d-grid gap-2 mt-4">
+								<button type="submit" class="btn btn-primary">Submit</button>
+							</div>
+						</form>
+					</div>
+					<div class="rounded shadow p-3">
+						<h4>Add Admin</h4>
+						<form>
+							<div class="form-group">
+								<label for="userref">Email</label>
+								<input type="text" class="form-control" id="userref" placeholder="Enter Admin Email Address">
+							</div>
+							<div class="d-grid gap-2 mt-4">
+								<button type="submit" class="btn btn-primary">Add</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="row mb-4">
+				<div class="col-6">
+					<div class="rounded shadow p-3">
+						<h4>Users</h4>
+						<div style="overflow:auto;height:250px;width: 100%;">
+							<table class="table table-striped table-bordered table-responsive" id="usersTable">
+								<thead>
+									<tr>
+										<th scope="col">User ID</th>
+										<th scope="col">Username</th>
+										<th scope="col">Verification Status</th>
+									</tr>
+								</thead>
+								<tbody id="users">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="col-6">
+					<div class="rounded shadow p-3">
+						<h4>Document Verifier</h4>
+						<div style="overflow:auto;height:250px;width: 100%;">
+							<table class="table table-striped table-bordered table-responsive" id="sampleTable">
+								<thead>
+									<tr>
+										<th>User ID</th>
+										<th>Status</th>
+										<th>Date Submitted</th>
+									</tr>
+								</thead>
+								<tbody id="table1">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
@@ -175,6 +258,8 @@ function verify_document(obj) {
 
 $(document).ready(function() {
 	get_userdoc();
+	get_dormlisting();
+	get_users();
 });
 
 function get_userdoc() {
@@ -193,6 +278,36 @@ function get_userdoc() {
 			var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
 				return new bootstrap.Tooltip(tooltipTriggerEl)
 			})
+		}
+	})
+}
+
+function get_dormlisting() {
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "GET",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "get_dormlisting"
+		},
+		complete:function(response) {
+			$('#dorms').html(response.responseText);
+			$('#dormsTable').DataTable();
+		}
+	})
+}
+
+function get_users() {
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "GET",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "get_users"
+		},
+		complete:function(response) {
+			$('#users').html(response.responseText);
+			$('#usersTable').DataTable();
 		}
 	})
 }

@@ -6,11 +6,8 @@ class sdm_query
 	{
 		$this->c = $db;
 	}
-	public function clearallnotif($userref) {
-		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
-			return "0";
-		}
-	}
+
+	// Admin Queries
 	public function change_status($btn_value) {
 		if($btn_value == "1") {
 			$vtitle = "DormFinder";
@@ -71,25 +68,6 @@ class sdm_query
 			}
 		}
 	}
-	public function login_app($username, $password)
-	{
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND password=?", [$username, $password], true));
-		$outx = json_decode($out, true);
-		if (count($outx) == 1) {
-			if ($outx[0]['password'] == $password) {
-				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => "true"]);
-			} else {
-				echo json_encode(["username" => "none", "id" => "none", "status" => "false"]);
-			}
-		}
-	}
-	public function signup_app($email, $username, $password)
-	{
-		$id = uniqid();
-		if ($this->QuickFire("INSERT INTO tbl_users SET id=? , identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) {
-			return "1";
-		}
-	}
 	public function verify_document($id, $docvalue)
 	{
 		$vtitle = "DormFinder";
@@ -131,7 +109,69 @@ class sdm_query
 		}
 		return $toecho;
 	}
-	public function look_morepastnotif($userref, $idstoftech)
+	public function get_dormlisting()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms", []), true), true);
+		$toecho = "";
+		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
+		$notif_icon="<i class='fa-light fa-bell fa-fw fa-lg'></i>";
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$out[$i]['userref']."</td>
+				<td class='align-middle'>".$out[$i]['name']."</td>
+				<td class='align-middle'>".$out[$i]['address']."</td>
+				<td class='align-middle'>".$out[$i]['createdAt']."</td>
+				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
+				<td width='50%' class='align-middle'>
+					<button class='btn btn-primary' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_notif(this)' data-id='".$out[$i]['userref']."'>".$notif_icon."</button>
+					<button class='btn btn-danger' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm(this)' data-id='".$out[$i]['id']."'>".$del_icon."</button>
+				</td>
+	  	</tr>";
+		}
+		return $toecho;
+	}
+	public function get_users()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users", []), true), true);
+		$toecho = "";
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$out[$i]['username']."</td>
+				<td width='25%' class='align-middle'>".$out[$i]['is_verified']."</td>
+	  	</tr>";
+		}
+		return $toecho;
+	}
+
+	// App Queries
+	public function login_app($username, $password)
+	{
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND password=?", [$username, $password], true));
+		$outx = json_decode($out, true);
+		if (count($outx) == 1) {
+			if ($outx[0]['password'] == $password) {
+				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => "true"]);
+			} else {
+				echo json_encode(["username" => "none", "id" => "none", "status" => "false"]);
+			}
+		}
+	}
+	public function signup_app($email, $username, $password)
+	{
+		$id = uniqid();
+		if ($this->QuickFire("INSERT INTO tbl_users SET id=? , identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) {
+			return "1";
+		}
+	}
+  public function clearallnotif($userref) 
+  {
+		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
+			return "0";
+		}
+	}
+  public function look_morepastnotif($userref, $idstoftech)
 	{
 		$thiday = date("Y-m-d H:i:s");
 		$tofetch = "";
@@ -261,7 +301,7 @@ class sdm_query
 		$currdate = date("Y-m-d H:i:s");
 		return $this->QuickLook("SELECT *, UNIX_TIMESTAMP(scheduled) as unix_time FROM tbl_notifications WHERE scheduled>?", [$currdate]);
 	}
-	public function get_account($id)
+  public function get_account($id)
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
 		if (count($out) == 1) {
@@ -296,9 +336,9 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
-	public function get_dorm_details($dormref)
+	public function get_dorm_details($dormref, $userref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id = ?", [$dormref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id=? AND  d.userref=?", [$dormref, $userref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 	public function get_bookmarks($userref)
@@ -335,10 +375,9 @@ class sdm_query
 			return "1";
 		}
 	}
-
 	public function popular_dorm()
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE rating>=4", []), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms d WHERE d.id IN (SELECT r.dormref FROM tbl_dormreviews r WHERE r.rating>=3)", []), true), true);
 		return json_encode(json_encode($out));
 	}
 	public function latest_dorm()
