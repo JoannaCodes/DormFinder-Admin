@@ -4,7 +4,6 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
-include_once "mod/app_queries.php";
 
 $domain = 'http:/192.168.0.24/DormFinder-Admin/';
 
