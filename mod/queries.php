@@ -389,6 +389,24 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE rating>=4", []), true), true);
 		return json_encode(json_encode($out));
 	}
+	public function update_dorm()
+	{
+		$dormquery = "UPDATE tbl_dorms SET name=?, address=?, longitude=?, latitude=?, price=?, slots=?, desc=?, hei=?, amenities=?, images=?, createdAt=?, updatedAt=? WHERE id=? AND userref=?";
+		$hrquery = "UPDATE tbl_houserules SET visitors=?, pets=?, curfew WHERE dormref=?";
+		$pdtquery = "UPDATE tbl_pdterms SET advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=? WHERE dormref=?";
+		if ($this->QuickFire($dormquery, []) && $this->QuickFire($hrquery, []) && $this->QuickFire($pdtquery, [])) {
+			return "1";
+		}
+	}
+	public function post_dorm()
+	{
+		$dormquery = "INSERT INTO tbl_dorms SET id=? userref=? name=?, address=?, longitude=?, latitude=?, price=?, slots=?, desc=?, hei=?, amenities=?, images=?, createdAt=now() updatedAt=now()";
+		$hrquery = "INSERT INTO tbl_houserules SET dormref=?, visitors=?, pets=?, curfew";
+		$pdtquery = "INSERT INTO tbl_pdterms SET dormref=?, advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=?";
+		if ($this->QuickFire($dormquery, []) && $this->QuickFire($hrquery, []) && $this->QuickFire($pdtquery, [])) {
+			return "1";
+		}
+	}
 
 	public function QuickLook($q, $par = array())
 	{

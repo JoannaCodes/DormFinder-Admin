@@ -6,6 +6,7 @@ include_once "inc/conn.php";
 include_once "mod/queries.php";
 
 $domain = 'http:/192.168.0.24/DormFinder-Admin/';
+$tag = '';
 
 if (isset($_POST["tag"])) {
 	//POST
@@ -154,6 +155,7 @@ switch ($tag) {
 		$image = $_FILES['image'];
 		$userref = $_POST["userref"];
 		$username = $_POST["username"];
+
 		$uploadDir = 'uploads/userImages/' . $userref . '/';
 		$uploadFile = $uploadDir . basename($image['name']);
 		// change domain to web hosts domain
@@ -165,10 +167,8 @@ switch ($tag) {
 		}
 
 		$out = sdmq()->update_profile($userref, $username, $fileName);
-		if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out) {
-			if ($out == "1") {
-				echo 'success';
-			}
+		if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out == "1") {
+			echo 'success';
 		} else {
 			echo 'failed';
 		}
@@ -196,97 +196,107 @@ switch ($tag) {
 		break;
 	case 'post_dorm':
 		$id = uniqid();
-		$userref = $_POST["name"];
+		$userref = $_POST["userref"];
+
+		$name = $_POST["name"];
 		$address = $_POST["address"];
-		$advdep = $_POST["advance_deposit"];
-		$amenities = $_POST["amenities"];
-		$curfew = $_POST["curfew"];
+		$price = $_POST["price"];
+		$slots = $_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$images = $_FILES["images[]"];
-		$minstay = $_POST["minimum_stay"];
-		$name = $_POST["name"];
+		$amenities = $_POST["amenities"];
+		$images = $_FILES['images'];
+
+		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
+		$curfew = $_POST["curfew"];
+
+		$advdep = $_POST["advance_deposit"];
 		$secdep = $_POST["security_deposit"];
 		$util = $_POST["utilities"];
-		$visitors = $_POST["visitors"];
+		$minstay = $_POST["minimum_stay"];
 
+		$longitude = 0;
+		$latitude = 0;
+
+		$uploadStatus = true;
 		$filenames = [];
 
-		foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-			$image = $_FILES['images']['name'][$key];
-			$uploadDir = 'uploads/dormImages/' . $id . '/';
-			$uploadFile = $uploadDir . basename($image);
-			
-			// Change domain to web host's domain
-			$fileName = $domain . $uploadDir . basename($image);
-			
-			// Check if the folder already exists
-			if (!file_exists($uploadDir)) {
-					mkdir($uploadDir, 0777, true);
-			}
-			
-			if (move_uploaded_file($tmp_name, $uploadFile)) {
-				// $filenames[] = $fileName;
-				echo 'success';
-			} else {
-				echo 'failed';
-				exit;
-			}
+		// Address Geocoding
+
+		foreach ($images['tmp_name'] as $index => $tmpName) {
+				$name = $images['name'][$index];
+				$uploadDir = 'uploads/dormImages/' . $dormref . '/';
+				$filename = basename($name);
+				$uploadFile = $uploadDir . $filename;
+				
+				// Move the file to the destination directory
+				if (!move_uploaded_file($tmpName, $uploadFile)) {
+					$uploadStatus = false;
+				} else {
+					array_push($fileNames, $filename);
+				}
 		}
 
-		// $images = implode(',', $uploadedFilenames);
-		// $out = sdmq()->post_dorm($advdep, $amenities, $curfew, $desc, $hei, $id, $images, $minstay, $name, $pets, $secdep, $userref, $util, $visitors);
-		// if ($out == "1") {
-		// 	echo 'success';
-		// }
+		$dormImages = implode(',', $fileNames);
+		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		if ($uploadStatus && $out == "1") {
+			echo 'success';
+		} else {
+			echo 'failed';
+		}
 		break;
 	case 'update_dorm':
-		$id = uniqid();
-		$userref = $_POST["name"];
+		$dormref = $_POST["dormref"];
+		$userref = $_POST["userref"];
+
+		$name = $_POST["name"];
 		$address = $_POST["address"];
-		$advdep = $_POST["advance_deposit"];
-		$amenities = $_POST["amenities"];
-		$curfew = $_POST["curfew"];
+		$price = $_POST["price"];
+		$slots = $_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$images = $_FILES["images[]"];
-		$minstay = $_POST["minimum_stay"];
-		$name = $_POST["name"];
+		$amenities = $_POST["amenities"];
+		$images = $_FILES['images'];
+
+		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
+		$curfew = $_POST["curfew"];
+
+		$advdep = $_POST["advance_deposit"];
 		$secdep = $_POST["security_deposit"];
 		$util = $_POST["utilities"];
-		$visitors = $_POST["visitors"];
+		$minstay = $_POST["minimum_stay"];
 
+		$longitude = 0;
+		$latitude = 0;
+
+		$uploadStatus = true;
 		$filenames = [];
 
-		foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-			$image = $_FILES['images']['name'][$key];
-			$uploadDir = 'uploads/dormImages/' . $id . '/';
-			$uploadFile = $uploadDir . basename($image);
-			
-			// Change domain to web host's domain
-			$fileName = $domain . $uploadDir . basename($image);
-			
-			// Check if the folder already exists
-			if (!file_exists($uploadDir)) {
-					mkdir($uploadDir, 0777, true);
-			}
-			
-			if (move_uploaded_file($tmp_name, $uploadFile)) {
-				// $filenames[] = $fileName;
-				echo 'success';
-			} else {
-				echo 'failed';
-				exit;
-			}
+		// Address Geocoding
+
+		foreach ($images['tmp_name'] as $index => $tmpName) {
+				$name = $images['name'][$index];
+				$uploadDir = 'uploads/dormImages/' . $dormref . '/';
+				$filename = basename($name);
+				$uploadFile = $uploadDir . $filename;
+				
+				// Move the file to the destination directory
+				if (!move_uploaded_file($tmpName, $uploadFile)) {
+					$uploadStatus = false;
+				} else {
+					array_push($fileNames, $filename);
+				}
 		}
 
-		// $images = implode(',', $uploadedFilenames);
-		// $out = sdmq()->update_dorm($advdep, $amenities, $curfew, $desc, $hei, $id, $images, $minstay, $name, $pets, $secdep, $userref, $util, $visitors);
-		// if ($out == "1") {
-		// 	echo 'success';
-		// }
+		$dormImages = implode(',', $fileNames);
+		$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		if ($uploadStatus && $out == "1") {
+			echo 'success';
+		} else {
+			echo 'failed';
+		}
 		break;
 }
 function sdmq()
