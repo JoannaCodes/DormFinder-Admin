@@ -223,6 +223,10 @@ switch ($tag) {
 		$filenames = [];
 
 		// Address Geocoding
+		if ($coordinates) {
+			$latitude = $coordinates['latitude'];
+			$longitude = $coordinates['longitude'];
+    }
 
 		foreach ($images['tmp_name'] as $index => $tmpName) {
 				$name = $images['name'][$index];
@@ -268,30 +272,49 @@ switch ($tag) {
 		$util = $_POST["utilities"];
 		$minstay = $_POST["minimum_stay"];
 
-		$longitude = 0;
-		$latitude = 0;
-
-		$uploadStatus = true;
-		$filenames = [];
-
 		// Address Geocoding
+		$coordinates = getAddressCoordinates($address);
+    if ($coordinates) {
+			$latitude = $coordinates['latitude'];
+			$longitude = $coordinates['longitude'];
+    }
 
-		foreach ($images['tmp_name'] as $index => $tmpName) {
+		// Checks if images is empty
+		if (!empty($images) && is_array($images['tmp_name'])) {
+			// Remove existing files in the folder
+			$uploadDir = 'uploads/dormImages/' . $dormref . '/';
+			$existingFiles = glob($uploadDir . '*');
+			foreach ($existingFiles as $file) {
+				if (is_file($file)) {
+						unlink($file);
+				}
+			}
+
+			// Upload images
+			$uploadStatus = true;
+			$filenames = [];
+			foreach ($images['tmp_name'] as $index => $tmpName) {
 				$name = $images['name'][$index];
-				$uploadDir = 'uploads/dormImages/' . $dormref . '/';
 				$filename = basename($name);
 				$uploadFile = $uploadDir . $filename;
-				
+
 				// Move the file to the destination directory
 				if (!move_uploaded_file($tmpName, $uploadFile)) {
-					$uploadStatus = false;
+						$uploadStatus = false;
 				} else {
-					array_push($fileNames, $filename);
+						array_push($filenames, $filename);
 				}
+			}
 		}
 
 		$dormImages = implode(',', $fileNames);
-		$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+
+		if (empty($dormImages)) {
+			$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, null, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		} else {
+			$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		}
+
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
@@ -299,6 +322,34 @@ switch ($tag) {
 		}
 		break;
 }
+
+function getAddressCoordinates($address) {
+    // Encode the address
+    $encodedAddress = urlencode($address);
+    
+    // Nominatim API endpoint
+    $url = "https://nominatim.openstreetmap.org/search?format=json&q={$encodedAddress}";
+
+    // Make a request to the API
+    $response = file_get_contents($url);
+    
+    // Parse the JSON response
+    $result = json_decode($response, true);
+    
+    // Check if the response contains valid data
+    if (is_array($result) && !empty($result)) {
+        // Extract latitude and longitude
+        $latitude = $result[0]['lat'];
+        $longitude = $result[0]['lon'];
+        
+        // Return the coordinates
+        return array('latitude' => $latitude, 'longitude' => $longitude);
+    }
+    
+    // Return null if no coordinates found
+    return null;
+}
+
 function sdmq()
 {
 	$c = new connection();
