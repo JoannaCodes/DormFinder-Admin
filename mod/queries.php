@@ -383,13 +383,37 @@ class sdm_query
 	}
 	public function latest_dorm()
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * ORDER BY createdAt DESC LIMIT 50", []), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms ORDER BY createdAt DESC LIMIT 50", []), true), true);
 		return json_encode(json_encode($out));
 	}
-	public function nearest_dorm()
+	public function nearest_dorm($formattedAddress)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE rating>=4", []), true), true);
-		return json_encode(json_encode($out));
+		// Make a request to the Nominatim API
+		$url = "https://nominatim.openstreetmap.org/search?q=" . urlencode($formattedAddress) . "&format=json";
+		$response = file_get_contents($url);
+	
+		// Parse the JSON response
+		$data = json_decode($response, true);
+	
+		// Extract the latitude and longitude if the request was successful
+		if (!empty($data)) {
+			$latitude = $data[0]['lat'];
+			$longitude = $data[0]['lon'];
+	
+			// Display the latitude and longitude
+			echo "Latitude: {$latitude}<br>";
+			echo "Longitude: {$longitude}";
+	
+			// Query the dorms table using the latitude and longitude
+			$out = json_decode(json_decode($this->QuickLook("SELECT *, (6371 * acos(cos(radians(" . $latitude . ")) * cos(radians(latitude)) * cos(radians(longitude) - radians(" . $longitude . ")) + sin(radians(" . $latitude . ")) * sin(radians(latitude)))) AS distance 
+			FROM tbl_dorms 
+			ORDER BY distance ASC"), true), true);
+	
+			return json_encode(json_encode($out));
+		} else {
+			echo "Geocoding failed.";
+			// if ito lumabas mag-pop up dapat na i-allow ung location access
+		}
 	}
 	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
