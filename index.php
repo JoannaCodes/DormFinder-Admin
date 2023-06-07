@@ -129,18 +129,24 @@ switch ($tag) {
 		$out = sdmq()->update_account($_POST["userref"], $_POST["identifier"]);
 		if ($out == "1") {
 			echo 'success';
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'delete_account':
 		$out = sdmq()->delete_account($_POST["userref"]);
 		if ($out == "1") {
 			echo 'success';
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'change_password':
 		$currentpassword = $_POST['currentpassword'];
 		$newpassword = $_POST['newpassword'];
-		echo sdmq()->change_password($_POST["userref"], $currentpassword, $newpassword);
+
+		$out = sdmq()->change_password($_POST["userref"], $currentpassword, $newpassword);
+		echo $out;
 		break;
 	case 'get_dorms':
 		echo sdmq()->get_dorms($_GET["userref"]);
@@ -177,21 +183,37 @@ switch ($tag) {
 		$out = sdmq()->delete_bookmark($_POST["dormref"], $_POST["userref"]);
 		if ($out == "1") {
 			echo 'success';
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'post_review':
 		$out = sdmq()->post_review($_POST["dormref"], $_POST["userref"], $_POST["rating"], $_POST["comment"], );
 		if ($out == "1") {
 			echo 'success';
+		} else {
+			echo 'failed';
 		}
 		break;
 	case 'get_reviews':
 		echo sdmq()->get_reviews($_GET["dormref"]);
 		break;
 	case 'delete_dorm':
-		$out = sdmq()->delete_dorm($_POST["dormref"], $_POST["userref"]);
-		if ($out == "1") {
-			echo 'success';
+		$dormref = $_POST["dormref"];
+		$userref = $_POST["userref"];
+		$folderPath = 'uploads/dormImages/' . $dormref . '/';
+
+		if (is_dir($folderPath)) {
+			if (deleteDirectory($folderPath)) {
+				$out = sdmq()->delete_dorm($dormref, $userref);
+				if ($out == "1") {
+					echo 'success';
+				}
+			} else {
+				echo 'failed.';
+			}
+		} else {
+			echo 'Folder does not exist.';
 		}
 		break;
 	case 'post_dorm':
@@ -201,48 +223,61 @@ switch ($tag) {
 		$name = $_POST["name"];
 		$address = $_POST["address"];
 		$price = $_POST["price"];
-		$slots = $_POST["slots"];
+		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
 		$amenities = $_POST["amenities"];
-		$images = $_FILES['images'];
+		$images = $_FILES["images"];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
-		$advdep = $_POST["advance_deposit"];
-		$secdep = $_POST["security_deposit"];
-		$util = $_POST["utilities"];
-		$minstay = $_POST["minimum_stay"];
+		// Convert to boolean
+		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
+		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
+		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
 
-		$longitude = 0;
+		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
+		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
+		$util = $_POST["utilities"] !== "" ? $_POST["utilities"] : "N/A";
+		$minstay = $_POST["minimum_stay"] !== "" ? $_POST["minimum_stay"] : "N/A";
+
 		$latitude = 0;
+		$longitude = 0;
 
+		// Upload images
 		$uploadStatus = true;
 		$filenames = [];
+		$dormImages = '';
 
 		// Address Geocoding
+		$coordinates = getAddressCoordinates($address);
 		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
     }
 
-		foreach ($images['tmp_name'] as $index => $tmpName) {
-				$name = $images['name'][$index];
-				$uploadDir = 'uploads/dormImages/' . $dormref . '/';
-				$filename = basename($name);
-				$uploadFile = $uploadDir . $filename;
-				
-				// Move the file to the destination directory
-				if (!move_uploaded_file($tmpName, $uploadFile)) {
-					$uploadStatus = false;
-				} else {
-					array_push($fileNames, $filename);
-				}
+		$uploadDir = 'uploads/dormImages/' . $id . '/';
+		if (!file_exists($uploadDir)) {
+			mkdir($uploadDir, 0777, true);
 		}
 
-		$dormImages = implode(',', $fileNames);
+		foreach ($images['tmp_name'] as $index => $tmpName) {
+			$imageName = $images['name'][$index];
+    	$filename = basename($imageName);
+			$uploadFile = $uploadDir . $filename;
+			
+			// Move the file to the destination directory
+			if (move_uploaded_file($tmpName, $uploadFile)) {
+				array_push($filenames, $filename);
+			} else {
+				$uploadStatus = false;
+				echo 'Failed to upload images';
+			}
+		}
+
+		$dormImages = implode(',', $filenames);
 		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
@@ -257,20 +292,32 @@ switch ($tag) {
 		$name = $_POST["name"];
 		$address = $_POST["address"];
 		$price = $_POST["price"];
-		$slots = $_POST["slots"];
+		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
 		$amenities = $_POST["amenities"];
-		$images = $_FILES['images'];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
-		$advdep = $_POST["advance_deposit"];
-		$secdep = $_POST["security_deposit"];
-		$util = $_POST["utilities"];
-		$minstay = $_POST["minimum_stay"];
+		// Convert to boolean
+		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
+		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
+		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
+
+		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
+		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
+		$util = $_POST["utilities"] !== "" ? $_POST["utilities"] : "N/A";
+		$minstay = $_POST["minimum_stay"] !== "" ? $_POST["minimum_stay"] : "N/A";
+
+		$latitude = 0;
+		$longitude = 0;
+
+		// Upload images
+		$uploadStatus = true;
+		$filenames = [];
+		$dormImages = '';
 
 		// Address Geocoding
 		$coordinates = getAddressCoordinates($address);
@@ -279,42 +326,37 @@ switch ($tag) {
 			$longitude = $coordinates['longitude'];
     }
 
-		// Checks if images is empty
-		if (!empty($images) && is_array($images['tmp_name'])) {
+		if (isset($_FILES['images']) && is_array($_FILES['images']['tmp_name'])) {
+			$images = $_FILES['images'];
+
 			// Remove existing files in the folder
 			$uploadDir = 'uploads/dormImages/' . $dormref . '/';
 			$existingFiles = glob($uploadDir . '*');
 			foreach ($existingFiles as $file) {
 				if (is_file($file)) {
-						unlink($file);
+					unlink($file);
 				}
 			}
 
-			// Upload images
-			$uploadStatus = true;
-			$filenames = [];
 			foreach ($images['tmp_name'] as $index => $tmpName) {
-				$name = $images['name'][$index];
-				$filename = basename($name);
+				$imageName = $images['name'][$index];
+    		$filename = basename($imageName);
 				$uploadFile = $uploadDir . $filename;
 
 				// Move the file to the destination directory
-				if (!move_uploaded_file($tmpName, $uploadFile)) {
-						$uploadStatus = false;
+				if (move_uploaded_file($tmpName, $uploadFile)) {
+					array_push($filenames, $filename);
 				} else {
-						array_push($filenames, $filename);
+					$uploadStatus = false;
+					echo 'Failed to upload images';
 				}
 			}
+
+			// Compile filenames
+			$dormImages = implode(',', $filenames);
 		}
-
-		$dormImages = implode(',', $fileNames);
-
-		if (empty($dormImages)) {
-			$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, null, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
-		} else {
-			$out = sdmq()->update_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
-		}
-
+		
+		$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
@@ -328,26 +370,49 @@ function getAddressCoordinates($address) {
     $encodedAddress = urlencode($address);
     
     // Nominatim API endpoint
-    $url = "https://nominatim.openstreetmap.org/search?format=json&q={$encodedAddress}";
+    $url = "https://nominatim.openstreetmap.org/search.php?q=" . $encodedAddress . "&format=jsonv2";
 
-    // Make a request to the API
-    $response = file_get_contents($url);
+		// Make a request to the API
+    $opts = array(
+			'http' => array(
+					'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
+			)
+		);
+		$context = stream_context_create($opts);
+		$response = file_get_contents($url, false, $context);
     
-    // Parse the JSON response
     $result = json_decode($response, true);
-    
-    // Check if the response contains valid data
     if (is_array($result) && !empty($result)) {
         // Extract latitude and longitude
         $latitude = $result[0]['lat'];
         $longitude = $result[0]['lon'];
-        
-        // Return the coordinates
+
         return array('latitude' => $latitude, 'longitude' => $longitude);
     }
-    
-    // Return null if no coordinates found
+
     return null;
+}
+
+function deleteDirectory($dir) {
+	if (!file_exists($dir)) {
+		return true;
+	}
+
+	if (!is_dir($dir)) {
+		return unlink($dir);
+	}
+
+	foreach (scandir($dir) as $item) {
+		if ($item == '.' || $item == '..') {
+			continue;
+		}
+
+		if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+			return false;
+		}
+	}
+
+	return rmdir($dir);
 }
 
 function sdmq()

@@ -325,6 +325,8 @@ class sdm_query
 		if ($out[0]['password'] == $currentpassword) {
 			if ($this->QuickFire("UPDATE tbl_users SET password=?, updated_at=now() WHERE id=?", [$newpassword, $id])) {
 				return 'success';
+			} else {
+				return 'failed';
 			}
 		} else {
 			return 'incorrect';
@@ -391,39 +393,40 @@ class sdm_query
 	}
 	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
-		$hrquery = "UPDATE tbl_houserules SET visitors=?, pets=?, curfew=? WHERE id=? AND userref=?";
-		$hrparams = [$visitors, $pets, $curfew, $dormref, $userref];
+		$hrquery = "UPDATE tbl_houserules SET visitors=?, pets=?, curfew=? WHERE dormref=?";
+		$hrparams = [$visitors, $pets, $curfew, $dormref];
 
-		$pdtquery = "UPDATE tbl_pdterms SET advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=? WHERE id=? AND userref=?";
-		$pdtparams = [$advdep, $secdep, $util, $minstay, $dormref, $userref];
+		$pdtquery = "UPDATE tbl_pdterms SET advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=? WHERE dormref=?";
+		$pdtparams = [$advdep, $secdep, $util, $minstay, $dormref];
 
-		if ($dormImages != null) {
-			$dormquery = "UPDATE tbl_dorms SET name=?, address=?, longitude=?, latitude=?, price=?, slots=?, desc=?, hei=?, amenities=?, images=?, updatedAt=now() WHERE id=? AND userref=?";
-			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages];
+		if (empty($dormImages)) {
+			$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, updatedAt=now() WHERE id=? AND userref=?";
+			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormref, $userref];
 		} else {
-			$dormquery = "UPDATE tbl_dorms SET name=?, address=?, longitude=?, latitude=?, price=?, slots=?, desc=?, hei=?, amenities=?, updatedAt=now() WHERE id=? AND userref=?";
-			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities];
+			$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, updatedAt=now() WHERE id=? AND userref=?";
+			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $dormref, $userref];
 		}
 	
 		if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
-			return "1";
+				return "1";
 		}
 	}
 	public function post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
-		$dormquery = "INSERT INTO tbl_dorms SET id=? userref=? name=?, address=?, longitude=?, latitude=?, price=?, slots=?, desc=?, hei=?, amenities=?, images=?, createdAt=now() updatedAt=now()";
+		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, createdAt=now(), updatedAt=now()";
 		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages];
 
-		$hrquery = "INSERT INTO tbl_houserules SET dormref=?, visitors=?, pets=?, curfew";
-		$hrparams = [$visitors, $pets, $curfew];
+		$hrquery = "INSERT INTO tbl_houserules SET dormref=?, visitors=?, pets=?, curfew=?";
+		$hrparams = [$id, $visitors, $pets, $curfew];
 
 		$pdtquery = "INSERT INTO tbl_pdterms SET dormref=?, advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=?";
-		$pdtparams = [$advdep, $secdep, $util, $minstay];
+		$pdtparams = [$id, $advdep, $secdep, $util, $minstay];
 
 		if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
 			return "1";
 		}
 	}
+
 
 	public function QuickLook($q, $par = array())
 	{
