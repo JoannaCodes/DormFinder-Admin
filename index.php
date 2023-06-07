@@ -157,6 +157,17 @@ switch ($tag) {
 	case 'get_bookmarks':
 		echo sdmq()->get_bookmarks($_GET["userref"]);
 		break;
+
+	case 'popular_dorm':
+			echo sdmq()->popular_dorm();
+		break;
+	case 'latest_dorm':
+			echo sdmq()->latest_dorm();
+		break;
+	case 'nearest_dorm':
+			echo sdmq()->nearest_dorm();
+		break;
+
 	case "update_profile":
 		$image = $_FILES['image'];
 		$userref = $_POST["userref"];
