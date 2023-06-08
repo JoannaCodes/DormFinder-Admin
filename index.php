@@ -152,7 +152,7 @@ switch ($tag) {
 		echo sdmq()->get_dorms($_GET["userref"]);
 		break;
 	case 'get_dorm_details':
-		echo sdmq()->get_dorm_details($_GET["dormref"], $_GET["userref"]);
+		echo sdmq()->get_dorm_details($_GET["dormref"]);
 		break;
 	case 'get_bookmarks':
 		echo sdmq()->get_bookmarks($_GET["userref"]);
@@ -164,9 +164,18 @@ switch ($tag) {
 	case 'latest_dorm':
 			echo sdmq()->latest_dorm();
 		break;
+
 	case 'nearest_dorm':
-			echo sdmq()->nearest_dorm();
-		break;
+		$lon = $_POST['longitude'];
+		$lat = $_POST['latitude'];
+		
+		$out = sdmq()->nearest_dorm($lon, $lat);
+		if (empty($out)) {
+			echo json_encode(['message' => 'No data available']);
+		} else {
+			echo $out;
+		}
+	break;
 
 	case "update_profile":
 		$image = $_FILES['image'];
