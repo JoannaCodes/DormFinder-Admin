@@ -19,13 +19,13 @@ if (isset($_POST["tag"])) {
 switch ($tag) {
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
-	break;
+		break;
 	case 'change_status':
 		echo sdmq()->change_status($_POST["btn_value"]);
-	break;
+		break;
 	case 'open_document':
 		echo sdmq()->open_document($_POST["user_id"]);
-	break;
+		break;
 	case 'send_document':
 		$target_dir = "uploads/user/";
 		$target_file = $target_dir . basename($_FILES["document1"]["name"]);
@@ -35,10 +35,10 @@ switch ($tag) {
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-  // Check if user folder exists, create it if it doesn't
-  if (!file_exists($target_dir)) {
-  	mkdir($target_dir, 0777, true);
-  }
+		// Check if user folder exists, create it if it doesn't
+		if (!file_exists($target_dir)) {
+			mkdir($target_dir, 0777, true);
+		}
 
 		// Check if file already exists
 		if (file_exists($target_file)) {
@@ -66,7 +66,7 @@ switch ($tag) {
 			$out = sdmq()->send_document($filename1,$filename2);
 			if ($out == "1") {
 				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
-	      echo "The file ". htmlspecialchars( basename( $_FILES["document1"]["name"])). " and ". htmlspecialchars( basename( $_FILES["document2"]["name"])). " has been uploaded.";
+				echo "The file ". htmlspecialchars( basename( $_FILES["document1"]["name"])). " and ". htmlspecialchars( basename( $_FILES["document2"]["name"])). " has been uploaded.";
 				} else {
 					echo "Sorry, there was an error uploading your file.";
 				}
@@ -383,6 +383,68 @@ switch ($tag) {
 			echo 'failed';
 		}
 		break;
+	case 'send_custom_notif':
+		$userref = $_POST["userref"];
+		$message = $_POST["notifMessage"];
+
+		$out = sdmq()->send_custom_notif($userref, $message);
+		if ($out == "1") {
+			echo "Notification sent to user:" . $userref;
+		} else {
+			echo "Failed to send notification to user:" . $userref;
+		}
+		break;
+	case 'add_admin':
+		$email = $_POST["email"];
+		$password = generatePassword();
+		// $message = '';
+
+		// // Email content
+		// $subject = "Admin Account";
+		// $message .= "Congratulations! Your admin account has been successfully created.\n";
+		// $message .= "Please find below your login credentials:\n";
+		// $message .= "Email: " . $email . "\n";
+		// $message .= "Password: " . $password . "\n\n";
+		// $message .= "If you have any questions or need further assistance, feel free to contact us.\n\n";
+		// $message .= "Best regards,\nThe UniHive Admin Team";
+
+		// // Sender and recipient details
+		// $from = "cyla1wp@ezztt.com"; // Replace with the actual sender email address: unihive-admin@gmail.com
+		// $headers = "From: " . $from . "\r\n";
+		// $headers .= "Reply-To: " . $from . "\r\n";
+		// $headers .= "MIME-Version: 1.0\r\n";
+		// $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
+
+		$out = sdmq()->new_admin($email, $password);
+
+		if ($out == "1") {
+				echo "New admin added";
+		} else {
+				echo "Failed to add admin";
+		}
+		break;
+	case 'delete_dorm_admin':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		$out = sdmq()->delete_dorm_admin($userref, $dormref);
+		if ($out == "1") {
+				echo "Dorm deleted. Notification sent to owner";
+		} else {
+				echo "Failed to delete dorm";
+		}
+		break;
+	case 'send_dorm_notif':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		$out = sdmq()->send_dorm_notif($userref, $dormref);
+		if ($out == "1") {
+				echo "Notification sent to dorm owner";
+		} else {
+				echo "Failed to send notification";
+		}
+		break;
 }
 
 function getAddressCoordinates($address) {
@@ -433,6 +495,28 @@ function deleteDirectory($dir) {
 	}
 
 	return rmdir($dir);
+}
+
+function generatePassword() {
+	// Define the character set for the password
+	$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
+
+	// Get the total number of characters in the character set
+	$characterCount = strlen($characters);
+
+	// Initialize an empty password string
+	$password = '';
+
+	// Generate the password
+	for ($i = 0; $i <= 8; $i++) {
+			// Get a random index within the character set
+			$randomIndex = mt_rand(0, $characterCount - 1);
+
+			// Append the randomly selected character to the password string
+			$password .= $characters[$randomIndex];
+	}
+
+	return $password;
 }
 
 function sdmq()

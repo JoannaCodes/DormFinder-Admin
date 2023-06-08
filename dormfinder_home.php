@@ -77,26 +77,26 @@
 				<div style="display:flex;flex-direction:column;justify-content:space-between;" class="col-3">
 					<div class="rounded shadow p-3">
 						<h4>Notification Form</h4>
-						<form>
+						<form id="notif-form">
 							<div class="form-group">
-								<label for="userref">User ID</label>
-								<input type="text" class="form-control" id="userref" placeholder="Enter User ID">
+									<label for="userref">User ID</label>
+									<input type="text" class="form-control" id="userref" placeholder="Enter User ID" required>
 							</div>
 							<div class="form-group">
-								<label for="notifMessage">Notification Message</label>
-								<textarea style="resize: none;" class="form-control" id="notifMessage" rows="3" placeholder="Enter Notification Message"></textarea>
+									<label for="notifMessage">Notification Message</label>
+									<textarea style="resize: none;" class="form-control" id="notifMessage" rows="6" placeholder="Enter Notification Message" required></textarea>
 							</div>
 							<div class="d-grid gap-2 mt-4">
-								<button type="submit" class="btn btn-primary">Submit</button>
+									<button type="submit" class="btn btn-primary">Submit</button>
 							</div>
 						</form>
 					</div>
 					<div class="rounded shadow p-3">
 						<h4>Add Admin</h4>
-						<form>
+						<form id="admin-form">
 							<div class="form-group">
-								<label for="userref">Email</label>
-								<input type="text" class="form-control" id="admin" placeholder="Enter Admin Email Address">
+								<label for="admin">Email</label>
+								<input type="text" class="form-control" id="admin" name="admin" placeholder="Enter Admin Email Address">
 							</div>
 							<div class="d-grid gap-2 mt-4">
 								<button type="submit" class="btn btn-primary">Add</button>
@@ -234,6 +234,57 @@ function check_cookies() {
 		window.location.href="http://localhost/DormFinder-Admin/dormfinder_admin.php";
 	}
 }
+function delete_dorm_admin(obj) {
+	var dormref = $(obj).data('dormref');
+	var userref = $(obj).data('userref');
+
+	Swal.fire({
+		title: `Continue deleting this dorm listing with id: ${dormref}`,
+		showDenyButton: true,
+		showCancelButton: false,
+		confirmButtonText: 'Yes',
+		denyButtonText: `No`,
+	}).then((result) => {
+		/* Read more about isConfirmed, isDenied below */
+		if (result.isConfirmed) {
+			$.ajax({
+				url: "http://localhost/DormFinder-Admin/index.php",
+				type: "POST",
+				data: {
+					_token: "{{ csrf_token() }}",
+					tag: "delete_dorm_admin",
+					userref: userref,
+					dormref: dormref
+				},
+				complete:function(response) {
+					Swal.fire('Dorm listing Deleted', '', 'success')
+					location.reload();
+				}
+			})
+		} else if (result.isDenied) {
+			Swal.fire('Deletion canceled', '', 'info')
+		}
+	})
+}
+function send_dorm_notif(obj) {
+	var userref = $(obj).data('userref');
+	var dormref = $(obj).data('dormref');
+
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "POST",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "send_dorm_notif",
+			userref: userref,
+			dormref: dormref
+		},
+		complete:function(response) {
+			alert(response.responseText)
+		}
+	})
+}
+
 // Initialize DataTable
 function verify_document(obj) {
 	var id = $(obj).data('id');
@@ -259,6 +310,14 @@ $(document).ready(function() {
 	get_userdoc();
 	get_dormlisting();
 	get_users();
+	$("#notif-form").submit(function(event) {
+			event.preventDefault();
+			send_custom_notif();
+	});
+	$("#admin-form").submit(function(event) {
+        event.preventDefault();
+        add_admin();
+    });
 });
 
 function get_userdoc() {
@@ -309,5 +368,41 @@ function get_users() {
 			$('#usersTable').DataTable();
 		}
 	})
+}
+
+function send_custom_notif(){
+	var userref = $('#userref').val();
+	var notifMessage = $('#notifMessage').val();
+
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php", // Replace with the correct URL or file path
+		type: "POST",
+		data: {
+			tag: "send_custom_notif",
+			userref: userref,
+			notifMessage: notifMessage
+		},
+		complete: function(response) {
+			alert(response.responseText);
+			location.reload();
+		}
+	});
+}
+
+function add_admin() {
+	var adminEmail = $('#admin').val();
+
+	$.ajax({
+			url: "http://localhost/DormFinder-Admin/index.php", // Replace with the correct URL or file path
+			type: "POST",
+			data: {
+					tag: "add_admin",
+					email: adminEmail
+			},
+			complete: function(response) {
+					alert(response.responseText);
+					location.reload();
+			}
+	});
 }
 </script>

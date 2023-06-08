@@ -123,8 +123,8 @@ class sdm_query
 				<td class='align-middle'>".$out[$i]['createdAt']."</td>
 				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
 				<td width='50%' class='align-middle'>
-					<button class='btn btn-primary' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_notif(this)' data-id='".$out[$i]['userref']."'>".$notif_icon."</button>
-					<button class='btn btn-danger' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm(this)' data-id='".$out[$i]['id']."'>".$del_icon."</button>
+					<button class='btn btn-primary' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_dorm_notif(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$notif_icon."</button>
+					<button class='btn btn-danger' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm_admin(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$del_icon."</button>
 				</td>
 	  	</tr>";
 		}
@@ -142,6 +142,53 @@ class sdm_query
 	  	</tr>";
 		}
 		return $toecho;
+	}
+	public function send_custom_notif($userref, $message)
+	{
+		$vtitle = "UniHive";
+		$vdesc = $message;
+		$vreferencestarter = uniqid();
+		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_time = date('Y-m-d H:i:s');
+
+		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+			return "1";
+		}
+	}
+	public function new_admin($email, $password)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_adminusers SET email=?, `password`=?, date_created=now()", [$email, $password])){
+			return "1";
+		}
+	}
+	public function delete_dorm_admin($userref, $dormref)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT `name` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
+
+		$vtitle = "UniHive";
+		$vdesc = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been removed. If you believe this removal was a mistake, kindly reach out to our team for assistance.";
+		$vreferencestarter = uniqid();
+		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_time = date('Y-m-d H:i:s');
+
+		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=?", [$dormref])) {
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+				return "1";
+			}
+		}
+	}
+	public function send_dorm_notif($userref, $dormref)
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT name FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
+
+		$vtitle = "UniHive";
+		$vdesc = "This is a reminder to update your listing named '" . $out[0]['name'] . "', for the upcoming semester. Please ensure your listing is up to date. If your listing is already current, you may disregard this message.";
+		$vreferencestarter = uniqid();
+		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_time = date('Y-m-d H:i:s');
+		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+			return "1";
+		}
 	}
 
 	// App Queries
@@ -337,9 +384,9 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
-	public function get_dorm_details($dormref, $userref)
+	public function get_dorm_details($dormref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id=? AND  d.userref=?", [$dormref, $userref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id=?", [$dormref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 	public function get_bookmarks($userref)
