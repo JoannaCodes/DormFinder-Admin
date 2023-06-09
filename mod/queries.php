@@ -440,7 +440,6 @@ class sdm_query
 	return json_encode(json_encode($out));
 }
 
-
 	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
 		$hrquery = "UPDATE tbl_houserules SET visitors=?, pets=?, curfew=? WHERE dormref=?";
@@ -449,18 +448,28 @@ class sdm_query
 		$pdtquery = "UPDATE tbl_pdterms SET advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=? WHERE dormref=?";
 		$pdtparams = [$advdep, $secdep, $util, $minstay, $dormref];
 
-		if (empty($dormImages)) {
-			$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, updatedAt=now() WHERE id=? AND userref=?";
-			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormref, $userref];
-		} else {
-			$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, updatedAt=now() WHERE id=? AND userref=?";
-			$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $dormref, $userref];
-		}
-	
-		if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
+		$dormquery = empty($dormImages) ?
+    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, updatedAt=now() WHERE id=? AND userref=?" :
+    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, updatedAt=now() WHERE id=? AND userref=?";
+
+		$dormparams = empty($dormImages) ?
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormref, $userref] :
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $dormref, $userref];
+
+
+		try {
+			if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
 				return "1";
+			} else {
+				return "0";
+			}
+
+			return "1";
+		} catch (Exception $e) {
+			return "0";
 		}
 	}
+
 	public function post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
 		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, createdAt=now(), updatedAt=now()";
@@ -472,8 +481,15 @@ class sdm_query
 		$pdtquery = "INSERT INTO tbl_pdterms SET dormref=?, advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=?";
 		$pdtparams = [$id, $advdep, $secdep, $util, $minstay];
 
-		if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
-			return "1";
+		try {
+			if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
+				return "1";
+			} else {
+				return "0";
+			}
+			return "success";
+		} catch (Exception $e) {
+			return "failed";
 		}
 	}
 

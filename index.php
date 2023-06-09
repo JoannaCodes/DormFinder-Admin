@@ -5,7 +5,7 @@ header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
 
-$domain = 'http:/192.168.0.24/DormFinder-Admin/';
+$domain = 'http:/192.168.0.12/DormFinder-Admin/';
 $tag = '';
 
 if (isset($_POST["tag"])) {
