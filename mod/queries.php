@@ -194,13 +194,13 @@ class sdm_query
 	// App Queries
 	public function login_app($username, $password)
 	{
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND password=?", [$username, $password], true));
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND `password`=?", [$username, $password], true));
 		$outx = json_decode($out, true);
 		if (count($outx) == 1) {
-			if ($outx[0]['password'] == $password) {
-				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => "true"]);
+			if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
+				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true]);
 			} else {
-				echo json_encode(["username" => "none", "id" => "none", "status" => "false"]);
+				echo json_encode(["status" => false]);
 			}
 		}
 	}
