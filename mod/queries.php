@@ -122,9 +122,9 @@ class sdm_query
 				<td class='align-middle'>".$out[$i]['address']."</td>
 				<td class='align-middle'>".$out[$i]['createdAt']."</td>
 				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
-				<td width='50%' class='align-middle'>
-					<button class='btn btn-primary' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_dorm_notif(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$notif_icon."</button>
-					<button class='btn btn-danger' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm_admin(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$del_icon."</button>
+				<td class='align-middle'>
+					<button class='btn btn-primary p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_dorm_notif(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$notif_icon."</button>
+					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm_admin(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$del_icon."</button>
 				</td>
 	  	</tr>";
 		}
@@ -151,8 +151,14 @@ class sdm_query
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 		$current_time = date('Y-m-d H:i:s');
 
-		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-			return "1";
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$userref], true));
+		$outx = json_decode($out, true);
+		if (count($outx) == 1) {
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+				return "1";
+			}
+		} else {
+			return "0";
 		}
 	}
 	public function new_admin($email, $password)

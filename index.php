@@ -390,8 +390,10 @@ switch ($tag) {
 		$out = sdmq()->send_custom_notif($userref, $message);
 		if ($out == "1") {
 			echo "Notification sent to user:" . $userref;
+		} else if ($out == "0") {
+			echo "User " . $userref . " does not exist";
 		} else {
-			echo "Failed to send notification to user:" . $userref;
+			echo "Failed to send notification to user: " . $userref;
 		}
 		break;
 	case 'add_admin':

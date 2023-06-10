@@ -51,10 +51,10 @@
 		<!-- Sample table -->
 		<div class="container-fluid mt-4 mx-auto ps-5 pe-5">
 			<div class="row mb-4">
-				<div class="col-9 me-auto">
+				<div class="col-9">
 					<div class="rounded shadow p-3">
 						<h4>Dorm Listing</h4>
-						<div style="height: fit-content;">
+						<div style="height: 500px;">
 							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="dormsTable">
 								<thead style="background-color: white;">
 									<tr>
@@ -84,7 +84,7 @@
 							</div>
 							<div class="form-group">
 									<label for="notifMessage">Notification Message</label>
-									<textarea style="resize: none;" class="form-control" id="notifMessage" rows="6" placeholder="Enter Notification Message" required></textarea>
+									<textarea style="resize: none;" class="form-control" id="notifMessage" rows="4" placeholder="Enter Notification Message" required></textarea>
 							</div>
 							<div class="d-grid gap-2 mt-4">
 									<button type="submit" class="btn btn-primary">Submit</button>
@@ -110,7 +110,7 @@
 				<div class="col-6">
 					<div class="rounded shadow p-3">
 						<h4>Users</h4>
-						<div style="height: fit-content;">
+						<div style="height: 300px;">
 							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="usersTable">
 								<thead>
 									<tr>
@@ -128,7 +128,7 @@
 				<div class="col-6">
 					<div class="rounded shadow p-3">
 						<h4>Document Verifier</h4>
-						<div style="height: fit-content;">
+						<div style="height: 300px;">
 							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="sampleTable">
 								<thead>
 									<tr>
