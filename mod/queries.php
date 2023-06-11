@@ -439,25 +439,20 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms ORDER BY createdAt DESC LIMIT 50", []), true), true);
 		return json_encode(json_encode($out));
 	}
-
 	public function nearest_dorm($latitude, $longitude)
-{
-    $out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))));"), true), true);
-	return json_encode(json_encode($out));
-}
-
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))));"), true), true);
+		return json_encode(json_encode($out));
+	}
 	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
-		$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now()";
-		$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
-
 		$dormquery = empty($dormImages) ?
     	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?" :
     	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?";
 
 		$dormparams = empty($dormImages) ?
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay] :
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $dormref, $userref] :
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $dormref, $userref];
 
 
 		try {
@@ -472,7 +467,6 @@ class sdm_query
 			return "0";
 		}
 	}
-
 	public function post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
 		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
@@ -489,7 +483,6 @@ class sdm_query
 			return "failed";
 		}
 	}
-
 
 	public function QuickLook($q, $par = array())
 	{

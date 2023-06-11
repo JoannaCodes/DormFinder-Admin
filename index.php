@@ -175,7 +175,7 @@ switch ($tag) {
 		} else {
 			echo $out;
 		}
-	break;
+		break;
 
 	case "update_profile":
 		$image = $_FILES['image'];
@@ -346,7 +346,7 @@ switch ($tag) {
 			$longitude = $coordinates['longitude'];
     }
 
-		if (isset($_FILES['images']) && is_array($_FILES['images']['tmp_name'])) {
+		if (isset($_FILES['images'])) {
 			$images = $_FILES['images'];
 
 			// Remove existing files in the folder
