@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 05, 2023 at 05:59 AM
+-- Generation Time: Jun 11, 2023 at 07:51 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -137,6 +137,13 @@ CREATE TABLE `tbl_dorms` (
   `hei` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `amenities` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `images` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `visitors` int(11) NOT NULL DEFAULT 0,
+  `pets` int(11) NOT NULL DEFAULT 0,
+  `curfew` int(11) NOT NULL DEFAULT 0,
+  `adv_dep` varchar(255) DEFAULT 'N/A',
+  `sec_dep` varchar(255) DEFAULT 'N/A',
+  `util` varchar(255) DEFAULT 'N/A',
+  `min_stay` varchar(255) DEFAULT 'N/A',
   `createdAt` date DEFAULT current_timestamp(),
   `updatedAt` date DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -145,36 +152,12 @@ CREATE TABLE `tbl_dorms` (
 -- Dumping data for table `tbl_dorms`
 --
 
-INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `longitude`, `latitude`, `price`, `slots`, `desc`, `hei`, `amenities`, `images`, `createdAt`, `updatedAt`) VALUES
-('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '07 Katie Terrace', 114.938683, 24.442181, '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'Air Conditioning, Elevator, Beddings, Kitchen, Wi-Fi', 'adam-winger-5zX1KAjPl4o-unsplash.jpg,alen-rojnic-GfvHuhw2Iqg-unsplash.jpg,alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,blake-woolwine-lz9W775oDyI-unsplash.jpg,chino-rocha-LDhXIvAqRJw-unsplash.jpg', '2022-09-21', '2023-06-01'),
-('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '4837 Spohn Junction', -8.473295, 40.276379, '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'Lounge, Parking, Security, Study Room', 'daria-shevtsova-RP4mtXJM7es-unsplash.jpg,fred-kleber-gTbaxaVLvsg-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,lissete-laverde-9XdCMuK8zlQ-unsplash.jpg,marcus-loke-WQJvWU_HZFo-unsplash.jpg', '2022-02-14', '2023-10-24'),
-('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '2739 Tony Park', -35.269779, -5.686115, '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'Laundry, Lounge, Parking, Wi-Fi', 'nguyen-dang-hoang-nhu-HHs_PrvxSQk-unsplash.jpg,rnaol-oKHHspCSWHQ-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,shashi-chaturvedula-UlHN7wFhtvU-unsplash.jpg,shashi-chaturvedula-xdY1s1I6J8U-unsplash.jpg', '2022-06-14', '2023-05-02'),
-('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '7780 Crescent Oaks Trail', -8.264878, 41.528942, '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'Lounge, Security, Study Room', 'shche_-team-PFi1uWHh2dQ-unsplash.jpg,sigmund-CwTfKH5edSk-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg,spacejoy-vOa-PSimwg4-unsplash.jpg,taiga-ishii-mukO8Po_LZ8-unsplash.jpg', '2021-04-04', '2023-09-09'),
-('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '3305 Susan Alley', 4.892595, 52.371693, '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'Beddings, Parking, Wi-Fi', 'alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg', '2022-03-19', '2023-03-05');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_houserules`
---
-
-CREATE TABLE `tbl_houserules` (
-  `id` int(11) NOT NULL,
-  `dormref` varchar(13) DEFAULT NULL,
-  `visitors` int(11) DEFAULT 0,
-  `pets` int(11) DEFAULT 0,
-  `curfew` int(11) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tbl_houserules`
---
-
-INSERT INTO `tbl_houserules` (`id`, `dormref`, `visitors`, `pets`, `curfew`) VALUES
-(1, 'BFHSJXnnAUkI2', 0, 0, 0),
-(3, 'i1QjNuLJTMZIB', 1, 0, 0),
-(4, 'Npqap0xFEsMlT', 0, 0, 0),
-(5, 'lABWe6poOzMcM', 1, 1, 0);
+INSERT INTO `tbl_dorms` (`id`, `userref`, `name`, `address`, `longitude`, `latitude`, `price`, `slots`, `desc`, `hei`, `amenities`, `images`, `visitors`, `pets`, `curfew`, `adv_dep`, `sec_dep`, `util`, `min_stay`, `createdAt`, `updatedAt`) VALUES
+('BFHSJXnnAUkI2', 'qzPHvK8kHTy3i', 'Ooba', '903 Engracia Reyes St, Ermita, Manila', 120.981796, 14.579275, '$1319.76', 12, 'brand interactive mindshare', 'PUP, FEU, UST', 'Air Conditioning, Elevator, Beddings, Kitchen, Wi-Fi', 'adam-winger-5zX1KAjPl4o-unsplash.jpg,alen-rojnic-GfvHuhw2Iqg-unsplash.jpg,alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,blake-woolwine-lz9W775oDyI-unsplash.jpg,chino-rocha-LDhXIvAqRJw-unsplash.jpg', 0, 0, 0, 'N/A', 'N/A', 'N/A', 'N/A', '2022-09-21', '2023-06-01'),
+('i1QjNuLJTMZIB', 'qzPHvK8kHTy3i', 'Quimba', '396 Zaragoza St, Tondo, Manila', 120.962776, 14.602634, '$1937.13', 16, 'innovate 24/365 web services', 'UP, UST, NU, FEU, PUP', 'Lounge, Parking, Security, Study Room', 'daria-shevtsova-RP4mtXJM7es-unsplash.jpg,fred-kleber-gTbaxaVLvsg-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,lissete-laverde-9XdCMuK8zlQ-unsplash.jpg,marcus-loke-WQJvWU_HZFo-unsplash.jpg', 0, 0, 0, 'N/A', 'N/A', 'N/A', 'N/A', '2022-02-14', '2023-10-24'),
+('KKtGjBpTq9VAI', 'LhVQ3FMv6d6lW', 'Tagcat', '303 Recto Ave, Binondo, Manila', 120.974670, 14.606092, '$3214.48', 17, 'extend granular infomediaries', 'PUP', 'Laundry, Lounge, Parking, Wi-Fi', 'nguyen-dang-hoang-nhu-HHs_PrvxSQk-unsplash.jpg,rnaol-oKHHspCSWHQ-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,shashi-chaturvedula-UlHN7wFhtvU-unsplash.jpg,shashi-chaturvedula-xdY1s1I6J8U-unsplash.jpg', 0, 0, 0, 'N/A', 'N/A', 'N/A', 'N/A', '2022-06-14', '2023-05-02'),
+('lABWe6poOzMcM', 'LhVQ3FMv6d6lW', 'Zooveo', '261 2nd St, Port Area, Manila', 120.964195, 14.593937, '$2628.09', 7, 'repurpose 24/365 interfaces', 'UP, UST, NU, FEU, PUP', 'Lounge, Security, Study Room', 'shche_-team-PFi1uWHh2dQ-unsplash.jpg,sigmund-CwTfKH5edSk-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg,spacejoy-vOa-PSimwg4-unsplash.jpg,taiga-ishii-mukO8Po_LZ8-unsplash.jpg', 0, 0, 0, 'N/A', 'N/A', 'N/A', 'N/A', '2021-04-04', '2023-09-09'),
+('Npqap0xFEsMlT', 'LhVQ3FMv6d6lW', 'Zoonder', '71 Wagas St, Tondo, Manila', 120.963966, 14.606765, '$1381.52', 3, 'recontextualize front-end experiences', 'UP, UST, NU, FEU', 'Beddings, Parking, Wi-Fi', 'alen-rojnic-T1Yvmf4oleQ-unsplash.jpg,gabriel-beaudry-WuQME0I_oZA-unsplash.jpg,samuel-regan-asante-CbptaPcrFCc-unsplash.jpg,spacejoy-808a4AWu8jE-unsplash.jpg', 0, 0, 0, 'N/A', 'N/A', 'N/A', 'N/A', '2022-03-19', '2023-03-05');
 
 -- --------------------------------------------------------
 
@@ -201,31 +184,6 @@ INSERT INTO `tbl_notifications` (`id`, `user_ref`, `title`, `ndesc`, `created`, 
 (1, '1122', 'DormFinder', 'Your documents have been verified! You can now publish your Dorm.', '2023-03-13 06:35:21', '2023-03-10 06:21:35', '1', 0),
 (31, '1122', 'DormFinder', 'Your documents have been verified! You can now publish your Dorm.', '2023-04-23 08:53:53', '2023-04-23 08:54:53', '1', 0),
 (32, '1122', 'DormFinder', 'Your documents have been verified! You can now publish your Dorm.', '2023-04-23 08:54:06', '2023-04-23 08:55:06', '1', 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_pdterms`
---
-
-CREATE TABLE `tbl_pdterms` (
-  `id` int(11) NOT NULL,
-  `dormref` varchar(13) NOT NULL,
-  `advance_deposit` varchar(255) NOT NULL,
-  `security_deposit` varchar(255) NOT NULL,
-  `utilities` varchar(255) NOT NULL,
-  `minimum_stay` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tbl_pdterms`
---
-
-INSERT INTO `tbl_pdterms` (`id`, `dormref`, `advance_deposit`, `security_deposit`, `utilities`, `minimum_stay`) VALUES
-(1, 'BFHSJXnnAUkI2', '1 Month/s', '2 Month/s', '2 Month/s', '7 Month/s'),
-(3, 'i1QjNuLJTMZIB', '2 Month/s', '1 Month/s', '1 Month/s', '5 Month/s'),
-(4, 'Npqap0xFEsMlT', '2 Month/s', '1 Month/s', '2 Month/s', '11 Month/s'),
-(5, 'lABWe6poOzMcM', '2 Month/s', '1 Month/s', '1 Month/s', '5 Month/s');
 
 -- --------------------------------------------------------
 
@@ -293,24 +251,10 @@ ALTER TABLE `tbl_dorms`
   ADD KEY `userref` (`userref`);
 
 --
--- Indexes for table `tbl_houserules`
---
-ALTER TABLE `tbl_houserules`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `dormref` (`dormref`);
-
---
 -- Indexes for table `tbl_notifications`
 --
 ALTER TABLE `tbl_notifications`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_pdterms`
---
-ALTER TABLE `tbl_pdterms`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `dormref` (`dormref`);
 
 --
 -- Indexes for table `tbl_users`
@@ -347,22 +291,10 @@ ALTER TABLE `tbl_dormreviews`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `tbl_houserules`
---
-ALTER TABLE `tbl_houserules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
 -- AUTO_INCREMENT for table `tbl_notifications`
 --
 ALTER TABLE `tbl_notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
-
---
--- AUTO_INCREMENT for table `tbl_pdterms`
---
-ALTER TABLE `tbl_pdterms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -387,18 +319,6 @@ ALTER TABLE `tbl_dormreviews`
 --
 ALTER TABLE `tbl_dorms`
   ADD CONSTRAINT `tbl_dorms_ibfk_1` FOREIGN KEY (`userref`) REFERENCES `tbl_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `tbl_houserules`
---
-ALTER TABLE `tbl_houserules`
-  ADD CONSTRAINT `tbl_houserules_ibfk_1` FOREIGN KEY (`dormref`) REFERENCES `tbl_dorms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `tbl_pdterms`
---
-ALTER TABLE `tbl_pdterms`
-  ADD CONSTRAINT `tbl_pdterms_ibfk_1` FOREIGN KEY (`dormref`) REFERENCES `tbl_dorms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

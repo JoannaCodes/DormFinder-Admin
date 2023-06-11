@@ -448,23 +448,20 @@ class sdm_query
 
 	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
-		$hrquery = "UPDATE tbl_houserules SET visitors=?, pets=?, curfew=? WHERE dormref=?";
-		$hrparams = [$visitors, $pets, $curfew, $dormref];
-
-		$pdtquery = "UPDATE tbl_pdterms SET advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=? WHERE dormref=?";
-		$pdtparams = [$advdep, $secdep, $util, $minstay, $dormref];
+		$dormquery = "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now()";
+		$dormparams = [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
 
 		$dormquery = empty($dormImages) ?
-    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, updatedAt=now() WHERE id=? AND userref=?" :
-    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, updatedAt=now() WHERE id=? AND userref=?";
+    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?" :
+    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?";
 
 		$dormparams = empty($dormImages) ?
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormref, $userref] :
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $dormref, $userref];
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay] :
+			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
 
 
 		try {
-			if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
+			if ($this->QuickFire($dormquery, $dormparams)) {
 				return "1";
 			} else {
 				return "0";
@@ -478,17 +475,11 @@ class sdm_query
 
 	public function post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
 	{
-		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, createdAt=now(), updatedAt=now()";
-		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages];
-
-		$hrquery = "INSERT INTO tbl_houserules SET dormref=?, visitors=?, pets=?, curfew=?";
-		$hrparams = [$id, $visitors, $pets, $curfew];
-
-		$pdtquery = "INSERT INTO tbl_pdterms SET dormref=?, advance_deposit=?, security_deposit=?, utilities=?, minimum_stay=?";
-		$pdtparams = [$id, $advdep, $secdep, $util, $minstay];
+		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
+		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
 
 		try {
-			if ($this->QuickFire($dormquery, $dormparams) && $this->QuickFire($hrquery, $hrparams) && $this->QuickFire($pdtquery, $pdtparams)) {
+			if ($this->QuickFire($dormquery, $dormparams)) {
 				return "1";
 			} else {
 				return "0";
