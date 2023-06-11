@@ -204,7 +204,7 @@ class sdm_query
 		$outx = json_decode($out, true);
 		if (count($outx) == 1) {
 			if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
-				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true]);
+				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "isVerified" => $outx[0]['is_verified'], "status" => true]);
 			} else {
 				echo json_encode(["status" => false]);
 			}
