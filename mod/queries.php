@@ -392,7 +392,7 @@ class sdm_query
 	}
 	public function get_dorm_details($dormref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, hr.*, pdt.* FROM tbl_dorms d INNER JOIN tbl_houserules hr ON d.id = hr.dormref INNER JOIN tbl_pdterms pdt ON d.id = pdt.dormref WHERE d.id=?", [$dormref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE id=?", [$dormref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 	public function get_bookmarks($userref)
