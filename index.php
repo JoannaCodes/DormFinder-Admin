@@ -157,7 +157,9 @@ switch ($tag) {
 	case 'get_bookmarks':
 		echo sdmq()->get_bookmarks($_GET["userref"]);
 		break;
-
+	case 'add_bookmarks':
+			echo sdmq()->get_bookmarks($_POST["dormref"] , $_POST["userref"]);
+		break;
 	case 'popular_dorm':
 			echo sdmq()->popular_dorm();
 		break;
