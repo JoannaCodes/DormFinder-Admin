@@ -400,6 +400,14 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
+
+	public function add_bookmarks($userref, $dormref)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_bookmarks SET dormref=?, userref=?", [$dormref, $userref])) {
+			return "1";
+		}
+	}
+
 	public function update_profile($userref, $username, $filename)
 	{
 		if ($this->QuickFire("UPDATE tbl_users SET username=?, imageUrl=?, updated_at=now() WHERE id=?", [$username, $filename, $userref])) {
