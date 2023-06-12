@@ -96,7 +96,7 @@
 						<form id="admin-form">
 							<div class="form-group">
 								<label for="admin">Email</label>
-								<input type="text" class="form-control" id="admin" name="admin" placeholder="Enter Admin Email Address">
+								<input type="text" class="form-control" id="admin" name="admin" placeholder="Enter Admin Email Address" required>
 							</div>
 							<div class="d-grid gap-2 mt-4">
 								<button type="submit" class="btn btn-primary">Add</button>

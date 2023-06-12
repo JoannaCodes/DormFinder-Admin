@@ -97,10 +97,10 @@ switch ($tag) {
 		break;
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
-			break;
+		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
-			break;	
+		break;	
 	case 'verify_document':
 		echo sdmq()->verify_document($_POST['id'], $_POST['docvalue']);
 		break;
@@ -446,6 +446,10 @@ switch ($tag) {
 		} else {
 				echo "Failed to send notification";
 		}
+		break;
+	case 'get_verification_status':
+		$userref = $_GET["userref"];
+		echo sdmq()->get_verification_status($userref);
 		break;
 }
 

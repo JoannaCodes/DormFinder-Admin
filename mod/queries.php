@@ -483,6 +483,10 @@ class sdm_query
 			return "failed";
 		}
 	}
+	public function get_verification_status($userref) {
+		$out = json_decode(json_decode($this->QuickLook("SELECT is_verified FROM tbl_users WHERE id=?", [$userref]), true), true);
+		return json_encode(json_encode($out[0]));
+	}
 
 	public function QuickLook($q, $par = array())
 	{
