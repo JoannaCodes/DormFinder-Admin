@@ -98,6 +98,9 @@ switch ($tag) {
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
 		break;
+	case 'login_app_guest':
+		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
+		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
 		break;	
@@ -525,6 +528,36 @@ function generatePassword() {
 	}
 
 	return $password;
+}
+
+function sendEmail($email, $fullname, $subject, $body){
+	$mail = new PHPMailer(TRUE);
+	try {
+		$mail->isSMTP();
+		$mail->Mailer = "smtp";
+		$mail->SMTPDebug  = 1;
+		$mail->Host = 'smtp.gmail.com';
+		$mail->Port = 587;
+		$mail->SMTPSecure = 'tls';
+		$mail->SMTPAuth = TRUE;
+		$mail->Username = 'oam.signopsys@gmail.com';
+		$mail->Password = 'ygmrikcgceedlcmr';
+		$mail->setFrom($email, $fullname);
+		$mail->addAddress('oam.signopsys@gmail.com', 'Office Admin');
+		$mail->Subject = $subject;
+		$mail->isHTML(true); 
+		$mail->Body = $body;
+		$mail->AltBody = $message;
+		
+
+		if($mail->send()){
+			echo "Error while sending Email.";
+			var_dump($mail);
+		}
+		$mail->smtpClose();
+	} catch (Exception $e) {
+	die($e->getMessage());
+	}
 }
 
 function sdmq()
