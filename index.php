@@ -5,7 +5,15 @@ header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
 
-$domain = 'http:/192.168.0.12/DormFinder-Admin/';
+require 'plugins/PHPMailer/src/Exception.php';
+require 'plugins/PHPMailer/src/PHPMailer.php';
+require 'plugins/PHPMailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+$domain = 'http://192.168.0.12/DormFinder-Admin/';
 $tag = '';
 
 if (isset($_POST["tag"])) {
@@ -404,27 +412,32 @@ switch ($tag) {
 	case 'add_admin':
 		$email = $_POST["email"];
 		$password = generatePassword();
-		// $message = '';
+		$subject = "Invitation to Admin Website - Login Credentials Inside";
+		$body = "
+			<h1>Welcome to the StudyHive Team</h1>
+			<p>Congratulations! You have been invited as a new admin.</p>
+			<p>Please use the following login credentials to access the admin website:</p>
+			<ul>
+					<li><strong>Email:</strong> {$email}</li>
+					<li><strong>Password:</strong> {$password}</li>
+			</ul>
+			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
+		";
 
-		// // Email content
-		// $subject = "Admin Account";
-		// $message .= "Congratulations! Your admin account has been successfully created.\n";
-		// $message .= "Please find below your login credentials:\n";
-		// $message .= "Email: " . $email . "\n";
-		// $message .= "Password: " . $password . "\n\n";
-		// $message .= "If you have any questions or need further assistance, feel free to contact us.\n\n";
-		// $message .= "Best regards,\nThe UniHive Admin Team";
+		$altBody = "
+				Welcome to the Admin Website
 
-		// // Sender and recipient details
-		// $from = "cyla1wp@ezztt.com"; // Replace with the actual sender email address: unihive-admin@gmail.com
-		// $headers = "From: " . $from . "\r\n";
-		// $headers .= "Reply-To: " . $from . "\r\n";
-		// $headers .= "MIME-Version: 1.0\r\n";
-		// $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
+				Congratulations! You have been invited as a new admin.
 
-		$out = sdmq()->new_admin($email, $password);
+				Please use the following login credentials to access the admin website:
 
-		if ($out == "1") {
+				- Username: {$email}
+				- Password: {$password}
+
+				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
+		";
+
+		if (sdmq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
 				echo "New admin added";
 		} else {
 				echo "Failed to add admin";
@@ -530,33 +543,35 @@ function generatePassword() {
 	return $password;
 }
 
-function sendEmail($email, $fullname, $subject, $body){
-	$mail = new PHPMailer(TRUE);
-	try {
-		$mail->isSMTP();
-		$mail->Mailer = "smtp";
-		$mail->SMTPDebug  = 1;
-		$mail->Host = 'smtp.gmail.com';
-		$mail->Port = 587;
-		$mail->SMTPSecure = 'tls';
-		$mail->SMTPAuth = TRUE;
-		$mail->Username = 'oam.signopsys@gmail.com';
-		$mail->Password = 'ygmrikcgceedlcmr';
-		$mail->setFrom($email, $fullname);
-		$mail->addAddress('oam.signopsys@gmail.com', 'Office Admin');
-		$mail->Subject = $subject;
-		$mail->isHTML(true); 
-		$mail->Body = $body;
-		$mail->AltBody = $message;
-		
+function sendEmail($email, $subject, $body, $altbody){
+	$mail = new PHPMailer(true);
 
-		if($mail->send()){
-			echo "Error while sending Email.";
-			var_dump($mail);
+	try {
+		//Server settings
+		$mail->SMTPDebug = SMTP::DEBUG_SERVER;
+		$mail->isSMTP();
+		$mail->Host       = 'smtp.gmail.com';
+		$mail->SMTPAuth   = true;
+		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+		$mail->Port       = 587;
+		$mail->Username   = 'info.studyhive@gmail.com';
+		$mail->Password   = 'zdzlezniksughxvn';
+
+		//Recipients
+		$mail->setFrom('info.studyhive@gmail.com', 'StudyHive Admin');
+		$mail->addAddress($email);
+
+		//Content
+		$mail->isHTML(true);
+		$mail->Subject = $subject;
+		$mail->Body    = $body;
+		$mail->AltBody = $altbody;
+
+		if ($mail->send()) {
+			return true;
 		}
-		$mail->smtpClose();
 	} catch (Exception $e) {
-	die($e->getMessage());
+		return true;
 	}
 }
 

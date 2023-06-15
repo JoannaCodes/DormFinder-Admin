@@ -87,7 +87,7 @@
 									<textarea style="resize: none;" class="form-control" id="notifMessage" rows="4" placeholder="Enter Notification Message" required></textarea>
 							</div>
 							<div class="d-grid gap-2 mt-4">
-									<button type="submit" class="btn btn-primary">Submit</button>
+									<button type="submit" class="btn btn-primary" id="notif-btn">Submit</button>
 							</div>
 						</form>
 					</div>
@@ -96,10 +96,10 @@
 						<form id="admin-form">
 							<div class="form-group">
 								<label for="admin">Email</label>
-								<input type="text" class="form-control" id="admin" name="admin" placeholder="Enter Admin Email Address" required>
+								<input type="email" class="form-control" id="admin" name="admin" placeholder="Enter Admin Email Address" required>
 							</div>
 							<div class="d-grid gap-2 mt-4">
-								<button type="submit" class="btn btn-primary">Add</button>
+								<button type="submit" class="btn btn-primary" id="admin-btn">Add</button>
 							</div>
 						</form>
 					</div>
@@ -373,6 +373,10 @@ function get_users() {
 function send_custom_notif(){
 	var userref = $('#userref').val();
 	var notifMessage = $('#notifMessage').val();
+	var btn = $('#notif-btn');
+
+	btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+	btn.prop('disabled', true);
 
 	$.ajax({
 		url: "http://localhost/DormFinder-Admin/index.php", // Replace with the correct URL or file path
@@ -384,6 +388,8 @@ function send_custom_notif(){
 		},
 		complete: function(response) {
 			alert(response.responseText);
+			btn.html('Add');
+			btn.prop('disabled', false);
 			location.reload();
 		}
 	});
@@ -391,6 +397,10 @@ function send_custom_notif(){
 
 function add_admin() {
 	var adminEmail = $('#admin').val();
+	var btn = $('#admin-btn');
+
+	btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+	btn.prop('disabled', true);
 
 	$.ajax({
 			url: "http://localhost/DormFinder-Admin/index.php", // Replace with the correct URL or file path
@@ -400,8 +410,10 @@ function add_admin() {
 					email: adminEmail
 			},
 			complete: function(response) {
-					alert(response.responseText);
-					location.reload();
+				alert(response.responseText);
+				btn.html('Add');
+				btn.prop('disabled', false);
+				location.reload();
 			}
 	});
 }
