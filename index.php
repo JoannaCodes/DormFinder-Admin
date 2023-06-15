@@ -169,7 +169,7 @@ switch ($tag) {
 		echo sdmq()->get_bookmarks($_GET["userref"]);
 		break;
 	case 'add_bookmarks':
-			echo sdmq()->get_bookmarks($_POST["dormref"] , $_POST["userref"]);
+			echo sdmq()->add_bookmarks($_POST["userref"], $_POST["dormref"]);
 		break;
 	case 'popular_dorm':
 			echo sdmq()->popular_dorm();
