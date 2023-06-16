@@ -173,7 +173,7 @@
 function change_status(obj) {
 	var doc1_statusval = $('#status_value').val();
 	var btn_value = $(obj).data('value');
-
+	var user_id = $('#user_id').val();
 	Swal.fire({
 		title: 'Do you want to save the changes?',
 		showDenyButton: true,
@@ -189,7 +189,8 @@ function change_status(obj) {
 				data: {
 					_token: "{{ csrf_token() }}",
 					tag: "change_status",
-					btn_value: btn_value
+					btn_value: btn_value,
+					user_id: user_id
 				},
 				complete:function(response) {
 					Swal.fire('Changes are saved!', '', 'success')

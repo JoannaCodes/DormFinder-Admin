@@ -8,16 +8,29 @@ class sdm_query
 	}
 
 	// Admin Queries
-	public function change_status($btn_value) {
+	public function check_ifsubmitted($user_id) {
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id], true));
+		$outx = json_decode($out, true);
+		if (count($outx) == 2) {
+			if($outx[0]['doc1_status'] == "1") {
+				return "1"; //approved
+			} else {
+				return "0"; //pending
+			}
+		} else {
+			return "2"; //disapproved
+		}
+	}
+	public function change_status($btn_value,$user_id) {
 		if($btn_value == "1") {
 			$vtitle = "DormFinder";
 			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
 			$vreferencestarter = "1";
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
-				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id='1122'",[$btn_value])) {
+				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
 					return "1";
 				}
 			}
@@ -27,9 +40,9 @@ class sdm_query
 			$vreferencestarter = "1";
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
-				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id='1122'",[])) {
+				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
 					return "0";
 				}
 			}
@@ -41,17 +54,19 @@ class sdm_query
 		$toecho = "";
 		$doc_status = "";
 		for ($i = 0; $i < count($out); $i++) {
-			$toecho.="<div class='d-flex mb-3'>
+			$toecho.="
+					<input type='hidden' id='user_id' value='".$out[$i]['user_id']."' />
+					<div class='d-flex mb-3'>
 						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
 						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/uploads/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
 					</div>";
 		}
 		return $toecho;
 	}
-	public function send_document($target_file,$target_file2)
+	public function send_document($target_file,$target_file2,$user_id)
 	{
-		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", "1122"])) {
-			if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file2, "0", "1122"])) {
+		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", $user_id])) {
+			if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file2, "0", $user_id])) {
 				return "1";
 			}
 		}
@@ -73,7 +88,7 @@ class sdm_query
 		$vtitle = "DormFinder";
 		$vdesc = "Your documents have been verified! You can now publish your Dorm.";
 		$vreferencestarter = "1";
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_timex = date('Y-m-d H:i:s', strtotime('+2 minute'));
 		$current_time = date('Y-m-d H:i:s');
 		if ($this->QuickFire(
 			"INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",
@@ -267,16 +282,9 @@ class sdm_query
 	}
 	public function look_passednotifications($userref)
 	{
-		$thiday = date("Y-m-d H:i:s");
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_notifications WHERE
-		user_ref=? AND
-		scheduled <= ? ORDER BY scheduled DESC LIMIT 8", [$userref, $thiday]), true), true);
-
-		for ($i = 0; $i < count($out); $i++) {
-			$out[$i]["scheduled"] = $this->DateExplainer($out[$i]["scheduled"])   . ";" . date("F d, Y g:i a", strtotime($out[$i]["scheduled"]));
-		}
-
-		return json_encode(json_encode($out));
+		$thiday = date("Y-m-d");
+		return $this->QuickLook("SELECT DATE_FORMAT(scheduled, '%b %e, %Y %l:%i %p') AS formatted_date, ndesc, title  FROM tbl_notifications WHERE
+		user_ref=? ORDER BY id DESC", [$userref]);
 	}
 	public function DateExplainer($thedate)
 	{
@@ -342,10 +350,10 @@ class sdm_query
 		}
 		return $dleft;
 	}
-	public function look_usersavednotifs()
+	public function look_usersavednotifs($user_ref)
 	{
 		$currdate = date("Y-m-d H:i:s");
-		return $this->QuickLook("SELECT *, UNIX_TIMESTAMP(scheduled) as unix_time FROM tbl_notifications WHERE scheduled>?", [$currdate]);
+		return $this->QuickLook("SELECT *, UNIX_TIMESTAMP(scheduled) as unix_time FROM tbl_notifications WHERE scheduled>? AND user_ref=?", [$currdate,$user_ref]);
 	}
   public function get_account($id)
 	{
