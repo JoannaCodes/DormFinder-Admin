@@ -25,23 +25,26 @@ if (isset($_POST["tag"])) {
 }
 
 switch ($tag) {
+	case 'check_ifsubmitted':
+		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
+	break;
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
 		break;
 	case 'change_status':
-		echo sdmq()->change_status($_POST["btn_value"]);
+		echo sdmq()->change_status($_POST["btn_value"],$_POST['user_id']);
 		break;
 	case 'open_document':
 		echo sdmq()->open_document($_POST["user_id"]);
-		break;
+	break;
 	case 'send_document':
-		$target_dir = "uploads/user/";
-		$target_file = $target_dir . basename($_FILES["document1"]["name"]);
-		$target_file2 = $target_dir . basename($_FILES["document2"]["name"]);
+		$target_dir = "uploads/user/" . $_POST['user_id'];
+		$target_file = $target_dir . "/" . basename($_FILES["document1"]["name"]);
+		$target_file2 = $target_dir . "/" . basename($_FILES["document2"]["name"]);
 		$filename1 = basename($_FILES["document1"]["name"]);
 		$filename2 = basename($_FILES["document2"]["name"]);
 		$uploadOk = 1;
-		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
 		// Check if user folder exists, create it if it doesn't
 		if (!file_exists($target_dir)) {
@@ -61,7 +64,7 @@ switch ($tag) {
 		}
 
 		// Allow certain file formats
-		if($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
+		if ($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
 			echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
 			$uploadOk = 0;
 		}
@@ -69,12 +72,12 @@ switch ($tag) {
 		// Check if $uploadOk is set to 0 by an error
 		if ($uploadOk == 0) {
 			echo "Sorry, your file was not uploaded.";
-			// If everything is ok, try to upload file
 		} else {
-			$out = sdmq()->send_document($filename1,$filename2);
+			$user_id = $_POST['user_id'];
+			$out = sdmq()->send_document($filename1, $filename2, $user_id);
 			if ($out == "1") {
 				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
-				echo "The file ". htmlspecialchars( basename( $_FILES["document1"]["name"])). " and ". htmlspecialchars( basename( $_FILES["document2"]["name"])). " has been uploaded.";
+					echo "The file " . htmlspecialchars(basename($_FILES["document1"]["name"])) . " and " . htmlspecialchars(basename($_FILES["document2"]["name"])) . " has been uploaded. We will notify you once you are verified thank you.";
 				} else {
 					echo "Sorry, there was an error uploading your file.";
 				}
@@ -82,7 +85,7 @@ switch ($tag) {
 				echo "Query failed.";
 			}
 		}
-		break;
+	break;
 	case 'upload_image':
 		$document = $_FILES['document'];
 		$uploadDir = './uploads/';
@@ -116,7 +119,7 @@ switch ($tag) {
 		echo sdmq()->verify_document($_POST['id'], $_POST['docvalue']);
 		break;
 	case 'fetch_saved_notif':
-		echo sdmq()->look_usersavednotifs();
+		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
 	case 'get_submitdocuments':
 		echo sdmq()->get_submitdocuments();
@@ -289,7 +292,7 @@ switch ($tag) {
 		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-    }
+	}
 
 		$uploadDir = 'uploads/dormImages/' . $id . '/';
 		if (!file_exists($uploadDir)) {
@@ -298,7 +301,7 @@ switch ($tag) {
 
 		foreach ($images['tmp_name'] as $index => $tmpName) {
 			$imageName = $images['name'][$index];
-    	$filename = basename($imageName);
+		$filename = basename($imageName);
 			$uploadFile = $uploadDir . $filename;
 			
 			// Move the file to the destination directory
@@ -354,10 +357,10 @@ switch ($tag) {
 
 		// Address Geocoding
 		$coordinates = getAddressCoordinates($address);
-    if ($coordinates) {
+	if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-    }
+	}
 
 		if (isset($_FILES['images'])) {
 			$images = $_FILES['images'];
@@ -373,7 +376,7 @@ switch ($tag) {
 
 			foreach ($images['tmp_name'] as $index => $tmpName) {
 				$imageName = $images['name'][$index];
-    		$filename = basename($imageName);
+			$filename = basename($imageName);
 				$uploadFile = $uploadDir . $filename;
 
 				// Move the file to the destination directory
@@ -472,31 +475,31 @@ switch ($tag) {
 }
 
 function getAddressCoordinates($address) {
-    // Encode the address
-    $encodedAddress = urlencode($address);
-    
-    // Nominatim API endpoint
-    $url = "https://nominatim.openstreetmap.org/search.php?q=" . $encodedAddress . "&format=jsonv2";
+	// Encode the address
+	$encodedAddress = urlencode($address);
+	
+	// Nominatim API endpoint
+	$url = "https://nominatim.openstreetmap.org/search.php?q=" . $encodedAddress . "&format=jsonv2";
 
 		// Make a request to the API
-    $opts = array(
+	$opts = array(
 			'http' => array(
 					'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
 			)
 		);
 		$context = stream_context_create($opts);
 		$response = file_get_contents($url, false, $context);
-    
-    $result = json_decode($response, true);
-    if (is_array($result) && !empty($result)) {
-        // Extract latitude and longitude
-        $latitude = $result[0]['lat'];
-        $longitude = $result[0]['lon'];
+	
+	$result = json_decode($response, true);
+	if (is_array($result) && !empty($result)) {
+		// Extract latitude and longitude
+		$latitude = $result[0]['lat'];
+		$longitude = $result[0]['lon'];
 
-        return array('latitude' => $latitude, 'longitude' => $longitude);
-    }
+		return array('latitude' => $latitude, 'longitude' => $longitude);
+	}
 
-    return null;
+	return null;
 }
 
 function deleteDirectory($dir) {
