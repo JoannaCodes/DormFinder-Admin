@@ -287,26 +287,6 @@ function send_dorm_notif(obj) {
 }
 
 // Initialize DataTable
-function verify_document(obj) {
-	var id = $(obj).data('id');
-	var docvalue = $(obj).data('docvalue');
-	$.ajax({
-		url: "http://localhost/DormFinder-Admin/index.php",
-		type: "POST",
-		data: {
-			_token: "{{ csrf_token() }}",
-			tag: "verify_document",
-			id: id,
-			docvalue: docvalue
-		},
-		complete:function(response) {
-			alert("Document is Verified!");
-			location.reload();
-			console.log(response.responseText);
-		}
-	})
-}
-
 $(document).ready(function() {
 	get_userdoc();
 	get_dormlisting();
