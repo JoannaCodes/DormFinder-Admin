@@ -114,9 +114,6 @@ switch ($tag) {
 		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
-		break;	
-	case 'verify_document':
-		echo sdmq()->verify_document($_POST['id'], $_POST['docvalue']);
 		break;
 	case 'fetch_saved_notif':
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
@@ -450,11 +447,19 @@ switch ($tag) {
 		$userref = $_POST["userref"];
 		$dormref = $_POST["dormref"];
 
-		$out = sdmq()->delete_dorm_admin($userref, $dormref);
-		if ($out == "1") {
-				echo "Dorm deleted. Notification sent to owner";
+		if (is_dir($folderPath)) {
+			if (deleteDirectory($folderPath)) {
+				$out = sdmq()->delete_dorm_admin($userref, $dormref);
+				if ($out == "1") {
+						echo "Dorm deleted. Notification sent to owner";
+				} else {
+						echo "Failed to delete dorm";
+				}
+			} else {
+				echo 'failed.';
+			}
 		} else {
-				echo "Failed to delete dorm";
+			echo 'Folder does not exist.';
 		}
 		break;
 	case 'send_dorm_notif':

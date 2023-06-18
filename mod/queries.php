@@ -83,25 +83,6 @@ class sdm_query
 			}
 		}
 	}
-	public function verify_document($id, $docvalue)
-	{
-		$vtitle = "DormFinder";
-		$vdesc = "Your documents have been verified! You can now publish your Dorm.";
-		$vreferencestarter = "1";
-		$current_timex = date('Y-m-d H:i:s', strtotime('+2 minute'));
-		$current_time = date('Y-m-d H:i:s');
-		if ($this->QuickFire(
-			"INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",
-			["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-		)) {
-			if ($this->QuickFire(
-				"UPDATE tbl_documents SET doc1_status=? WHERE id=?",
-				[$docvalue, $id]
-			)) {
-				return "1";
-			}
-		}
-	}
 	public function get_submitdocuments()
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents GROUP BY user_id", []), true), true);
