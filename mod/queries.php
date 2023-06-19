@@ -31,7 +31,9 @@ class sdm_query
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
 				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
-					return "1";
+					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
+						return "1";
+					}
 				}
 			}
 		} else if ($btn_value == "2") {
@@ -43,7 +45,9 @@ class sdm_query
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
 				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
-					return "0";
+					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
+						return "0";
+					}
 				}
 			}
 			
@@ -58,7 +62,7 @@ class sdm_query
 					<input type='hidden' id='user_id' value='".$out[$i]['user_id']."' />
 					<div class='d-flex mb-3'>
 						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
-						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/dormfinder_php/uploads/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
+						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/DormFinder-Admin/uploads/user/" .$out[$i]['user_id']. "/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
 					</div>";
 		}
 		return $toecho;
@@ -194,18 +198,35 @@ class sdm_query
 	}
 
 	// App Queries
+	// public function login_app($username, $password)
+	// {
+	// 	$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
+	// 	$outx = json_decode($out, true);
+	// 	if (count($outx) == 1) {
+	// 		if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
+	// 			echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+	// 		} else {
+	// 			echo json_encode(["status" => false]);
+	// 		}
+	// 	}
+	// }
+
 	public function login_app($username, $password)
 	{
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND `password`=?", [$username, $password], true));
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
 		$outx = json_decode($out, true);
+
 		if (count($outx) == 1) {
-			if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
-				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
-			} else {
-				echo json_encode(["status" => false]);
+			if (($outx[0]["username"] == $username || $outx[0]["identifier"] == $username)) {
+				if ($outx[0]["password"] == $password) {
+					echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+				} else {
+					echo json_encode(["status" => false]);
 			}
 		}
+	  }
 	}
+
 	public function signup_app($email, $username, $password)
 	{
 		$id = uniqid();
@@ -419,6 +440,12 @@ class sdm_query
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT u.id, u.username, u.imageUrl, r.rating, r.comment, r.createdAt FROM tbl_users u INNER JOIN tbl_dormreviews r ON u.id = r.userref WHERE dormref=?", [$dormref]), true), true);
 		return json_encode(json_encode($out));
+	}
+	public function post_report($id, $dormref, $userref, $comment)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_dormreports SET id=?, dormref=?, userref=?, comment=?, createdAt=now()", [$id, $dormref, $userref, $comment])) {
+			return "1";
+		}
 	}
 	public function delete_dorm($dormref, $userref)
 	{
