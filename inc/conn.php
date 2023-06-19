@@ -20,5 +20,11 @@ Class connection{
 		date_default_timezone_set('Asia/Manila');
 		return $this->conn;
 	}
+
+	public function mysqli_connect(){
+		$this->conn = new mysqli($this->host, $this->username, $this->password, $this->db);
+		date_default_timezone_set('Asia/Manila');
+		return $this->conn;
+	}
 }
 ?>
