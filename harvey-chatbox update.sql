@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 18, 2023 at 10:12 AM
+-- Generation Time: Jun 19, 2023 at 06:04 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -24,6 +24,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `tbl_chatrooms` (
   `id` int(11) NOT NULL,
   `unique_code` text NOT NULL,
+  `chatroom_code` text NOT NULL,
   `to_user` varchar(13) NOT NULL,
   `from_user` varchar(13) NOT NULL,
   `time` int(11) NOT NULL
@@ -38,7 +39,7 @@ CREATE TABLE `tbl_chatrooms` (
 CREATE TABLE `tbl_chats` (
   `id` int(11) NOT NULL,
   `itr` int(11) NOT NULL,
-  `unique_code` text NOT NULL,
+  `chatroom_code` text NOT NULL,
   `user_id` varchar(13) NOT NULL,
   `message` text NOT NULL,
   `image` text NOT NULL,
