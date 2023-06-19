@@ -198,18 +198,35 @@ class sdm_query
 	}
 
 	// App Queries
+	// public function login_app($username, $password)
+	// {
+	// 	$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
+	// 	$outx = json_decode($out, true);
+	// 	if (count($outx) == 1) {
+	// 		if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
+	// 			echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+	// 		} else {
+	// 			echo json_encode(["status" => false]);
+	// 		}
+	// 	}
+	// }
+
 	public function login_app($username, $password)
 	{
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND `password`=?", [$username, $password], true));
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
 		$outx = json_decode($out, true);
+
 		if (count($outx) == 1) {
-			if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
-				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
-			} else {
-				echo json_encode(["status" => false]);
+			if (($outx[0]["username"] == $username || $outx[0]["identifier"] == $username)) {
+				if ($outx[0]["password"] == $password) {
+					echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+				} else {
+					echo json_encode(["status" => false]);
 			}
 		}
+	  }
 	}
+
 	public function signup_app($email, $username, $password)
 	{
 		$id = uniqid();
