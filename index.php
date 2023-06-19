@@ -233,6 +233,15 @@ switch ($tag) {
 	case 'get_reviews':
 		echo sdmq()->get_reviews($_GET["dormref"]);
 		break;
+	case 'post_report':
+		$id = uniqId();
+			$out = sdmq()->post_report($id, $_POST["dormref"], $_POST["userref"], $_POST["comment"], );
+			if ($out == "1") {
+				echo 'success';
+			} else {
+				echo 'failed';
+			}
+	break;
 	case 'delete_dorm':
 		$dormref = $_POST["dormref"];
 		$userref = $_POST["userref"];

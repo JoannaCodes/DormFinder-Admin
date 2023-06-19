@@ -442,6 +442,12 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT u.id, u.username, u.imageUrl, r.rating, r.comment, r.createdAt FROM tbl_users u INNER JOIN tbl_dormreviews r ON u.id = r.userref WHERE dormref=?", [$dormref]), true), true);
 		return json_encode(json_encode($out));
 	}
+	public function post_report($id, $dormref, $userref, $comment)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_dormreports SET id=?, dormref=?, userref=?, comment=?, createdAt=now()", [$id, $dormref, $userref, $comment])) {
+			return "1";
+		}
+	}
 	public function delete_dorm($dormref, $userref)
 	{
 		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=? AND userref=?", [$dormref, $userref])) {
