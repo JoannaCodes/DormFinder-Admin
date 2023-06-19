@@ -4,6 +4,7 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
+include_once "mod/app_queries.php";
 
 require 'plugins/PHPMailer/src/Exception.php';
 require 'plugins/PHPMailer/src/PHPMailer.php';
@@ -14,6 +15,7 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 $domain = 'http://192.168.0.12/DormFinder-Admin/';
+// $domain = http://studyhive-admin.infinityfreeapp.com/DormFinder-Admin
 $tag = '';
 
 if (isset($_POST["tag"])) {
@@ -259,17 +261,38 @@ switch ($tag) {
 		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$amenities = $_POST["amenities"];
 		$images = $_FILES["images"];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
+		$aircon = $_POST['aircon'];
+		$elevator = $_POST['elevator'];
+		$beddings = $_POST['beddings'];
+		$kitchen = $_POST['kitchen'];
+		$laundry = $_POST['laundry'];
+		$lounge = $_POST['lounge'];
+		$parking = $_POST['parking'];
+		$security = $_POST['security'];
+		$study_room = $_POST['study_room'];
+		$wifi = $_POST['wifi'];
+
 		// Convert to boolean
 		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
 		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
 		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
+
+		$aircon = (int)filter_var($aircon, FILTER_VALIDATE_BOOLEAN);
+		$elevator = (int)filter_var($elevator, FILTER_VALIDATE_BOOLEAN);
+		$beddings = (int)filter_var($beddings, FILTER_VALIDATE_BOOLEAN);
+		$kitchen = (int)filter_var($kitchen, FILTER_VALIDATE_BOOLEAN);
+		$laundry = (int)filter_var($laundry, FILTER_VALIDATE_BOOLEAN);
+		$lounge = (int)filter_var($lounge, FILTER_VALIDATE_BOOLEAN);
+		$parking = (int)filter_var($parking, FILTER_VALIDATE_BOOLEAN);
+		$security = (int)filter_var($security, FILTER_VALIDATE_BOOLEAN);
+		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
+		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
 		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
 		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
@@ -289,7 +312,7 @@ switch ($tag) {
 		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-	}
+		}
 
 		$uploadDir = 'uploads/dormImages/' . $id . '/';
 		if (!file_exists($uploadDir)) {
@@ -298,7 +321,7 @@ switch ($tag) {
 
 		foreach ($images['tmp_name'] as $index => $tmpName) {
 			$imageName = $images['name'][$index];
-		$filename = basename($imageName);
+			$filename = basename($imageName);
 			$uploadFile = $uploadDir . $filename;
 			
 			// Move the file to the destination directory
@@ -311,7 +334,7 @@ switch ($tag) {
 		}
 
 		$dormImages = implode(',', $filenames);
-		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
@@ -328,16 +351,37 @@ switch ($tag) {
 		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$amenities = $_POST["amenities"];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
+		$aircon = $_POST['aircon'];
+		$elevator = $_POST['elevator'];
+		$beddings = $_POST['beddings'];
+		$kitchen = $_POST['kitchen'];
+		$laundry = $_POST['laundry'];
+		$lounge = $_POST['lounge'];
+		$parking = $_POST['parking'];
+		$security = $_POST['security'];
+		$study_room = $_POST['study_room'];
+		$wifi = $_POST['wifi'];
+
 		// Convert to boolean
 		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
 		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
 		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
+
+		$aircon = (int)filter_var($aircon, FILTER_VALIDATE_BOOLEAN);
+		$elevator = (int)filter_var($elevator, FILTER_VALIDATE_BOOLEAN);
+		$beddings = (int)filter_var($beddings, FILTER_VALIDATE_BOOLEAN);
+		$kitchen = (int)filter_var($kitchen, FILTER_VALIDATE_BOOLEAN);
+		$laundry = (int)filter_var($laundry, FILTER_VALIDATE_BOOLEAN);
+		$lounge = (int)filter_var($lounge, FILTER_VALIDATE_BOOLEAN);
+		$parking = (int)filter_var($parking, FILTER_VALIDATE_BOOLEAN);
+		$security = (int)filter_var($security, FILTER_VALIDATE_BOOLEAN);
+		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
+		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
 		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
 		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
@@ -354,10 +398,10 @@ switch ($tag) {
 
 		// Address Geocoding
 		$coordinates = getAddressCoordinates($address);
-	if ($coordinates) {
+		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-	}
+		}
 
 		if (isset($_FILES['images'])) {
 			$images = $_FILES['images'];
@@ -389,7 +433,7 @@ switch ($tag) {
 			$dormImages = implode(',', $filenames);
 		}
 		
-		$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
@@ -479,6 +523,8 @@ switch ($tag) {
 		break;
 }
 
+
+// functions
 function getAddressCoordinates($address) {
 	// Encode the address
 	$encodedAddress = urlencode($address);
@@ -588,5 +634,6 @@ function sdmq()
 	$c = new connection();
 	$c = $c->sdm_connect();
 	$sdm_q = new sdm_query($c);
+	$app_q = new app_query($c);
 	return $sdm_q;
 }
