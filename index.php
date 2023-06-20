@@ -143,10 +143,10 @@ switch ($tag) {
 	// App Queries
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
-		break
+		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
-			break;	
+		break;	
 	case 'check_ifsubmitted':
 		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
 		break;
