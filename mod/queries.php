@@ -447,6 +447,31 @@ class sdm_query
 			return "1";
 		}
 	}
+	public function get_reports()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dormreports", []), true), true);
+		$toecho = "";
+		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$out[$i]['userref']."</td>
+				<td class='align-middle'>".$out[$i]['dormref']."</td>
+				<td class='align-middle'>".$out[$i]['comment']."</td>
+				<td class='align-middle'>".$out[$i]['createdAt']."</td>
+				<td class='align-middle'>
+					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Resolve Report' onclick='resolve_report_admin(this)' data-reportid='".$out[$i]['id']."'>".$del_icon."</button>
+				</td>
+	  	</tr>";
+		}
+		return $toecho;
+	}
+	public function resolve_dorm($reportid)
+	{
+		if ($this->QuickFire("DELETE FROM `tbl_dormreports` WHERE id=?", [$reportid])) {
+			return "1";
+		}
+	}
 	public function delete_dorm($dormref, $userref)
 	{
 		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=? AND userref=?", [$dormref, $userref])) {
