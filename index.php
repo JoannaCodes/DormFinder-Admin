@@ -4,7 +4,7 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
-include_once "mod/app_queries.php";
+include_once "mod/admin_queries.php";
 
 require 'plugins/PHPMailer/src/Exception.php';
 require 'plugins/PHPMailer/src/PHPMailer.php';
@@ -28,16 +28,16 @@ if (isset($_POST["tag"])) {
 
 switch ($tag) {
 	case 'check_ifsubmitted':
-		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
+		echo adminq()->check_ifsubmitted($_GET["user_id"]);
 	break;
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
 		break;
 	case 'change_status':
-		echo sdmq()->change_status($_POST["btn_value"],$_POST['user_id']);
+		echo adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
 		break;
 	case 'open_document':
-		echo sdmq()->open_document($_POST["user_id"]);
+		echo adminq()->open_document($_POST["user_id"]);
 	break;
 	case 'send_document':
 		$target_dir = "uploads/user/" . $_POST['user_id'];
@@ -76,7 +76,7 @@ switch ($tag) {
 			echo "Sorry, your file was not uploaded.";
 		} else {
 			$user_id = $_POST['user_id'];
-			$out = sdmq()->send_document($filename1, $filename2, $user_id);
+			$out = adminq()->send_document($filename1, $filename2, $user_id);
 			if ($out == "1") {
 				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
 					echo "The file " . htmlspecialchars(basename($_FILES["document1"]["name"])) . " and " . htmlspecialchars(basename($_FILES["document2"]["name"])) . " has been uploaded. We will notify you once you are verified thank you.";
@@ -94,7 +94,7 @@ switch ($tag) {
 		$uploadFile = $uploadDir . basename($document['name']);
 		$fileName = basename($document['name']);
 
-		$out = sdmq()->send_document($fileName);
+		$out = adminq()->send_document($fileName);
 		if ($out == "1") {
 			if (move_uploaded_file($document['tmp_name'], $uploadFile)) {
 				echo 'File is valid, and was successfully uploaded.';
@@ -106,7 +106,7 @@ switch ($tag) {
 		}
 		break;
 	case 'login':
-		echo sdmq()->login_dormfinder($_POST["email"], $_POST["password"]);
+		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
@@ -121,13 +121,13 @@ switch ($tag) {
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
 	case 'get_submitdocuments':
-		echo sdmq()->get_submitdocuments();
+		echo adminq()->get_submitdocuments();
 		break;
 	case 'get_dormlisting':
-		echo sdmq()->get_dormlisting();
+		echo adminq()->get_dormlisting();
 		break;
 	case 'get_users':
-		echo sdmq()->get_users();
+		echo adminq()->get_users();
 		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
@@ -466,7 +466,7 @@ switch ($tag) {
 		$userref = $_POST["userref"];
 		$message = $_POST["notifMessage"];
 
-		$out = sdmq()->send_custom_notif($userref, $message);
+		$out = adminq()->send_custom_notif($userref, $message);
 		if ($out == "1") {
 			echo "Notification sent to user:" . $userref;
 		} else if ($out == "0") {
@@ -503,7 +503,7 @@ switch ($tag) {
 				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
 		";
 
-		if (sdmq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+		if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
 				echo "New admin added";
 		} else {
 				echo "Failed to add admin";
@@ -515,7 +515,7 @@ switch ($tag) {
 
 		if (is_dir($folderPath)) {
 			if (deleteDirectory($folderPath)) {
-				$out = sdmq()->delete_dorm_admin($userref, $dormref);
+				$out = adminq()->delete_dorm_admin($userref, $dormref);
 				if ($out == "1") {
 						echo "Dorm deleted. Notification sent to owner";
 				} else {
@@ -532,7 +532,7 @@ switch ($tag) {
 		$userref = $_POST["userref"];
 		$dormref = $_POST["dormref"];
 
-		$out = sdmq()->send_dorm_notif($userref, $dormref);
+		$out = adminq()->send_dorm_notif($userref, $dormref);
 		if ($out == "1") {
 				echo "Notification sent to dorm owner";
 		} else {
@@ -656,6 +656,14 @@ function sdmq()
 	$c = new connection();
 	$c = $c->sdm_connect();
 	$sdm_q = new sdm_query($c);
-	$app_q = new app_query($c);
+	$admin_q = new admin_query($c);
 	return $sdm_q;
+}
+
+function adminq()
+{
+	$c = new connection();
+	$c = $c->sdm_connect();
+	$admin_q = new admin_query($c);
+	return $admin_q;
 }
