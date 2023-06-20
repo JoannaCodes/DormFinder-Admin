@@ -241,7 +241,20 @@ switch ($tag) {
 			} else {
 				echo 'failed';
 			}
-	break;
+		break;
+	case 'get_reports':
+			echo sdmq()->get_reports();
+			break;
+	case 'resolve_report_admin':
+		$reportid = $_POST["reportid"];
+
+		$out = sdmq()->resolve_dorm($reportid);
+		if ($out == "1") {
+			echo "Report Resolved" . $reportid;
+		} else {
+			echo "Failed to resolved: " . $reportid;
+		}
+		break;
 	case 'delete_dorm':
 		$dormref = $_POST["dormref"];
 		$userref = $_POST["userref"];
