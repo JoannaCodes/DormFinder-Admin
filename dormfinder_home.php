@@ -22,7 +22,7 @@
 		<!-- Navbar -->
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<div class="container-fluid">
-				<a class="navbar-brand" href="#">DormFinder</a>
+				<a class="navbar-brand" href="#">StudyHive Admin</a>
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
@@ -48,7 +48,8 @@
 				</div>
 			</div>
 		</div>
-		<!-- Sample table -->
+
+		<!-- Tables -->
 		<div class="container-fluid mt-4 mx-auto ps-5 pe-5">
 			<div class="row mb-4">
 				<div class="col-9">
@@ -143,7 +144,30 @@
 					</div>
 				</div>
 			</div>
-		</div>
+
+			<div class="row mb-4">
+				<div class="col-12">
+					<div class="rounded shadow p-3">
+						<h4>Reports</h4>
+							<div style="height: 500px;">
+								<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="reportsTable">
+									<thead>
+										<tr>
+											<th scope="col">Report ID</th>
+											<th scope="col">User</th>
+											<th scope="col">Dorm Reported</th>
+											<th scope="col">Message</th>
+											<th scope="col">Date Created</th>
+											<th scope="col">Actions</th>
+										</tr>
+									</thead>
+									<tbody id="reports">
+									</tbody>
+								</table>
+							</div>
+						</div>
+				</div>
+			</div>
 	</body>
 </html>
 
@@ -286,11 +310,30 @@ function send_dorm_notif(obj) {
 	})
 }
 
+function resolve_report_admin(obj) {
+	var reportid = $(obj).data('reportid');
+
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "POST",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "resolve_report_admin",
+			reportid: reportid
+		},
+		complete:function(response) {
+			alert(response.responseText)
+			location.reload();
+		}
+	})
+}
+
 // Initialize DataTable
 $(document).ready(function() {
 	get_userdoc();
 	get_dormlisting();
 	get_users();
+	get_reports();
 	$("#notif-form").submit(function(event) {
 			event.preventDefault();
 			send_custom_notif();
@@ -300,6 +343,23 @@ $(document).ready(function() {
         add_admin();
     });
 });
+
+//reports
+function get_reports() {
+	$.ajax({
+		url: "http://localhost/DormFinder-Admin/index.php",
+		type: "GET",
+		data: {
+			_token: "{{ csrf_token() }}",
+			tag: "get_reports"
+		},
+		complete:function(response) {
+			$('#reports').html(response.responseText);
+			$('#reportsTable').DataTable();
+		}
+	})
+}
+
 
 function get_userdoc() {
 	$.ajax({
@@ -398,4 +458,5 @@ function add_admin() {
 			}
 	});
 }
+
 </script>

@@ -7,8 +7,8 @@ class sdm_query
 		$this->c = $db;
 	}
 
-	// Admin Queries
-	public function check_ifsubmitted($user_id) {
+	public function check_ifsubmitted($user_id) 
+	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id], true));
 		$outx = json_decode($out, true);
 		if (count($outx) == 2) {
@@ -21,52 +21,6 @@ class sdm_query
 			return "2"; //disapproved
 		}
 	}
-	public function change_status($btn_value,$user_id) {
-		if($btn_value == "1") {
-			$vtitle = "DormFinder";
-			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
-			$vreferencestarter = "1";
-			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-			)) {
-				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
-					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
-						return "1";
-					}
-				}
-			}
-		} else if ($btn_value == "2") {
-			$vtitle = "DormFinder";
-			$vdesc = "Your documents have not been verified! Please upload a new document.";
-			$vreferencestarter = "1";
-			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-			)) {
-				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
-					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
-						return "0";
-					}
-				}
-			}
-			
-		}
-	}
-	public function open_document($user_id) {
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id]), true), true);
-		$toecho = "";
-		$doc_status = "";
-		for ($i = 0; $i < count($out); $i++) {
-			$toecho.="
-					<input type='hidden' id='user_id' value='".$out[$i]['user_id']."' />
-					<div class='d-flex mb-3'>
-						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
-						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='http://localhost/DormFinder-Admin/uploads/user/" .$out[$i]['user_id']. "/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
-					</div>";
-		}
-		return $toecho;
-	}
 	public function send_document($target_file,$target_file2,$user_id)
 	{
 		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", $user_id])) {
@@ -75,142 +29,6 @@ class sdm_query
 			}
 		}
 	}
-	public function login_dormfinder($email, $password)
-	{
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_adminusers WHERE email=? AND password=?", [$email, $password], true));
-		$outx = json_decode($out, true);
-		if (count($outx) == 1) {
-			if ($outx[0]['password'] == $password) {
-				echo json_encode(["email" => $outx[0]['email'], "id" => $outx[0]['id'], "status" => "true"]);
-			} else {
-				echo json_encode(["email" => "none", "id" => "none", "status" => "false"]);
-			}
-		}
-	}
-	public function get_submitdocuments()
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents GROUP BY user_id", []), true), true);
-		$toecho = "";
-		$doc_status = "";
-		for ($i = 0; $i < count($out); $i++) {
-			switch ($out[$i]['doc1_status']) {
-				case '0':
-					$doc_status = "Unverified";
-				break;
-				case '1':
-					$doc_status = "Verified";
-				break;
-			}
-			$toecho .= "<tr>
-				<td class='align-middle'><button class='btn btn-link text-primary' data-user_id='".$out[$i]['user_id']."' data-doc_status='".$out[$i]['doc1_status']."' onclick='open_userdoc(this)'>" . $out[$i]['user_id'] . "</button></td>
-				<td class='align-middle'>" . $doc_status . "</td>
-	        </tr>";
-		}
-		return $toecho;
-	}
-	public function get_dormlisting()
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms", []), true), true);
-		$toecho = "";
-		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
-		$notif_icon="<i class='fa-light fa-bell fa-fw fa-lg'></i>";
-		for ($i = 0; $i < count($out); $i++) {
-			$toecho .= "<tr>
-				<td class='align-middle'>".$out[$i]['id']."</td>
-				<td class='align-middle'>".$out[$i]['userref']."</td>
-				<td class='align-middle'>".$out[$i]['name']."</td>
-				<td class='align-middle'>".$out[$i]['address']."</td>
-				<td class='align-middle'>".$out[$i]['createdAt']."</td>
-				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
-				<td class='align-middle'>
-					<button class='btn btn-primary p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_dorm_notif(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$notif_icon."</button>
-					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm_admin(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$del_icon."</button>
-				</td>
-	  	</tr>";
-		}
-		return $toecho;
-	}
-	public function get_users()
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users", []), true), true);
-		$toecho = "";
-		for ($i = 0; $i < count($out); $i++) {
-			$toecho .= "<tr>
-				<td class='align-middle'>".$out[$i]['id']."</td>
-				<td class='align-middle'>".$out[$i]['username']."</td>
-				<td width='25%' class='align-middle'>".$out[$i]['is_verified']."</td>
-	  	</tr>";
-		}
-		return $toecho;
-	}
-	public function send_custom_notif($userref, $message)
-	{
-		$vtitle = "UniHive";
-		$vdesc = $message;
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-
-		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$userref], true));
-		$outx = json_decode($out, true);
-		if (count($outx) == 1) {
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-				return "1";
-			}
-		} else {
-			return "0";
-		}
-	}
-	public function new_admin($email, $password)
-	{
-		if ($this->QuickFire("INSERT INTO tbl_adminusers SET email=?, `password`=?, date_created=now()", [$email, $password])){
-			return "1";
-		}
-	}
-	public function delete_dorm_admin($userref, $dormref)
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT `name` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
-
-		$vtitle = "UniHive";
-		$vdesc = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been removed. If you believe this removal was a mistake, kindly reach out to our team for assistance.";
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-
-		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=?", [$dormref])) {
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-				return "1";
-			}
-		}
-	}
-	public function send_dorm_notif($userref, $dormref)
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT name FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
-
-		$vtitle = "UniHive";
-		$vdesc = "This is a reminder to update your listing named '" . $out[0]['name'] . "', for the upcoming semester. Please ensure your listing is up to date. If your listing is already current, you may disregard this message.";
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-			return "1";
-		}
-	}
-
-	// App Queries
-	// public function login_app($username, $password)
-	// {
-	// 	$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
-	// 	$outx = json_decode($out, true);
-	// 	if (count($outx) == 1) {
-	// 		if ($outx[0]['password'] == $password && $outx[0]['username'] == $username) {
-	// 			echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
-	// 		} else {
-	// 			echo json_encode(["status" => false]);
-	// 		}
-	// 	}
-	// }
-
 	public function login_app($username, $password)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
@@ -226,7 +44,6 @@ class sdm_query
 		}
 	  }
 	}
-
 	public function signup_app($email, $username, $password)
 	{
 		$id = uniqid();
@@ -402,7 +219,7 @@ class sdm_query
 	}
 	public function get_dorm_details($dormref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE id=?", [$dormref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.*, a.* FROM tbl_dorms d JOIN tbl_amenities a ON d.id = a.dormref WHERE d.id=?", [$dormref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 	public function get_bookmarks($userref)
@@ -410,14 +227,12 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
-
 	public function add_bookmarks($userref, $dormref)
 	{
 		if ($this->QuickFire("INSERT INTO tbl_bookmarks SET dormref=?, userref=?", [$dormref, $userref])) {
 			return "1";
 		}
 	}
-
 	public function update_profile($userref, $username, $filename)
 	{
 		if ($this->QuickFire("UPDATE tbl_users SET username=?, imageUrl=?, updated_at=now() WHERE id=?", [$username, $filename, $userref])) {
@@ -468,50 +283,110 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))));"), true), true);
 		return json_encode(json_encode($out));
 	}
-	public function update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
-	{
-		$dormquery = empty($dormImages) ?
-    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?" :
-    	"UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=now() WHERE id=? AND userref=?";
+	public function update_dorm(
+		$dormref,
+		$userref,
+		$name,
+		$address,
+		$longitude,
+		$latitude,
+		$price,
+		$slots,
+		$desc,
+		$hei,
+		$dormImages,
+		$visitors,
+		$pets,
+		$curfew,
+		$advDep,
+		$secDep,
+		$util,
+		$minStay,
+		$aircon,
+		$elevator,
+		$beddings,
+		$kitchen,
+		$laundry,
+		$lounge,
+		$parking,
+		$security,
+		$studyRoom,
+		$wifi
+		){
+		$dormQuery = empty($dormImages)
+				? "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?"
+				: "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?";
 
-		$dormparams = empty($dormImages) ?
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $dormref, $userref] :
-			[$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $dormref, $userref];
+		$dormParams = empty($dormImages)
+				? [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref]
+				: [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref];
 
+		$amenitiesQuery = "UPDATE tbl_amenities SET aircon=?, elevator=?, beddings=?, kitchen=?, laundry=?, lounge=?, parking=?, `security`=?, study_room=?, wifi=? WHERE dormref=?";
+		$amenitiesParams = [$aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $studyRoom, $wifi, $dormref];
 
 		try {
-			if ($this->QuickFire($dormquery, $dormparams)) {
-				return "1";
-			} else {
-				return "0";
+			if ($this->quickFire($dormQuery, $dormParams)) {
+				if ($this->quickFire($amenitiesQuery, $amenitiesParams)) {
+					return "1";
+				}
 			}
-
-			return "1";
 		} catch (Exception $e) {
 			return "0";
 		}
 	}
-	public function post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay)
-	{
-		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, amenities=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
-		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
+	public function post_dorm(
+		$id,
+		$userref,
+		$name,
+		$address,
+		$longitude,
+		$latitude,
+		$price,
+		$slots,
+		$desc,
+		$hei,
+		$dormImages,
+		$visitors,
+		$pets,
+		$curfew,
+		$advdep,
+		$secdep,
+		$util,
+		$minstay,
+		$aircon,
+		$elevator,
+		$beddings,
+		$kitchen,
+		$laundry,
+		$lounge,
+		$parking,
+		$security,
+		$studyRoom,
+		$wifi
+		){
+		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
+		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
+
+		$amenitiesQuery = "INSERT INTO tbl_amenities SET dormref=?, aircon=?, elevator=?, beddings=?, kitchen=?, laundry=?, lounge=?, parking=?, security=?, study_room=?, wifi=?";
+    $amenitiesParams = [$id, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $studyRoom, $wifi];
 
 		try {
 			if ($this->QuickFire($dormquery, $dormparams)) {
-				return "1";
-			} else {
-				return "0";
+				if ($this->quickFire($amenitiesQuery, $amenitiesParams)) {
+					return "1";
+				}
 			}
-			return "success";
 		} catch (Exception $e) {
-			return "failed";
+			return "0";
 		}
 	}
-	public function get_verification_status($userref) {
+	public function get_verification_status($userref) 
+	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT is_verified FROM tbl_users WHERE id=?", [$userref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
 
+	// DB Actions
 	public function QuickLook($q, $par = array())
 	{
 		$q = $this->c->prepare($q);

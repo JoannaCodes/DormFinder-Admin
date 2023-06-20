@@ -4,6 +4,7 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods:POST");
 include_once "inc/conn.php";
 include_once "mod/queries.php";
+include_once "mod/admin_queries.php";
 
 require 'plugins/PHPMailer/src/Exception.php';
 require 'plugins/PHPMailer/src/PHPMailer.php';
@@ -14,6 +15,7 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 $domain = 'http://192.168.0.12/DormFinder-Admin/';
+// $domain = http://studyhive-admin.infinityfreeapp.com/DormFinder-Admin/
 $tag = '';
 
 if (isset($_POST["tag"])) {
@@ -25,22 +27,130 @@ if (isset($_POST["tag"])) {
 }
 
 switch ($tag) {
+	// Admin Queries
+	case 'change_status':
+		echo adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
+		break;
+	case 'open_document':
+		echo adminq()->open_document($_POST["user_id"]);
+		break;
+	case 'send_custom_notif':
+		$userref = $_POST["userref"];
+		$message = $_POST["notifMessage"];
+
+		$out = adminq()->send_custom_notif($userref, $message);
+		if ($out == "1") {
+			echo "Notification sent to user:" . $userref;
+		} else if ($out == "0") {
+			echo "User " . $userref . " does not exist";
+		} else {
+			echo "Failed to send notification to user: " . $userref;
+		}
+		break;
+	case 'add_admin':
+		$email = $_POST["email"];
+		$password = generatePassword();
+		$subject = "Invitation to Admin Website - Login Credentials Inside";
+		$body = "
+			<h1>Welcome to the StudyHive Team</h1>
+			<p>Congratulations! You have been invited as a new admin.</p>
+			<p>Please use the following login credentials to access the admin website:</p>
+			<ul>
+					<li><strong>Email:</strong> {$email}</li>
+					<li><strong>Password:</strong> {$password}</li>
+			</ul>
+			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
+		";
+
+		$altBody = "
+				Welcome to the Admin Website
+
+				Congratulations! You have been invited as a new admin.
+
+				Please use the following login credentials to access the admin website:
+
+				- Username: {$email}
+				- Password: {$password}
+
+				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
+		";
+
+		if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+				echo "New admin added";
+		} else {
+				echo "Failed to add admin";
+		}
+		break;
+	case 'delete_dorm_admin':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		if (is_dir($folderPath)) {
+			if (deleteDirectory($folderPath)) {
+				$out = adminq()->delete_dorm_admin($userref, $dormref);
+				if ($out == "1") {
+						echo "Dorm deleted. Notification sent to owner";
+				} else {
+						echo "Failed to delete dorm";
+				}
+			} else {
+				echo 'failed.';
+			}
+		} else {
+			echo 'Folder does not exist.';
+		}
+		break;
+	case 'send_dorm_notif':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		$out = adminq()->send_dorm_notif($userref, $dormref);
+		if ($out == "1") {
+				echo "Notification sent to dorm owner";
+		} else {
+				echo "Failed to send notification";
+		}
+		break;
+	case 'login':
+		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
+		break;
+
+		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
+		break;
+	case 'get_submitdocuments':
+		echo adminq()->get_submitdocuments();
+		break;
+	case 'get_dormlisting':
+		echo adminq()->get_dormlisting();
+		break;
+	case 'get_users':
+		echo adminq()->get_users();
+		break;
+	case 'get_reports':
+		echo adminq()->get_reports();
+		break;
+	case 'resolve_report_admin':
+		$reportid = $_POST["reportid"];
+
+		$out = adminq()->resolve_dorm($reportid);
+		if ($out == "1") {
+			echo "Report Resolved" . $reportid;
+		} else {
+			echo "Failed to resolved: " . $reportid;
+		}
+		break;
+
+	// App Queries
 	case 'check_ifsubmitted':
 		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
-	break;
+		break;
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
 		break;
-	case 'change_status':
-		echo sdmq()->change_status($_POST["btn_value"],$_POST['user_id']);
-		break;
-	case 'open_document':
-		echo sdmq()->open_document($_POST["user_id"]);
-	break;
 	case 'send_document':
 		$target_dir = "uploads/user/" . $_POST['user_id'];
-		$target_file = $target_dir . "/" . basename($_FILES["document1"]["name"]);
-		$target_file2 = $target_dir . "/" . basename($_FILES["document2"]["name"]);
+		$target_file = $domain . $target_dir . "/" . basename($_FILES["document1"]["name"]);
+		$target_file2 = $domain . $target_dir . "/" . basename($_FILES["document2"]["name"]);
 		$filename1 = basename($_FILES["document1"]["name"]);
 		$filename2 = basename($_FILES["document2"]["name"]);
 		$uploadOk = 1;
@@ -85,7 +195,7 @@ switch ($tag) {
 				echo "Query failed.";
 			}
 		}
-	break;
+		break;
 	case 'upload_image':
 		$document = $_FILES['document'];
 		$uploadDir = './uploads/';
@@ -102,30 +212,6 @@ switch ($tag) {
 		} else {
 			echo "Query failed.";
 		}
-		break;
-	case 'login':
-		echo sdmq()->login_dormfinder($_POST["email"], $_POST["password"]);
-		break;
-	case 'login_app':
-		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
-		break;
-	case 'login_app_guest':
-		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
-		break;
-	case 'signup_app':
-		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
-		break;
-	case 'fetch_saved_notif':
-		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
-		break;
-	case 'get_submitdocuments':
-		echo sdmq()->get_submitdocuments();
-		break;
-	case 'get_dormlisting':
-		echo sdmq()->get_dormlisting();
-		break;
-	case 'get_users':
-		echo sdmq()->get_users();
 		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
@@ -177,7 +263,6 @@ switch ($tag) {
 	case 'latest_dorm':
 			echo sdmq()->latest_dorm();
 		break;
-
 	case 'nearest_dorm':
 		$lon = $_POST['longitude'];
 		$lat = $_POST['latitude'];
@@ -189,7 +274,6 @@ switch ($tag) {
 			echo $out;
 		}
 		break;
-
 	case "update_profile":
 		$image = $_FILES['image'];
 		$userref = $_POST["userref"];
@@ -239,7 +323,8 @@ switch ($tag) {
 			} else {
 				echo 'failed';
 			}
-	break;
+		break;
+	
 	case 'delete_dorm':
 		$dormref = $_POST["dormref"];
 		$userref = $_POST["userref"];
@@ -268,17 +353,38 @@ switch ($tag) {
 		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$amenities = $_POST["amenities"];
 		$images = $_FILES["images"];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
+		$aircon = $_POST['aircon'];
+		$elevator = $_POST['elevator'];
+		$beddings = $_POST['beddings'];
+		$kitchen = $_POST['kitchen'];
+		$laundry = $_POST['laundry'];
+		$lounge = $_POST['lounge'];
+		$parking = $_POST['parking'];
+		$security = $_POST['security'];
+		$study_room = $_POST['study_room'];
+		$wifi = $_POST['wifi'];
+
 		// Convert to boolean
 		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
 		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
 		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
+
+		$aircon = (int)filter_var($aircon, FILTER_VALIDATE_BOOLEAN);
+		$elevator = (int)filter_var($elevator, FILTER_VALIDATE_BOOLEAN);
+		$beddings = (int)filter_var($beddings, FILTER_VALIDATE_BOOLEAN);
+		$kitchen = (int)filter_var($kitchen, FILTER_VALIDATE_BOOLEAN);
+		$laundry = (int)filter_var($laundry, FILTER_VALIDATE_BOOLEAN);
+		$lounge = (int)filter_var($lounge, FILTER_VALIDATE_BOOLEAN);
+		$parking = (int)filter_var($parking, FILTER_VALIDATE_BOOLEAN);
+		$security = (int)filter_var($security, FILTER_VALIDATE_BOOLEAN);
+		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
+		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
 		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
 		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
@@ -298,7 +404,7 @@ switch ($tag) {
 		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-	}
+		}
 
 		$uploadDir = 'uploads/dormImages/' . $id . '/';
 		if (!file_exists($uploadDir)) {
@@ -307,7 +413,7 @@ switch ($tag) {
 
 		foreach ($images['tmp_name'] as $index => $tmpName) {
 			$imageName = $images['name'][$index];
-		$filename = basename($imageName);
+			$filename = basename($imageName);
 			$uploadFile = $uploadDir . $filename;
 			
 			// Move the file to the destination directory
@@ -320,7 +426,7 @@ switch ($tag) {
 		}
 
 		$dormImages = implode(',', $filenames);
-		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
@@ -337,16 +443,37 @@ switch ($tag) {
 		$slots = (int)$_POST["slots"];
 		$desc = $_POST["desc"];
 		$hei = $_POST["hei"];
-		$amenities = $_POST["amenities"];
 
 		$visitors = $_POST["visitors"];
 		$pets = $_POST["pets"];
 		$curfew = $_POST["curfew"];
 
+		$aircon = $_POST['aircon'];
+		$elevator = $_POST['elevator'];
+		$beddings = $_POST['beddings'];
+		$kitchen = $_POST['kitchen'];
+		$laundry = $_POST['laundry'];
+		$lounge = $_POST['lounge'];
+		$parking = $_POST['parking'];
+		$security = $_POST['security'];
+		$study_room = $_POST['study_room'];
+		$wifi = $_POST['wifi'];
+
 		// Convert to boolean
 		$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
 		$pets = (int)filter_var($pets, FILTER_VALIDATE_BOOLEAN);
 		$curfew = (int)filter_var($curfew, FILTER_VALIDATE_BOOLEAN);
+
+		$aircon = (int)filter_var($aircon, FILTER_VALIDATE_BOOLEAN);
+		$elevator = (int)filter_var($elevator, FILTER_VALIDATE_BOOLEAN);
+		$beddings = (int)filter_var($beddings, FILTER_VALIDATE_BOOLEAN);
+		$kitchen = (int)filter_var($kitchen, FILTER_VALIDATE_BOOLEAN);
+		$laundry = (int)filter_var($laundry, FILTER_VALIDATE_BOOLEAN);
+		$lounge = (int)filter_var($lounge, FILTER_VALIDATE_BOOLEAN);
+		$parking = (int)filter_var($parking, FILTER_VALIDATE_BOOLEAN);
+		$security = (int)filter_var($security, FILTER_VALIDATE_BOOLEAN);
+		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
+		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
 		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
 		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
@@ -363,10 +490,10 @@ switch ($tag) {
 
 		// Address Geocoding
 		$coordinates = getAddressCoordinates($address);
-	if ($coordinates) {
+		if ($coordinates) {
 			$latitude = $coordinates['latitude'];
 			$longitude = $coordinates['longitude'];
-	}
+		}
 
 		if (isset($_FILES['images'])) {
 			$images = $_FILES['images'];
@@ -398,96 +525,22 @@ switch ($tag) {
 			$dormImages = implode(',', $filenames);
 		}
 		
-		$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $amenities, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay);
+		$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 		if ($uploadStatus && $out == "1") {
 			echo 'success';
 		} else {
 			echo 'failed';
 		}
 		break;
-	case 'send_custom_notif':
-		$userref = $_POST["userref"];
-		$message = $_POST["notifMessage"];
-
-		$out = sdmq()->send_custom_notif($userref, $message);
-		if ($out == "1") {
-			echo "Notification sent to user:" . $userref;
-		} else if ($out == "0") {
-			echo "User " . $userref . " does not exist";
-		} else {
-			echo "Failed to send notification to user: " . $userref;
-		}
-		break;
-	case 'add_admin':
-		$email = $_POST["email"];
-		$password = generatePassword();
-		$subject = "Invitation to Admin Website - Login Credentials Inside";
-		$body = "
-			<h1>Welcome to the StudyHive Team</h1>
-			<p>Congratulations! You have been invited as a new admin.</p>
-			<p>Please use the following login credentials to access the admin website:</p>
-			<ul>
-					<li><strong>Email:</strong> {$email}</li>
-					<li><strong>Password:</strong> {$password}</li>
-			</ul>
-			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
-		";
-
-		$altBody = "
-				Welcome to the Admin Website
-
-				Congratulations! You have been invited as a new admin.
-
-				Please use the following login credentials to access the admin website:
-
-				- Username: {$email}
-				- Password: {$password}
-
-				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
-		";
-
-		if (sdmq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
-				echo "New admin added";
-		} else {
-				echo "Failed to add admin";
-		}
-		break;
-	case 'delete_dorm_admin':
-		$userref = $_POST["userref"];
-		$dormref = $_POST["dormref"];
-
-		if (is_dir($folderPath)) {
-			if (deleteDirectory($folderPath)) {
-				$out = sdmq()->delete_dorm_admin($userref, $dormref);
-				if ($out == "1") {
-						echo "Dorm deleted. Notification sent to owner";
-				} else {
-						echo "Failed to delete dorm";
-				}
-			} else {
-				echo 'failed.';
-			}
-		} else {
-			echo 'Folder does not exist.';
-		}
-		break;
-	case 'send_dorm_notif':
-		$userref = $_POST["userref"];
-		$dormref = $_POST["dormref"];
-
-		$out = sdmq()->send_dorm_notif($userref, $dormref);
-		if ($out == "1") {
-				echo "Notification sent to dorm owner";
-		} else {
-				echo "Failed to send notification";
-		}
-		break;
+	
 	case 'get_verification_status':
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
 		break;
 }
 
+
+// Functions
 function getAddressCoordinates($address) {
 	// Encode the address
 	$encodedAddress = urlencode($address);
@@ -597,5 +650,14 @@ function sdmq()
 	$c = new connection();
 	$c = $c->sdm_connect();
 	$sdm_q = new sdm_query($c);
+	$admin_q = new admin_query($c);
 	return $sdm_q;
+}
+
+function adminq()
+{
+	$c = new connection();
+	$c = $c->sdm_connect();
+	$admin_q = new admin_query($c);
+	return $admin_q;
 }
