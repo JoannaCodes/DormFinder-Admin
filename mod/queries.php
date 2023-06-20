@@ -7,7 +7,28 @@ class sdm_query
 		$this->c = $db;
 	}
 
-	// App Queries
+	public function check_ifsubmitted($user_id) 
+	{
+		$out = json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id], true));
+		$outx = json_decode($out, true);
+		if (count($outx) == 2) {
+			if($outx[0]['doc1_status'] == "1") {
+				return "1"; //approved
+			} else {
+				return "0"; //pending
+			}
+		} else {
+			return "2"; //disapproved
+		}
+	}
+	public function send_document($target_file,$target_file2,$user_id)
+	{
+		if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file, "0", $user_id])) {
+			if ($this->QuickFire("INSERT INTO tbl_documents SET doc_1=?, doc1_status=?, user_id=?",[$target_file2, "0", $user_id])) {
+				return "1";
+			}
+		}
+	}
 	public function login_app($username, $password)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
@@ -238,31 +259,6 @@ class sdm_query
 	public function post_report($id, $dormref, $userref, $comment)
 	{
 		if ($this->QuickFire("INSERT INTO tbl_dormreports SET id=?, dormref=?, userref=?, comment=?, createdAt=now()", [$id, $dormref, $userref, $comment])) {
-			return "1";
-		}
-	}
-	public function get_reports()
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dormreports", []), true), true);
-		$toecho = "";
-		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
-		for ($i = 0; $i < count($out); $i++) {
-			$toecho .= "<tr>
-				<td class='align-middle'>".$out[$i]['id']."</td>
-				<td class='align-middle'>".$out[$i]['userref']."</td>
-				<td class='align-middle'>".$out[$i]['dormref']."</td>
-				<td class='align-middle'>".$out[$i]['comment']."</td>
-				<td class='align-middle'>".$out[$i]['createdAt']."</td>
-				<td class='align-middle'>
-					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Resolve Report' onclick='resolve_report_admin(this)' data-reportid='".$out[$i]['id']."'>".$del_icon."</button>
-				</td>
-	  	</tr>";
-		}
-		return $toecho;
-	}
-	public function resolve_dorm($reportid)
-	{
-		if ($this->QuickFire("DELETE FROM `tbl_dormreports` WHERE id=?", [$reportid])) {
 			return "1";
 		}
 	}

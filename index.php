@@ -28,83 +28,11 @@ if (isset($_POST["tag"])) {
 
 switch ($tag) {
 	// Admin Queries
-	case 'check_ifsubmitted':
-		echo adminq()->check_ifsubmitted($_GET["user_id"]);
-		break;
-	case 'clearallnotif':
-		echo sdmq()->clearallnotif($_GET["userref"]);
-		break;
 	case 'change_status':
 		echo adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
 		break;
 	case 'open_document':
 		echo adminq()->open_document($_POST["user_id"]);
-		break;
-	case 'send_document':
-		$target_dir = "uploads/user/" . $_POST['user_id'];
-		$target_file = $target_dir . "/" . basename($_FILES["document1"]["name"]);
-		$target_file2 = $target_dir . "/" . basename($_FILES["document2"]["name"]);
-		$filename1 = basename($_FILES["document1"]["name"]);
-		$filename2 = basename($_FILES["document2"]["name"]);
-		$uploadOk = 1;
-		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-		// Check if user folder exists, create it if it doesn't
-		if (!file_exists($target_dir)) {
-			mkdir($target_dir, 0777, true);
-		}
-
-		// Check if file already exists
-		if (file_exists($target_file)) {
-			echo "Sorry, file already exists.";
-			$uploadOk = 0;
-		}
-
-		// Check file size
-		if ($_FILES["document1"]["size"] > 5000000) {
-			echo "Sorry, your file is too large.";
-			$uploadOk = 0;
-		}
-
-		// Allow certain file formats
-		if ($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
-			echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
-			$uploadOk = 0;
-		}
-
-		// Check if $uploadOk is set to 0 by an error
-		if ($uploadOk == 0) {
-			echo "Sorry, your file was not uploaded.";
-		} else {
-			$user_id = $_POST['user_id'];
-			$out = adminq()->send_document($filename1, $filename2, $user_id);
-			if ($out == "1") {
-				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
-					echo "The file " . htmlspecialchars(basename($_FILES["document1"]["name"])) . " and " . htmlspecialchars(basename($_FILES["document2"]["name"])) . " has been uploaded. We will notify you once you are verified thank you.";
-				} else {
-					echo "Sorry, there was an error uploading your file.";
-				}
-			} else {
-				echo "Query failed.";
-			}
-		}
-		break;
-	case 'upload_image':
-		$document = $_FILES['document'];
-		$uploadDir = './uploads/';
-		$uploadFile = $uploadDir . basename($document['name']);
-		$fileName = basename($document['name']);
-
-		$out = adminq()->send_document($fileName);
-		if ($out == "1") {
-			if (move_uploaded_file($document['tmp_name'], $uploadFile)) {
-				echo 'File is valid, and was successfully uploaded.';
-			} else {
-				echo 'Upload failed.';
-			}
-		} else {
-			echo "Query failed.";
-		}
 		break;
 	case 'send_custom_notif':
 		$userref = $_POST["userref"];
@@ -183,8 +111,6 @@ switch ($tag) {
 				echo "Failed to send notification";
 		}
 		break;
-	
-	// App Queries
 	case 'login':
 		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
@@ -199,6 +125,93 @@ switch ($tag) {
 		break;
 	case 'get_users':
 		echo adminq()->get_users();
+		break;
+	case 'get_reports':
+		echo adminq()->get_reports();
+		break;
+	case 'resolve_report_admin':
+		$reportid = $_POST["reportid"];
+
+		$out = adminq()->resolve_dorm($reportid);
+		if ($out == "1") {
+			echo "Report Resolved" . $reportid;
+		} else {
+			echo "Failed to resolved: " . $reportid;
+		}
+		break;
+
+	// App Queries
+	case 'check_ifsubmitted':
+		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
+		break;
+	case 'clearallnotif':
+		echo sdmq()->clearallnotif($_GET["userref"]);
+		break;
+	case 'send_document':
+		$target_dir = "uploads/user/" . $_POST['user_id'];
+		$target_file = $domain . $target_dir . "/" . basename($_FILES["document1"]["name"]);
+		$target_file2 = $domain . $target_dir . "/" . basename($_FILES["document2"]["name"]);
+		$filename1 = basename($_FILES["document1"]["name"]);
+		$filename2 = basename($_FILES["document2"]["name"]);
+		$uploadOk = 1;
+		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+		// Check if user folder exists, create it if it doesn't
+		if (!file_exists($target_dir)) {
+			mkdir($target_dir, 0777, true);
+		}
+
+		// Check if file already exists
+		if (file_exists($target_file)) {
+			echo "Sorry, file already exists.";
+			$uploadOk = 0;
+		}
+
+		// Check file size
+		if ($_FILES["document1"]["size"] > 5000000) {
+			echo "Sorry, your file is too large.";
+			$uploadOk = 0;
+		}
+
+		// Allow certain file formats
+		if ($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
+			echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
+			$uploadOk = 0;
+		}
+
+		// Check if $uploadOk is set to 0 by an error
+		if ($uploadOk == 0) {
+			echo "Sorry, your file was not uploaded.";
+		} else {
+			$user_id = $_POST['user_id'];
+			$out = sdmq()->send_document($filename1, $filename2, $user_id);
+			if ($out == "1") {
+				if (move_uploaded_file($_FILES["document1"]["tmp_name"], $target_file) && move_uploaded_file($_FILES["document2"]["tmp_name"], $target_file2)) {
+					echo "The file " . htmlspecialchars(basename($_FILES["document1"]["name"])) . " and " . htmlspecialchars(basename($_FILES["document2"]["name"])) . " has been uploaded. We will notify you once you are verified thank you.";
+				} else {
+					echo "Sorry, there was an error uploading your file.";
+				}
+			} else {
+				echo "Query failed.";
+			}
+		}
+		break;
+	case 'upload_image':
+		$document = $_FILES['document'];
+		$uploadDir = './uploads/';
+		$uploadFile = $uploadDir . basename($document['name']);
+		$fileName = basename($document['name']);
+
+		$out = sdmq()->send_document($fileName);
+		if ($out == "1") {
+			if (move_uploaded_file($document['tmp_name'], $uploadFile)) {
+				echo 'File is valid, and was successfully uploaded.';
+			} else {
+				echo 'Upload failed.';
+			}
+		} else {
+			echo "Query failed.";
+		}
 		break;
 	case "getmorenotification":
 		echo sdmq()->look_morepastnotif($_GET["userref"], $_GET["idstoftech"]);
@@ -250,7 +263,6 @@ switch ($tag) {
 	case 'latest_dorm':
 			echo sdmq()->latest_dorm();
 		break;
-
 	case 'nearest_dorm':
 		$lon = $_POST['longitude'];
 		$lat = $_POST['latitude'];
@@ -262,7 +274,6 @@ switch ($tag) {
 			echo $out;
 		}
 		break;
-
 	case "update_profile":
 		$image = $_FILES['image'];
 		$userref = $_POST["userref"];
@@ -313,19 +324,7 @@ switch ($tag) {
 				echo 'failed';
 			}
 		break;
-	case 'get_reports':
-			echo sdmq()->get_reports();
-			break;
-	case 'resolve_report_admin':
-		$reportid = $_POST["reportid"];
-
-		$out = sdmq()->resolve_dorm($reportid);
-		if ($out == "1") {
-			echo "Report Resolved" . $reportid;
-		} else {
-			echo "Failed to resolved: " . $reportid;
-		}
-		break;
+	
 	case 'delete_dorm':
 		$dormref = $_POST["dormref"];
 		$userref = $_POST["userref"];
