@@ -22,7 +22,7 @@
 		<!-- Navbar -->
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<div class="container-fluid">
-				<a class="navbar-brand" href="#">DormFinder</a>
+				<a class="navbar-brand" href="#">StudyHive Admin</a>
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
@@ -48,7 +48,8 @@
 				</div>
 			</div>
 		</div>
-		<!-- Sample table -->
+
+		<!-- Tables -->
 		<div class="container-fluid mt-4 mx-auto ps-5 pe-5">
 			<div class="row mb-4">
 				<div class="col-9">
@@ -143,33 +144,32 @@
 					</div>
 				</div>
 			</div>
-		</div>
+
+			<div class="row mb-4">
+				<div class="col-12">
+					<div class="rounded shadow p-3">
+						<h4>Reports</h4>
+							<div style="height: 500px;">
+								<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="reportsTable">
+									<thead>
+										<tr>
+											<th scope="col">Report ID</th>
+											<th scope="col">User</th>
+											<th scope="col">Dorm Reported</th>
+											<th scope="col">Message</th>
+											<th scope="col">Date Created</th>
+											<th scope="col">Actions</th>
+										</tr>
+									</thead>
+									<tbody id="reports">
+									</tbody>
+								</table>
+							</div>
+						</div>
+				</div>
+			</div>
 	</body>
 </html>
-
-<!-- Reports -->
-<div class="row mb-4">
-	<div class="col-12">
-		<div class="rounded shadow p-3">
-				<h4>Reports</h4>
-						<div style="height: 300px;">
-							<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="reportsTable">
-								<thead>
-									<tr>
-										<th scope="col">Report ID</th>
-										<th scope="col">User</th>
-										<th scope="col">Dorm Reported</th>
-										<th scope="col">Message</th>
-										<th scope="col">Date Created</th>
-										<th scope="col">Actions</th>
-									</tr>
-								</thead>
-								<tbody id="reports">
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
 
 <!-- Modal -->
 <div class="modal fade" id="open_userdocumodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

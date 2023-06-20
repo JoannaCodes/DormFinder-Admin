@@ -15,7 +15,7 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 $domain = 'http://192.168.0.12/DormFinder-Admin/';
-// $domain = http://studyhive-admin.infinityfreeapp.com/DormFinder-Admin
+// $domain = http://studyhive-admin.infinityfreeapp.com/DormFinder-Admin/
 $tag = '';
 
 if (isset($_POST["tag"])) {
@@ -27,9 +27,10 @@ if (isset($_POST["tag"])) {
 }
 
 switch ($tag) {
+	// Admin Queries
 	case 'check_ifsubmitted':
 		echo adminq()->check_ifsubmitted($_GET["user_id"]);
-	break;
+		break;
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
 		break;
@@ -38,7 +39,7 @@ switch ($tag) {
 		break;
 	case 'open_document':
 		echo adminq()->open_document($_POST["user_id"]);
-	break;
+		break;
 	case 'send_document':
 		$target_dir = "uploads/user/" . $_POST['user_id'];
 		$target_file = $target_dir . "/" . basename($_FILES["document1"]["name"]);
@@ -87,7 +88,7 @@ switch ($tag) {
 				echo "Query failed.";
 			}
 		}
-	break;
+		break;
 	case 'upload_image':
 		$document = $_FILES['document'];
 		$uploadDir = './uploads/';
@@ -105,19 +106,89 @@ switch ($tag) {
 			echo "Query failed.";
 		}
 		break;
+	case 'send_custom_notif':
+		$userref = $_POST["userref"];
+		$message = $_POST["notifMessage"];
+
+		$out = adminq()->send_custom_notif($userref, $message);
+		if ($out == "1") {
+			echo "Notification sent to user:" . $userref;
+		} else if ($out == "0") {
+			echo "User " . $userref . " does not exist";
+		} else {
+			echo "Failed to send notification to user: " . $userref;
+		}
+		break;
+	case 'add_admin':
+		$email = $_POST["email"];
+		$password = generatePassword();
+		$subject = "Invitation to Admin Website - Login Credentials Inside";
+		$body = "
+			<h1>Welcome to the StudyHive Team</h1>
+			<p>Congratulations! You have been invited as a new admin.</p>
+			<p>Please use the following login credentials to access the admin website:</p>
+			<ul>
+					<li><strong>Email:</strong> {$email}</li>
+					<li><strong>Password:</strong> {$password}</li>
+			</ul>
+			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
+		";
+
+		$altBody = "
+				Welcome to the Admin Website
+
+				Congratulations! You have been invited as a new admin.
+
+				Please use the following login credentials to access the admin website:
+
+				- Username: {$email}
+				- Password: {$password}
+
+				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
+		";
+
+		if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+				echo "New admin added";
+		} else {
+				echo "Failed to add admin";
+		}
+		break;
+	case 'delete_dorm_admin':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		if (is_dir($folderPath)) {
+			if (deleteDirectory($folderPath)) {
+				$out = adminq()->delete_dorm_admin($userref, $dormref);
+				if ($out == "1") {
+						echo "Dorm deleted. Notification sent to owner";
+				} else {
+						echo "Failed to delete dorm";
+				}
+			} else {
+				echo 'failed.';
+			}
+		} else {
+			echo 'Folder does not exist.';
+		}
+		break;
+	case 'send_dorm_notif':
+		$userref = $_POST["userref"];
+		$dormref = $_POST["dormref"];
+
+		$out = adminq()->send_dorm_notif($userref, $dormref);
+		if ($out == "1") {
+				echo "Notification sent to dorm owner";
+		} else {
+				echo "Failed to send notification";
+		}
+		break;
+	
+	// App Queries
 	case 'login':
 		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
-	case 'login_app':
-		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
-		break;
-	case 'login_app_guest':
-		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
-		break;
-	case 'signup_app':
-		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
-		break;
-	case 'fetch_saved_notif':
+
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
 	case 'get_submitdocuments':
@@ -462,83 +533,7 @@ switch ($tag) {
 			echo 'failed';
 		}
 		break;
-	case 'send_custom_notif':
-		$userref = $_POST["userref"];
-		$message = $_POST["notifMessage"];
-
-		$out = adminq()->send_custom_notif($userref, $message);
-		if ($out == "1") {
-			echo "Notification sent to user:" . $userref;
-		} else if ($out == "0") {
-			echo "User " . $userref . " does not exist";
-		} else {
-			echo "Failed to send notification to user: " . $userref;
-		}
-		break;
-	case 'add_admin':
-		$email = $_POST["email"];
-		$password = generatePassword();
-		$subject = "Invitation to Admin Website - Login Credentials Inside";
-		$body = "
-			<h1>Welcome to the StudyHive Team</h1>
-			<p>Congratulations! You have been invited as a new admin.</p>
-			<p>Please use the following login credentials to access the admin website:</p>
-			<ul>
-					<li><strong>Email:</strong> {$email}</li>
-					<li><strong>Password:</strong> {$password}</li>
-			</ul>
-			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
-		";
-
-		$altBody = "
-				Welcome to the Admin Website
-
-				Congratulations! You have been invited as a new admin.
-
-				Please use the following login credentials to access the admin website:
-
-				- Username: {$email}
-				- Password: {$password}
-
-				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
-		";
-
-		if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
-				echo "New admin added";
-		} else {
-				echo "Failed to add admin";
-		}
-		break;
-	case 'delete_dorm_admin':
-		$userref = $_POST["userref"];
-		$dormref = $_POST["dormref"];
-
-		if (is_dir($folderPath)) {
-			if (deleteDirectory($folderPath)) {
-				$out = adminq()->delete_dorm_admin($userref, $dormref);
-				if ($out == "1") {
-						echo "Dorm deleted. Notification sent to owner";
-				} else {
-						echo "Failed to delete dorm";
-				}
-			} else {
-				echo 'failed.';
-			}
-		} else {
-			echo 'Folder does not exist.';
-		}
-		break;
-	case 'send_dorm_notif':
-		$userref = $_POST["userref"];
-		$dormref = $_POST["dormref"];
-
-		$out = adminq()->send_dorm_notif($userref, $dormref);
-		if ($out == "1") {
-				echo "Notification sent to dorm owner";
-		} else {
-				echo "Failed to send notification";
-		}
-		break;
+	
 	case 'get_verification_status':
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
@@ -546,7 +541,7 @@ switch ($tag) {
 }
 
 
-// functions
+// Functions
 function getAddressCoordinates($address) {
 	// Encode the address
 	$encodedAddress = urlencode($address);
