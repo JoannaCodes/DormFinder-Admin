@@ -3,6 +3,7 @@
     header('Access-Control-Max-Age: 86400');
     header("Access-Control-Allow-Methods: POST");
     header("Content-Type: multipart/form-data");
+    header("Content-Type: application/json");
     date_default_timezone_set('Asia/Manila');
 
     include_once "inc/conn.php";
@@ -70,7 +71,7 @@
                 switch($action) {
                     
                     case "getLastChatByID":
-                        $result = conn()->getLastChatByID(_validate($_POST['unique_code']));
+                        $result = conn()->getLastChatByID(_validate($_POST['chatroom_code']));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "getChatrooms":
@@ -78,15 +79,15 @@
                         statusCode($result['code'], $result['data']);
                     break;
                     case "getChats":
-                        $result = conn()->getChats(_validate($_POST['unique_code']), _validate($_POST['myid']), _validate($_POST['itr']));
+                        $result = conn()->getChats(_validate($_POST['chatroom_code']), _validate($_POST['myid']), _validate($_POST['itr']));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "getPreviouslyChats":
-                        $result = conn()->getPreviouslyChats(_validate($_POST['unique_code']), _validate($_POST['myid']), _validate($_POST['itr']));
+                        $result = conn()->getPreviouslyChats(_validate($_POST['chatroom_code']), _validate($_POST['myid']), _validate($_POST['itr']));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "sendChat":
-                        $result = conn()->sendChat(_validate($_POST['unique_code']), _validate($_POST['myid']), _validate($_POST['message']), $_POST['image'] ?? "");
+                        $result = conn()->sendChat(_validate($_POST['chatroom_code']), _validate($_POST['myid']), _validate($_POST['message']), $_POST['image'] ?? "");
                         statusCode($result['code'], $result['data']);
                     break;
                     case "addChat":
@@ -95,6 +96,26 @@
                     break;
                     case "getDorm":
                         $result = conn()->getDorm(_validate($_POST['unique_code']));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "getAmenities":
+                        $result = conn()->getAmenities(_validate($_POST['unique_code']));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "popular_dorm":
+                        $result = conn()->popular_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "latest_dorm":
+                        $result = conn()->latest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "nearest_dorm":
+                        $result = conn()->nearest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL),_validate($_POST['latitude']), _validate($_POST['longitude']));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "getMessageInfos":
+                        $result = conn()->getMessageInfos(_validate($_POST['unique_code'] ?? NULL), _validate($_POST['myid'] ?? NULL), _validate($_POST['other_id'] ?? NULL));
                         statusCode($result['code'], $result['data']);
                     break;
                     default:

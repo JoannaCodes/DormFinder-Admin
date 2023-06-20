@@ -8,8 +8,8 @@ class api_queries
 		$this->conn = $conn;
 	}
     
-    public function getLastChatByID($unique_code) {
-        $statement = sprintf("SELECT * FROM `tbl_chats` WHERE `unique_code` = '%s' ORDER BY id DESC", $unique_code);
+    public function getLastChatByID($chatroom_code) {
+        $statement = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $chatroom_code);
         $result = $this->conn->query($statement);
         $row = $result->fetch_assoc();
         return array(
@@ -19,7 +19,7 @@ class api_queries
     }
 
     public function getChatrooms($to_user) {
-        $statement = sprintf("SELECT tbl_users.id, tbl_users.username, tbl_chatrooms.unique_code, tbl_users.imageUrl FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+        $statement = sprintf("SELECT tbl_users.id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
 
         $result = $this->conn->query($statement);
 
@@ -27,7 +27,7 @@ class api_queries
             $array = array();
             $count = 1;
             while($row = $result->fetch_assoc()) {
-                $statement2 = sprintf("SELECT * FROM `tbl_chats` WHERE `unique_code` = '%s' ORDER BY id DESC", $row['unique_code']);
+                $statement2 = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $row['chatroom_code']);
                 $result2 = $this->conn->query($statement2);
                 $row2 = $result2->fetch_assoc();
                 if($row2) {
@@ -51,6 +51,7 @@ class api_queries
                         'user_id' => $row['id'],
                         'username' => $username,
                         'unique_code' => $row['unique_code'],
+                        'chatroom_code' => $row['chatroom_code'],
                         'imageUrl' => $row['imageUrl'],
                         'message' => $whoFirst,
                         'time' => $row2['time'] ?? 0
@@ -68,6 +69,7 @@ class api_queries
                         'user_id' => $row['id'],
                         'username' => $username,
                         'unique_code' => $row['unique_code'],
+                        'chatroom_code' => $row['chatroom_code'],
                         'imageUrl' => $row['imageUrl'],
                         'message' => "",
                         'time' => $row2['time'] ?? 0
@@ -88,8 +90,8 @@ class api_queries
         }
     }
 
-    public function getChats($unique_code, $myId, $itr) {
-        $statement = sprintf("SELECT tbl_chats.id as id, tbl_chats.itr, tbl_users.id as user_id, tbl_users.username, tbl_users.imageUrl, tbl_chats.message, tbl_chats.image, tbl_chats.time FROM tbl_chats INNER JOIN tbl_users ON tbl_chats.user_id = tbl_users.id WHERE unique_code = '%s' AND `itr` > '".$itr."' ORDER BY tbl_chats.id DESC LIMIT 10", $unique_code);
+    public function getChats($chatroom_code, $myId, $itr) {
+        $statement = sprintf("SELECT tbl_chats.id as id, tbl_chats.itr, tbl_users.id as user_id, tbl_users.username, tbl_users.imageUrl, tbl_chats.message, tbl_chats.image, tbl_chats.time FROM tbl_chats INNER JOIN tbl_users ON tbl_chats.user_id = tbl_users.id WHERE chatroom_code = '%s' AND `itr` > '".$itr."' ORDER BY tbl_chats.id DESC LIMIT 10", $chatroom_code);
 
         $result = $this->conn->query($statement);
 
@@ -122,8 +124,8 @@ class api_queries
         }
     }
 
-    public function getPreviouslyChats($unique_code, $myId, $itr) {
-        $statement = sprintf("SELECT tbl_chats.id as id, tbl_chats.itr, tbl_users.id as user_id, tbl_users.username, tbl_users.imageUrl, tbl_chats.message, tbl_chats.image, tbl_chats.time FROM tbl_chats INNER JOIN tbl_users ON tbl_chats.user_id = tbl_users.id WHERE unique_code = '%s' AND `itr` < '".$itr."' ORDER BY tbl_chats.id DESC LIMIT 10", $unique_code);
+    public function getPreviouslyChats($chatroom_code, $myId, $itr) {
+        $statement = sprintf("SELECT tbl_chats.id as id, tbl_chats.itr, tbl_users.id as user_id, tbl_users.username, tbl_users.imageUrl, tbl_chats.message, tbl_chats.image, tbl_chats.time FROM tbl_chats INNER JOIN tbl_users ON tbl_chats.user_id = tbl_users.id WHERE chatroom_code = '%s' AND `itr` < '".$itr."' ORDER BY tbl_chats.id DESC LIMIT 10", $chatroom_code);
 
         $result = $this->conn->query($statement);
 
@@ -156,16 +158,16 @@ class api_queries
         }
     }
 
-    public function sendChat($unique_code, $myId, $message, $image) {
-        $getStatement = sprintf("SELECT * FROM `tbl_chats` WHERE `unique_code` = '%s' ORDER BY id DESC", $unique_code);
+    public function sendChat($chatroom_code, $myId, $message, $image) {
+        $getStatement = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $chatroom_code);
         $getResult = $this->conn->query($getStatement);
         $getRow = $getResult->fetch_assoc();
 
         if(strlen($image) != 0) {
-            $statement = sprintf("INSERT INTO tbl_chats (unique_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $unique_code, $myId, $this->base64ToImage($image, $unique_code), time(), $getRow['itr'] + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), $getRow['itr'] + 1);
             $this->conn->query($statement);
         } else {
-            $statement = sprintf("INSERT INTO tbl_chats (unique_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $unique_code, $myId, $message, time(), $getRow['itr'] + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), $getRow['itr'] + 1);
             $this->conn->query($statement);
         }
         
@@ -220,11 +222,13 @@ class api_queries
                 'code' => 403
             );
         } else {
+            $unique = uniqid();
+            $unique2 = $unique;
             // Success, does not exist data
-            $statement2 = sprintf("INSERT INTO tbl_chatrooms (`unique_code`,`to_user`,`from_user`,`time`) VALUES ('%s','%s','%s', %d)", $unique_code, $myid, $other_id, time());
+            $statement2 = sprintf("INSERT INTO tbl_chatrooms (`unique_code`,`chatroom_code`,`to_user`,`from_user`,`time`) VALUES ('%s','%s','%s','%s', %d)", $unique_code, $unique2, $myid, $other_id, time());
             $this->conn->query($statement2);
 
-            $statement3 = sprintf("INSERT INTO tbl_chatrooms (`unique_code`,`to_user`,`from_user`,`time`) VALUES ('%s','%s','%s', %d)", $unique_code, $other_id, $myid, time());
+            $statement3 = sprintf("INSERT INTO tbl_chatrooms (`unique_code`,`chatroom_code`,`to_user`,`from_user`,`time`) VALUES ('%s','%s','%s','%s', %d)", $unique_code, $unique2, $other_id, $myid, time());
             $this->conn->query($statement3);
 
             return array(
@@ -251,6 +255,469 @@ class api_queries
             // Error, does not exist data
             return array(
                 'data' => 'Error, that dorm doesn\'t exist!',
+                'code' => 403
+            );
+        }
+    }
+
+    public function getAmenities($unique_code) {
+        $statement = sprintf("SELECT * FROM `tbl_amenities` WHERE `dormref` = '%s'", $unique_code);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // Success, exist data
+            $data = $result->fetch_assoc();
+            return array(
+                'data' => $data,
+                'code' => 200
+            );
+        } else {
+            // Error, does not exist data
+            return array(
+                'data' => 'Error, that amenities doesn\'t exist!',
+                'code' => 403
+            );
+        }
+    }
+    public function popular_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew) {
+        
+        if(
+            $aircon == 0 &&
+            $elevator == 0 &&
+            $beddings == 0 &&
+            $kitchen == 0 &&
+            $laundry == 0 &&
+            $lounge == 0 &&
+            $parking == 0 &&
+            $security == 0 &&
+            $study_room == 0 &&
+            $pet == 0 &&
+            $visitor == 0 &&
+            $curfew == 0 &&
+            $wifi == 0
+        ) {
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            $sql .= ' tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)';
+
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        } else {
+            $establishment_rules_array = array(
+                array('name' => 'pets','value' => $pet),
+                array('name' => 'visitors','value' => $visitor),
+                array('name' => 'curfew','value' => $curfew)
+            );
+
+            $amenities_array = array(
+                array('name' => 'aircon','value' => $aircon),
+                array('name' => 'elevator','value' => $elevator),
+                array('name' => 'beddings','value' => $beddings),
+                array('name' => 'kitchen','value' => $kitchen),
+                array('name' => 'laundry','value' => $laundry),
+                array('name' => 'lounge','value' => $lounge),
+                array('name' => 'parking','value' => $parking),
+                array('name' => 'security','value' => $security),
+                array('name' => 'study_room','value' => $study_room),
+                array('name' => 'wifi','value' => $wifi)
+            );
+
+            $establishment_rules_array = array(
+                array('name' => 'pets','value' => $pet),
+                array('name' => 'visitors','value' => $visitor),
+                array('name' => 'curfew','value' => $curfew)
+            );
+
+            $amenities_array = array(
+                array('name' => 'aircon','value' => $aircon),
+                array('name' => 'elevator','value' => $elevator),
+                array('name' => 'beddings','value' => $beddings),
+                array('name' => 'kitchen','value' => $kitchen),
+                array('name' => 'laundry','value' => $laundry),
+                array('name' => 'lounge','value' => $lounge),
+                array('name' => 'parking','value' => $parking),
+                array('name' => 'security','value' => $security),
+                array('name' => 'study_room','value' => $study_room),
+                array('name' => 'wifi','value' => $wifi)
+            );
+
+            $establishment_rules_sql = '';
+            $amenities_sql = '';
+            $countEstablishment = count($establishment_rules_array);
+            $countAmenities = count($amenities_array);
+            
+            $conditions = [];
+
+            for ($sqs = 0; $sqs < $countEstablishment; $sqs++) {
+                if ($establishment_rules_array[$sqs]['value'] == 1 || $establishment_rules_array[$sqs]['value'] == "1") {
+                    $condition = sprintf("tbl_dorms.%s = %d", $establishment_rules_array[$sqs]['name'], $establishment_rules_array[$sqs]['value']);
+                    $conditions[] = $condition;
+                }
+            }
+
+            $establishment_rules_sql .= implode(' AND ', $conditions);
+
+            $conditions2 = [];
+
+            for ($sq = 0; $sq < $countAmenities; $sq++) {
+                if ($amenities_array[$sq]['value'] == 1 || $amenities_array[$sq]['value'] == "1") {
+                    $condition = sprintf("tbl_amenities.%s = %d", $amenities_array[$sq]['name'], $amenities_array[$sq]['value']);
+                    $conditions2[] = $condition;
+                }
+            }
+
+            $amenities_sql .= implode(' AND ', $conditions2);
+
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            
+            if($establishment_rules_sql != '') {
+                $sql .= '(';
+                    $sql .= $establishment_rules_sql;
+                $sql .= ')';
+            }
+
+            if($amenities_sql != '') {
+                if($establishment_rules_sql != '') {
+                    $sql .= ' AND ';
+                }
+                $sql .= '(';
+                    $sql .= $amenities_sql;
+                $sql .= ')';
+            }
+            
+            if($establishment_rules_sql != '' || $amenities_sql != '') {
+                $sql .= ' AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)';
+            }
+
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        }
+    }
+    public function latest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew) {
+        
+        if(
+            $aircon == 0 &&
+            $elevator == 0 &&
+            $beddings == 0 &&
+            $kitchen == 0 &&
+            $laundry == 0 &&
+            $lounge == 0 &&
+            $parking == 0 &&
+            $security == 0 &&
+            $study_room == 0 &&
+            $pet == 0 &&
+            $visitor == 0 &&
+            $curfew == 0 &&
+            $wifi == 0
+        ) {
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        } else {
+            $establishment_rules_array = array(
+                array('name' => 'pets','value' => $pet),
+                array('name' => 'visitors','value' => $visitor),
+                array('name' => 'curfew','value' => $curfew)
+            );
+
+            $amenities_array = array(
+                array('name' => 'aircon','value' => $aircon),
+                array('name' => 'elevator','value' => $elevator),
+                array('name' => 'beddings','value' => $beddings),
+                array('name' => 'kitchen','value' => $kitchen),
+                array('name' => 'laundry','value' => $laundry),
+                array('name' => 'lounge','value' => $lounge),
+                array('name' => 'parking','value' => $parking),
+                array('name' => 'security','value' => $security),
+                array('name' => 'study_room','value' => $study_room),
+                array('name' => 'wifi','value' => $wifi)
+            );
+
+            $establishment_rules_sql = '';
+            $amenities_sql = '';
+            $countEstablishment = count($establishment_rules_array);
+            $countAmenities = count($amenities_array);
+            
+            $conditions = [];
+
+            for ($sqs = 0; $sqs < $countEstablishment; $sqs++) {
+                if ($establishment_rules_array[$sqs]['value'] == 1 || $establishment_rules_array[$sqs]['value'] == "1") {
+                    $condition = sprintf("tbl_dorms.%s = %d", $establishment_rules_array[$sqs]['name'], $establishment_rules_array[$sqs]['value']);
+                    $conditions[] = $condition;
+                }
+            }
+
+            $establishment_rules_sql .= implode(' AND ', $conditions);
+
+            $conditions2 = [];
+
+            for ($sq = 0; $sq < $countAmenities; $sq++) {
+                if ($amenities_array[$sq]['value'] == 1 || $amenities_array[$sq]['value'] == "1") {
+                    $condition = sprintf("tbl_amenities.%s = %d", $amenities_array[$sq]['name'], $amenities_array[$sq]['value']);
+                    $conditions2[] = $condition;
+                }
+            }
+
+            $amenities_sql .= implode(' AND ', $conditions2);
+
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            if($establishment_rules_sql != '' || $amenities_sql != '') {
+                $sql .= ' WHERE';
+            }
+            if($establishment_rules_sql != '') {
+                $sql .= '(';
+                    $sql .= $establishment_rules_sql;
+                $sql .= ')';
+            }
+
+            if($amenities_sql != '') {
+                if($establishment_rules_sql != '') {
+                    $sql .= ' AND ';
+                }
+                $sql .= '(';
+                    $sql .= $amenities_sql;
+                $sql .= ')';
+            }
+
+            $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
+
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        }
+    }
+    public function nearest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew,$latitude, $longitude) {
+        
+        if(
+            $aircon == 0 &&
+            $elevator == 0 &&
+            $beddings == 0 &&
+            $kitchen == 0 &&
+            $laundry == 0 &&
+            $lounge == 0 &&
+            $parking == 0 &&
+            $security == 0 &&
+            $study_room == 0 &&
+            $pet == 0 &&
+            $visitor == 0 &&
+            $curfew == 0 &&
+            $wifi == 0
+        ) {
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
+
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        } else {
+            $establishment_rules_array = array(
+                array('name' => 'pets','value' => $pet),
+                array('name' => 'visitors','value' => $visitor),
+                array('name' => 'curfew','value' => $curfew)
+            );
+
+            $amenities_array = array(
+                array('name' => 'aircon','value' => $aircon),
+                array('name' => 'elevator','value' => $elevator),
+                array('name' => 'beddings','value' => $beddings),
+                array('name' => 'kitchen','value' => $kitchen),
+                array('name' => 'laundry','value' => $laundry),
+                array('name' => 'lounge','value' => $lounge),
+                array('name' => 'parking','value' => $parking),
+                array('name' => 'security','value' => $security),
+                array('name' => 'study_room','value' => $study_room),
+                array('name' => 'wifi','value' => $wifi)
+            );
+
+            $establishment_rules_sql = '';
+            $amenities_sql = '';
+            $countEstablishment = count($establishment_rules_array);
+            $countAmenities = count($amenities_array);
+            
+            $conditions = [];
+
+            for ($sqs = 0; $sqs < $countEstablishment; $sqs++) {
+                if ($establishment_rules_array[$sqs]['value'] == 1 || $establishment_rules_array[$sqs]['value'] == "1") {
+                    $condition = sprintf("tbl_dorms.%s = %d", $establishment_rules_array[$sqs]['name'], $establishment_rules_array[$sqs]['value']);
+                    $conditions[] = $condition;
+                }
+            }
+
+            $establishment_rules_sql .= implode(' AND ', $conditions);
+
+            $conditions2 = [];
+
+            for ($sq = 0; $sq < $countAmenities; $sq++) {
+                if ($amenities_array[$sq]['value'] == 1 || $amenities_array[$sq]['value'] == "1") {
+                    $condition = sprintf("tbl_amenities.%s = %d", $amenities_array[$sq]['name'], $amenities_array[$sq]['value']);
+                    $conditions2[] = $condition;
+                }
+            }
+
+            $amenities_sql .= implode(' AND ', $conditions2);
+
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
+            if($establishment_rules_sql != '') {
+                $sql .= ' AND ';
+                $sql .= '(';
+                    $sql .= $establishment_rules_sql;
+                $sql .= ')';
+            }
+
+            if($amenities_sql != '') {
+                if($establishment_rules_sql != '') {
+                    $sql .= ' AND ';
+                }
+                $sql .= '(';
+                    $sql .= $amenities_sql;
+                $sql .= ')';
+            }
+
+            $result = $this->conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Success, exist data
+                $array = array();
+                while($row = $result->fetch_assoc()) {
+                    $array[] = $row;
+                }
+                
+                return array(
+                    'data' => $array,
+                    'code' => 200
+                );
+            } else {
+                // Error, does not exist data
+                return array(
+                    'data' => 'Error, no results found.',
+                    'code' => 403
+                );
+            }
+        }
+    }
+    public function getMessageInfos($unique_code, $myid, $other_id) {
+        $statement = sprintf("SELECT * FROM `tbl_chatrooms` WHERE `unique_code` = '%s' AND `to_user` = '%s' AND `from_user` = '%s'", $unique_code, $myid, $other_id);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // Success, exist data
+            $data = $result->fetch_assoc();
+
+            $me_statement = sprintf("SELECT tbl_users.username, tbl_users.imageUrl FROM `tbl_users` WHERE `id` = '%s'", $myid);
+            $me_result = $this->conn->query($me_statement);
+            $data['me'] = $me_result->fetch_assoc();
+
+            $other_statement = sprintf("SELECT tbl_users.username, tbl_users.imageUrl FROM `tbl_users` WHERE `id` = '%s'", $myid);
+            $other_result = $this->conn->query($other_statement);
+            $data['other'] = $other_result->fetch_assoc();
+
+            return array(
+                'data' => $data,
+                'code' => 200
+            );
+        } else {
+            // Error, does not exist data
+            return array(
+                'data' => 'Error! There\'s something wrong!',
                 'code' => 403
             );
         }
