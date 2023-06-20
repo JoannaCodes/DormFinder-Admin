@@ -319,7 +319,7 @@ switch ($tag) {
 		}
 		break;
 	case 'get_reviews':
-		echo sdmq()->get_reviews($_GET["dormref"]);
+		echo sdmq()->get_reviews($_GET["dormref"] ?? 0);
 		break;
 	case 'post_report':
 		$id = uniqId();
