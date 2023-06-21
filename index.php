@@ -557,6 +557,43 @@ switch ($tag) {
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
 		break;
+	
+	case 'forgot_password':
+		$email = $_POST['email'];
+		$password = generatePassword();
+		
+		$subject = "Forgot Password - Login Credentials Inside";
+		$body = "
+			<h1>Forgot Password - StudyHive</h1>
+			<p>You have requested to reset your password. Here is your temporary password:</p>
+			<p><strong>New Password:</strong> {$password}</p>
+			<p>You can use this temporary password to login and then change your password to a more secure one or you can use this as your new password.</p>
+			<p>If you did not request a password reset, please disregard this email.</p>
+			<p>Thank you,</p>
+			<p>The StudyHive Team</p>
+		";
+
+		$altBody = "
+			Forgot Password - StudyHive
+
+			You have requested to reset your password. Here is your temporary password:
+
+			- New Password: {$password}
+
+			You can use this temporary password to login and then change your password to a more secure one.
+
+			If you did not request a password reset, please disregard this email.
+
+			Thank you,
+			The StudyHive Team
+		";
+
+		if (sdmq()->forgot_password($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+				echo "success";
+		} else {
+				echo "failed";
+		}
+		break;
     
   default:
     header("Location: ./dormfinder_admin.php");
@@ -642,7 +679,7 @@ function sendEmail($email, $subject, $body, $altbody){
 
 	try {
 		//Server settings
-		$mail->SMTPDebug = SMTP::DEBUG_SERVER;
+		$mail->SMTPDebug = false;
 		$mail->isSMTP();
 		$mail->Host       = 'smtp.gmail.com';
 		$mail->SMTPAuth   = true;
@@ -662,11 +699,13 @@ function sendEmail($email, $subject, $body, $altbody){
 		$mail->AltBody = $altbody;
 
 		if ($mail->send()) {
-			return true;
-		}
-	} catch (Exception $e) {
-		return true;
+			$success = true;
 	}
+	} catch (Exception $e) {
+		$success = false;
+	}
+
+	return $success;
 }
 
 function sdmq()
