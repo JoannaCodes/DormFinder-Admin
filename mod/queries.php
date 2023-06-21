@@ -387,7 +387,7 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT is_verified FROM tbl_users WHERE id=?", [$userref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
-	function forgot_password($email, $password) {
+	public function forgot_password($email, $password) {
 		if ($this->QuickFire("UPDATE tbl_users SET `password`=?, updated_at=now() WHERE identifier=?", [$password, $email])) {
 			return "1";
 		}
