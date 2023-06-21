@@ -51,6 +51,8 @@ class sdm_query
 			return "1";
 		}
 	}
+
+
   public function clearallnotif($userref) 
   {
 		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
