@@ -90,6 +90,53 @@ class api_queries
         }
     }
 
+    public function checkLogin($email) {
+        $statement = sprintf("SELECT * FROM tbl_users WHERE `identifier` = '%s'", $email);
+
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // success, email exist
+            $row = $result->fetch_assoc();
+            return array (
+                'data' => ["username" => $row['username'], "id" => $row['id'], "status" => true, "mode" => "user"],
+                'code' => 200
+            );
+        } else {
+            // error, email doesn't exist
+            return array(
+                'data' => 'No results found.',
+                'code' => 403
+            );
+        }
+    }
+
+    public function checkRegister($email, $username, $imageUrl) {
+        $statement = sprintf("SELECT * FROM tbl_users WHERE `identifier` = '%s'", $email);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // error, email exist
+            return array(
+                'data' => 'Your account already exist! Go to login page!',
+                'code' => 403
+            );
+        } else {
+            // success, email doesn't exist
+            $statement2 = sprintf("INSERT INTO tbl_users SET id = '%s', identifier='%s', username='%s', `password`='%s', `imageUrl` = '%s', updated_at=now(), created_at=now()", uniqid(), $email, $username, uniqid(), $imageUrl);
+            $this->conn->query($statement2);
+
+            $statement3 = sprintf("SELECT * FROM tbl_users WHERE `identifier` = '%s'", $email);
+            $result3 = $this->conn->query($statement3);
+            $row = $result3->fetch_assoc();
+
+            return array(
+                'data' => ["username" => $row['username'], "id" => $row['id'], "status" => true, "mode" => "user"],
+                'code' => 200
+            );
+        }
+    }
+
     public function getChats($chatroom_code, $myId, $itr) {
         $statement = sprintf("SELECT tbl_chats.id as id, tbl_chats.itr, tbl_users.id as user_id, tbl_users.username, tbl_users.imageUrl, tbl_chats.message, tbl_chats.image, tbl_chats.time FROM tbl_chats INNER JOIN tbl_users ON tbl_chats.user_id = tbl_users.id WHERE chatroom_code = '%s' AND `itr` > '".$itr."' ORDER BY tbl_chats.id DESC LIMIT 10", $chatroom_code);
 
@@ -164,10 +211,10 @@ class api_queries
         $getRow = $getResult->fetch_assoc();
 
         if(strlen($image) != 0) {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), $getRow['itr'] + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), $getRow['itr'] ?? 0 + 1);
             $this->conn->query($statement);
         } else {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), $getRow['itr'] + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), $getRow['itr'] ?? 0 + 1);
             $this->conn->query($statement);
         }
         

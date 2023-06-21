@@ -118,6 +118,14 @@
                         $result = conn()->getMessageInfos(_validate($_POST['unique_code'] ?? NULL), _validate($_POST['myid'] ?? NULL), _validate($_POST['other_id'] ?? NULL));
                         statusCode($result['code'], $result['data']);
                     break;
+                    case "checkLogin":
+                        $result = conn()->checkLogin(_validate($_POST['email'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "checkRegister":
+                        $result = conn()->checkRegister(_validate($_POST['email'] ?? NULL), _validate($_POST['username'] ?? NULL), _validate($_POST['imageUrl'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
                     default:
                         statusCode(200, "Welcome to DormFinder API");
                     break;
