@@ -9,7 +9,7 @@ class admin_query
 
 	public function change_status($btn_value,$user_id) {
 		if($btn_value == "1") {
-			$vtitle = "DormFinder";
+			$vtitle = "StudyHive";
 			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
 			$vreferencestarter = "1";
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -23,7 +23,7 @@ class admin_query
 				}
 			}
 		} else if ($btn_value == "2") {
-			$vtitle = "DormFinder";
+			$vtitle = "StudyHive";
 			$vdesc = "Your documents have not been verified! Please upload a new document.";
 			$vreferencestarter = "1";
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -53,7 +53,7 @@ class admin_query
 		}
 		return $toecho;
 	}
-	public function login_dormfinder($email, $password)
+	public function login_StudyHive($email, $password)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_adminusers WHERE email=? AND password=?", [$email, $password], true));
 		$outx = json_decode($out, true);
@@ -195,8 +195,18 @@ class admin_query
 	}
 	public function resolve_dorm($reportid)
 	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dormreports WHERE id=?", [$reportid]), true), true);
+
+		$vtitle = "UniHive";
+		$vdesc = "The dorm listing you reported has been resolved. Thank you for your contribution!";
+		$vreferencestarter = uniqid();
+		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_time = date('Y-m-d H:i:s');
+
 		if ($this->QuickFire("DELETE FROM `tbl_dormreports` WHERE id=?", [$reportid])) {
-			return "1";
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$out[0]['userref'], $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+				return "1";
+			}
 		}
 	}
   
