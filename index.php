@@ -129,6 +129,7 @@ switch ($tag) {
 
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
+
 	case 'get_submitdocuments':
 		echo adminq()->get_submitdocuments();
 		break;
