@@ -59,7 +59,7 @@ switch ($tag) {
 					<li><strong>Email:</strong> {$email}</li>
 					<li><strong>Password:</strong> {$password}</li>
 			</ul>
-			<p>Visit the <a href='http://192.168.0.12/DormFinder-Admin/dormfinder_home.php'>Admin Website</a> to log in.</p>
+			<p>Visit the <a href={$domain}>Admin Website</a> to log in.</p>
 		";
 
 		$altBody = "
@@ -72,7 +72,7 @@ switch ($tag) {
 				- Username: {$email}
 				- Password: {$password}
 
-				Visit the Admin Website (http://192.168.0.12/DormFinder-Admin/dormfinder_home.php) to log in.
+				Visit the Admin Website ({$domain}) to log in.
 		";
 
 		if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
@@ -143,6 +143,9 @@ switch ($tag) {
 	// App Queries
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
+		break;
+	case 'login_app_guest':
+		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
 		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
@@ -287,15 +290,14 @@ switch ($tag) {
 
 		$uploadDir = 'uploads/userImages/' . $userref . '/';
 		$uploadFile = $uploadDir . basename($image['name']);
-		// change domain to web hosts domain
-		$fileName = $domain . $uploadDir . basename($image['name']);
+		$fileName = $uploadDir . basename($image['name']);
 
 		// Check if the folder already exists
-		if (!file_exists($uploadDir)) {
+		if (!is_dir($uploadDir)) {
 			mkdir($uploadDir, 0777, true);
 		}
 
-		$out = sdmq()->update_profile($userref, $username, $fileName);
+		$out = sdmq()->update_profile($userref, $username, $domain . $fileName);
 		if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out == "1") {
 			echo 'success';
 		} else {
@@ -392,10 +394,10 @@ switch ($tag) {
 		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
 		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
-		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
-		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
-		$util = $_POST["utilities"] !== "" ? $_POST["utilities"] : "N/A";
-		$minstay = $_POST["minimum_stay"] !== "" ? $_POST["minimum_stay"] : "N/A";
+		$advdep = $_POST["advance_deposit"];
+		$secdep = $_POST["security_deposit"];
+		$util = $_POST["utilities"];
+		$minstay = $_POST["minimum_stay"];
 
 		$latitude = 0;
 		$longitude = 0;
@@ -413,7 +415,7 @@ switch ($tag) {
 		}
 
 		$uploadDir = 'uploads/dormImages/' . $id . '/';
-		if (!file_exists($uploadDir)) {
+		if (!is_dir($uploadDir)) {
 			mkdir($uploadDir, 0777, true);
 		}
 
@@ -481,10 +483,10 @@ switch ($tag) {
 		$study_room = (int)filter_var($study_room, FILTER_VALIDATE_BOOLEAN);
 		$wifi = (int)filter_var($wifi, FILTER_VALIDATE_BOOLEAN);
 
-		$advdep = $_POST["advance_deposit"] !== "" ? $_POST["advance_deposit"] : "N/A";
-		$secdep = $_POST["security_deposit"] !== "" ? $_POST["security_deposit"] : "N/A";
-		$util = $_POST["utilities"] !== "" ? $_POST["utilities"] : "N/A";
-		$minstay = $_POST["minimum_stay"] !== "" ? $_POST["minimum_stay"] : "N/A";
+		$advdep = $_POST["advance_deposit"];
+		$secdep = $_POST["security_deposit"];
+		$util = $_POST["utilities"];
+		$minstay = $_POST["minimum_stay"];
 
 		$latitude = 0;
 		$longitude = 0;
@@ -515,7 +517,7 @@ switch ($tag) {
 
 			foreach ($images['tmp_name'] as $index => $tmpName) {
 				$imageName = $images['name'][$index];
-			$filename = basename($imageName);
+				$filename = basename($imageName);
 				$uploadFile = $uploadDir . $filename;
 
 				// Move the file to the destination directory
@@ -543,6 +545,10 @@ switch ($tag) {
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
 		break;
+    
+  default:
+    header("Location: ./dormfinder_admin.php");
+   break;
 }
 
 
