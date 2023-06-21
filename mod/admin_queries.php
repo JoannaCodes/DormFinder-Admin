@@ -31,7 +31,7 @@ class admin_query
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
 				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
-					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
+					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",["0",$user_id])) {
 						return "0";
 					}
 				}

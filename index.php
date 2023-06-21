@@ -29,7 +29,18 @@ if (isset($_POST["tag"])) {
 switch ($tag) {
 	// Admin Queries
 	case 'change_status':
-		echo adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
+		$out = adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
+		echo $out;
+
+		$folderPath = 'uploads/user/' . $_POST['user_id'] . '/';
+
+		if($out == "0") {
+			if (is_dir($folderPath)) {
+				deleteDirectory($folderPath);
+			} else {
+				echo 'Folder does not exist.';
+			}
+		}
 		break;
 	case 'open_document':
 		echo adminq()->open_document($_POST["user_id"]);
@@ -84,6 +95,7 @@ switch ($tag) {
 	case 'delete_dorm_admin':
 		$userref = $_POST["userref"];
 		$dormref = $_POST["dormref"];
+		$folderPath = 'uploads/dormImages/' . $dormref . '/';
 
 		if (is_dir($folderPath)) {
 			if (deleteDirectory($folderPath)) {
@@ -158,8 +170,8 @@ switch ($tag) {
 		break;
 	case 'send_document':
 		$target_dir = "uploads/user/" . $_POST['user_id'];
-		$target_file = $domain . $target_dir . "/" . basename($_FILES["document1"]["name"]);
-		$target_file2 = $domain . $target_dir . "/" . basename($_FILES["document2"]["name"]);
+		$target_file = $target_dir . "/" . basename($_FILES["document1"]["name"]);
+		$target_file2 = $target_dir . "/" . basename($_FILES["document2"]["name"]);
 		$filename1 = basename($_FILES["document1"]["name"]);
 		$filename2 = basename($_FILES["document2"]["name"]);
 		$uploadOk = 1;
