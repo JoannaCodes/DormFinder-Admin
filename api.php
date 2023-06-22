@@ -103,15 +103,15 @@
                         statusCode($result['code'], $result['data']);
                     break;
                     case "popular_dorm":
-                        $result = conn()->popular_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL));
+                        $result = conn()->popular_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL) , _validate($_POST['rating'] ?? 0), _validate($_POST['min_price'] ?? 0), _validate($_POST['max_price'] ?? 0));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "latest_dorm":
-                        $result = conn()->latest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL));
+                        $result = conn()->latest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL) , _validate($_POST['rating'] ?? 0), _validate($_POST['min_price'] ?? 0), _validate($_POST['max_price'] ?? 0));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "nearest_dorm":
-                        $result = conn()->nearest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL),_validate($_POST['latitude']), _validate($_POST['longitude']));
+                        $result = conn()->nearest_dorm(_validate($_POST['aircon'] ?? NULL), _validate($_POST['elevator'] ?? NULL), _validate($_POST['beddings'] ?? NULL), _validate($_POST['kitchen'] ?? NULL), _validate($_POST['laundry'] ?? NULL), _validate($_POST['lounge'] ?? NULL), _validate($_POST['parking'] ?? NULL), _validate($_POST['security'] ?? NULL), _validate($_POST['study_room'] ?? NULL), _validate($_POST['wifi'] ?? NULL), _validate($_POST['pet'] ?? NULL), _validate($_POST['visitor'] ?? NULL), _validate($_POST['curfew'] ?? NULL), _validate($_POST['rating'] ?? 0), _validate($_POST['min_price'] ?? 0), _validate($_POST['max_price'] ?? 0), _validate($_POST['latitude']), _validate($_POST['longitude']));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "getMessageInfos":
@@ -124,6 +124,14 @@
                     break;
                     case "checkRegister":
                         $result = conn()->checkRegister(_validate($_POST['email'] ?? NULL), _validate($_POST['username'] ?? NULL), _validate($_POST['imageUrl'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "get_dorm_details":
+                        $result = conn()->get_dorm_details(_validate($_POST['dormref'] ?? NULL), _validate($_POST['user_id'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "addRemoveFavorite":
+                        $result = conn()->addRemoveFavorite(_validate($_POST['dormref'] ?? NULL), _validate($_POST['user_id'] ?? NULL));
                         statusCode($result['code'], $result['data']);
                     break;
                     default:

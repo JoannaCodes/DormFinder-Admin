@@ -326,7 +326,7 @@ class api_queries
             );
         }
     }
-    public function popular_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew) {
+    public function popular_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew,$rating, $min_price, $max_price) {
         
         if(
             $aircon == 0 &&
@@ -341,12 +341,15 @@ class api_queries
             $pet == 0 &&
             $visitor == 0 &&
             $curfew == 0 &&
-            $wifi == 0
+            $wifi == 0 &&
+            $rating == 0 &&
+            $min_price == 0 &&
+            $max_price == 0
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)';
+            $sql .= ' tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 0)';
 
             $result = $this->conn->query($sql);
 
@@ -369,25 +372,6 @@ class api_queries
                 );
             }
         } else {
-            $establishment_rules_array = array(
-                array('name' => 'pets','value' => $pet),
-                array('name' => 'visitors','value' => $visitor),
-                array('name' => 'curfew','value' => $curfew)
-            );
-
-            $amenities_array = array(
-                array('name' => 'aircon','value' => $aircon),
-                array('name' => 'elevator','value' => $elevator),
-                array('name' => 'beddings','value' => $beddings),
-                array('name' => 'kitchen','value' => $kitchen),
-                array('name' => 'laundry','value' => $laundry),
-                array('name' => 'lounge','value' => $lounge),
-                array('name' => 'parking','value' => $parking),
-                array('name' => 'security','value' => $security),
-                array('name' => 'study_room','value' => $study_room),
-                array('name' => 'wifi','value' => $wifi)
-            );
-
             $establishment_rules_array = array(
                 array('name' => 'pets','value' => $pet),
                 array('name' => 'visitors','value' => $visitor),
@@ -436,7 +420,9 @@ class api_queries
 
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
-            $sql .= ' WHERE';
+            if($establishment_rules_sql != '' || $amenities_sql != '' ) {
+                $sql .= ' WHERE';
+            }
             
             if($establishment_rules_sql != '') {
                 $sql .= '(';
@@ -454,7 +440,13 @@ class api_queries
             }
             
             if($establishment_rules_sql != '' || $amenities_sql != '') {
-                $sql .= ' AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)';
+                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            } else {
+                $sql .= sprintf(" WHERE tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            }
+
+            if($min_price != 0 && $max_price != 0) {
+                $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
 
             $result = $this->conn->query($sql);
@@ -479,7 +471,7 @@ class api_queries
             }
         }
     }
-    public function latest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew) {
+    public function latest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price) {
         
         if(
             $aircon == 0 &&
@@ -494,7 +486,10 @@ class api_queries
             $pet == 0 &&
             $visitor == 0 &&
             $curfew == 0 &&
-            $wifi == 0
+            $wifi == 0 &&
+            $rating == 0 &&
+            $min_price == 0 &&
+            $max_price == 0
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
@@ -571,6 +566,7 @@ class api_queries
             if($establishment_rules_sql != '' || $amenities_sql != '') {
                 $sql .= ' WHERE';
             }
+
             if($establishment_rules_sql != '') {
                 $sql .= '(';
                     $sql .= $establishment_rules_sql;
@@ -585,9 +581,20 @@ class api_queries
                     $sql .= $amenities_sql;
                 $sql .= ')';
             }
+            
+            
+            if($establishment_rules_sql != '' || $amenities_sql != '') {
+                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            } else {
+                $sql .= sprintf(" WHERE tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            }
+
+            if($min_price != 0 && $max_price != 0) {
+                $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
+            }
 
             $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
-
+            
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -610,7 +617,7 @@ class api_queries
             }
         }
     }
-    public function nearest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew,$latitude, $longitude) {
+    public function nearest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price, $latitude, $longitude) {
         
         if(
             $aircon == 0 &&
@@ -625,7 +632,10 @@ class api_queries
             $pet == 0 &&
             $visitor == 0 &&
             $curfew == 0 &&
-            $wifi == 0
+            $wifi == 0 &&
+            $rating == 0 &&
+            $min_price == 0 &&
+            $max_price == 0
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
@@ -719,6 +729,16 @@ class api_queries
                 $sql .= ')';
             }
 
+            if($establishment_rules_sql != '' || $amenities_sql != '') {
+                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            } else {
+                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            }
+
+            if($min_price != 0 && $max_price != 0) {
+                $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
+            }
+
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -766,6 +786,54 @@ class api_queries
             return array(
                 'data' => 'Error! There\'s something wrong!',
                 'code' => 403
+            );
+        }
+    }
+    public function get_dorm_details($dormref, $user_id) {
+        $statement = sprintf("SELECT d.*, a.* FROM tbl_dorms d JOIN tbl_amenities a ON d.id = a.dormref WHERE d.id='%s'", $dormref);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            $me_statement = sprintf("SELECT * FROM `tbl_bookmarks` WHERE `dormref` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+            $me_result = $this->conn->query($me_statement);
+            $data['myfavorite'] = ($me_result->num_rows > 0) ? 1 : 0;
+
+            return array(
+                'data' => $data,
+                'code' => 200
+            );
+
+        } else {
+            // Error, does not exist data
+            return array(
+                'data' => 'Error! There\'s something wrong!',
+                'code' => 403
+            );
+        }
+    }
+    public function addRemoveFavorite($dormref, $user_id) {
+        $statement = sprintf("SELECT * FROM `tbl_bookmarks` WHERE `dormref` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // Success, exist
+            $me_statement = sprintf("DELETE FROM `tbl_bookmarks` WHERE `dormref` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+            $this->conn->query($me_statement);
+
+            return array(
+                'data' => 'Successfully removed!',
+                'code' => 200
+            );
+
+        } else {
+            // Success, not exist
+            $me_statement = sprintf("INSERT INTO `tbl_bookmarks` (dormref, userref) VALUES('%s','%s')", $dormref, $user_id);
+            $this->conn->query($me_statement);
+
+            return array(
+                'data' => 'Successfully added!',
+                'code' => 200
             );
         }
     }
