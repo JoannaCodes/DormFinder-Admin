@@ -1,4 +1,5 @@
 <?php
+session_start();
 class admin_query
 {
 	private $c;
@@ -53,13 +54,18 @@ class admin_query
 		}
 		return $toecho;
 	}
-	public function login_StudyHive($email, $password)
+	public function login_dormfinder($email, $password)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_adminusers WHERE email=? AND password=?", [$email, $password], true));
 		$outx = json_decode($out, true);
 		if (count($outx) == 1) {
 			if ($outx[0]['password'] == $password) {
 				echo json_encode(["email" => $outx[0]['email'], "id" => $outx[0]['id'], "status" => "true"]);
+              	
+                // SESSION
+              	session_regenerate_id();
+              	$_SESSION['id'] = $outx[0]['id'];
+              	session_write_close();
 			} else {
 				echo json_encode(["email" => "none", "id" => "none", "status" => "false"]);
 			}
@@ -123,7 +129,7 @@ class admin_query
 	}
 	public function send_custom_notif($userref, $message)
 	{
-		$vtitle = "UniHive";
+		$vtitle = "StudyHive";
 		$vdesc = $message;
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -149,7 +155,7 @@ class admin_query
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT `name` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
 
-		$vtitle = "UniHive";
+		$vtitle = "StudyHive";
 		$vdesc = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been removed. If you believe this removal was a mistake, kindly reach out to our team for assistance.";
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -165,7 +171,7 @@ class admin_query
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT name FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
 
-		$vtitle = "UniHive";
+		$vtitle = "StudyHive";
 		$vdesc = "This is a reminder to update your listing named '" . $out[0]['name'] . "', for the upcoming semester. Please ensure your listing is up to date. If your listing is already current, you may disregard this message.";
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -197,7 +203,7 @@ class admin_query
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dormreports WHERE id=?", [$reportid]), true), true);
 
-		$vtitle = "UniHive";
+		$vtitle = "StudyHive";
 		$vdesc = "The dorm listing you reported has been resolved. Thank you for your contribution!";
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));

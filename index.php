@@ -95,7 +95,8 @@ switch ($tag) {
 	case 'delete_dorm_admin':
 		$userref = $_POST["userref"];
 		$dormref = $_POST["dormref"];
-		$folderPath = 'uploads/dormImages/' . $dormref . '/';
+
+    	$folderPath = 'uploads/dormImages/' . $dormref . '/';
 
 		if (is_dir($folderPath)) {
 			if (deleteDirectory($folderPath)) {
@@ -126,10 +127,9 @@ switch ($tag) {
 	case 'login':
 		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
-
+  case 'fetch_saved_notif':
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
-
 	case 'get_submitdocuments':
 		echo adminq()->get_submitdocuments();
 		break;
@@ -156,9 +156,6 @@ switch ($tag) {
 	// App Queries
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
-		break;
-	case 'login_app_guest':
-		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
 		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
@@ -558,8 +555,7 @@ switch ($tag) {
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
 		break;
-	
-	case 'forgot_password':
+    case 'forgot_password':
 		$email = $_POST['email'];
 		$password = generatePassword();
 		
@@ -573,22 +569,15 @@ switch ($tag) {
 			<p>Thank you,</p>
 			<p>The StudyHive Team</p>
 		";
-
 		$altBody = "
 			Forgot Password - StudyHive
-
 			You have requested to reset your password. Here is your temporary password:
-
 			- New Password: {$password}
-
 			You can use this temporary password to login and then change your password to a more secure one.
-
 			If you did not request a password reset, please disregard this email.
-
 			Thank you,
 			The StudyHive Team
 		";
-
 		if (sdmq()->forgot_password($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
 				echo "success";
 		} else {
@@ -680,8 +669,8 @@ function sendEmail($email, $subject, $body, $altbody){
 
 	try {
 		//Server settings
+      	$mail->isSMTP();
 		$mail->SMTPDebug = false;
-		$mail->isSMTP();
 		$mail->Host       = 'smtp.gmail.com';
 		$mail->SMTPAuth   = true;
 		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
@@ -701,11 +690,10 @@ function sendEmail($email, $subject, $body, $altbody){
 
 		if ($mail->send()) {
 			$success = true;
-	}
+		}
 	} catch (Exception $e) {
 		$success = false;
 	}
-
 	return $success;
 }
 
