@@ -155,6 +155,7 @@ switch ($tag) {
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
 		break;
+	case 'login_app_guest':
 		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
 		break;
 	case 'signup_app':
@@ -164,6 +165,7 @@ switch ($tag) {
 		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
 		break;
 	case 'check_ifsubmitted':
+		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
 		break;
 	case 'clearallnotif':
 		echo sdmq()->clearallnotif($_GET["userref"]);
@@ -678,7 +680,7 @@ function sendEmail($email, $subject, $body, $altbody){
 		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 		$mail->Port       = 587;
 		$mail->Username   = 'info.studyhive@gmail.com';
-		$mail->Password   = 'kmcfkdludblkdcka';
+		$mail->Password   = 'gprtsweefwmrustr';
 
 		//Recipients
 		$mail->setFrom('info.studyhive@gmail.com', 'StudyHive Admin');
