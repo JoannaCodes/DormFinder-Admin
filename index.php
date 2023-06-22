@@ -127,9 +127,7 @@ switch ($tag) {
 	case 'login':
 		echo adminq()->login_dormfinder($_POST["email"], $_POST["password"]);
 		break;
-  case 'fetch_saved_notif':
-		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
-		break;
+  
 	case 'get_submitdocuments':
 		echo adminq()->get_submitdocuments();
 		break;
@@ -157,9 +155,15 @@ switch ($tag) {
 	case 'login_app':
 		echo sdmq()->login_app($_POST["username"], $_POST["password"]);
 		break;
+	case 'login_app_guest':
+		echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
+		break;
 	case 'signup_app':
 		echo sdmq()->signup_app($_POST["email"], $_POST["username"], $_POST["password"]);
 		break;	
+	case 'fetch_saved_notif':
+		echo sdmq()->look_usersavednotifs($_GET['user_ref']);
+		break;
 	case 'check_ifsubmitted':
 		echo sdmq()->check_ifsubmitted($_GET["user_id"]);
 		break;
@@ -555,7 +559,7 @@ switch ($tag) {
 		$userref = $_GET["userref"];
 		echo sdmq()->get_verification_status($userref);
 		break;
-    case 'forgot_password':
+  case 'forgot_password':
 		$email = $_POST['email'];
 		$password = generatePassword();
 		
