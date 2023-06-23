@@ -326,7 +326,7 @@ class api_queries
             );
         }
     }
-    public function popular_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew,$rating, $min_price, $max_price) {
+    public function popular_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew,$rating, $min_price, $max_price, $hei) {
         
         if(
             $aircon == 0 &&
@@ -344,7 +344,8 @@ class api_queries
             $wifi == 0 &&
             $rating == 0 &&
             $min_price == 0 &&
-            $max_price == 0
+            $max_price == 0 &&
+            $hei == ""
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
@@ -449,6 +450,10 @@ class api_queries
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
 
+            if($hei != "") {
+                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
+            }
+
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -471,7 +476,7 @@ class api_queries
             }
         }
     }
-    public function latest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price) {
+    public function latest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price, $hei) {
         
         if(
             $aircon == 0 &&
@@ -489,7 +494,8 @@ class api_queries
             $wifi == 0 &&
             $rating == 0 &&
             $min_price == 0 &&
-            $max_price == 0
+            $max_price == 0 &&
+            $hei == ""
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
@@ -593,6 +599,10 @@ class api_queries
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
 
+            if($hei != "") {
+                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
+            }
+
             $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
             
             $result = $this->conn->query($sql);
@@ -617,7 +627,7 @@ class api_queries
             }
         }
     }
-    public function nearest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price, $latitude, $longitude) {
+    public function nearest_dorm($aircon,$elevator,$beddings,$kitchen,$laundry,$lounge,$parking,$security,$study_room,$wifi,$pet,$visitor,$curfew, $rating, $min_price, $max_price, $hei, $latitude, $longitude) {
         
         if(
             $aircon == 0 &&
@@ -635,7 +645,8 @@ class api_queries
             $wifi == 0 &&
             $rating == 0 &&
             $min_price == 0 &&
-            $max_price == 0
+            $max_price == 0 &&
+            $hei == ""
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
@@ -737,6 +748,10 @@ class api_queries
 
             if($min_price != 0 && $max_price != 0) {
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
+            }
+
+            if($hei != "") {
+                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
             }
 
             $result = $this->conn->query($sql);
