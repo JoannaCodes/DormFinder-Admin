@@ -226,7 +226,7 @@ class sdm_query
 	}
 	public function get_bookmarks($userref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.* FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
 	public function add_bookmarks($userref, $dormref)
