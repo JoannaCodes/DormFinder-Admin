@@ -119,7 +119,7 @@
                         statusCode($result['code'], $result['data']);
                     break;
                     case "checkLogin":
-                        $result = conn()->checkLogin(_validate($_POST['email'] ?? NULL));
+                        $result = conn()->checkLogin(_validate($_POST['email'] ?? NULL), _validate($_POST['fcm'] ?? NULL));
                         statusCode($result['code'], $result['data']);
                     break;
                     case "checkRegister":

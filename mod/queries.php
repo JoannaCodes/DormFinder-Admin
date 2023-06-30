@@ -165,7 +165,7 @@ class sdm_query
 		    $dormImagesPath = 'uploads/dormImages/' . $dorm[0]['id'] . '/';
 		    
 		    if (is_dir($dormImagesPath)) {
-                deleteDirectory($folderPath);
+                deleteDirectory($dormImagesPath);
             } else {
                echo json_encode(["message" => "Folder does not exist"]);
             }

@@ -90,7 +90,7 @@ class api_queries
         }
     }
 
-    public function checkLogin($email) {
+    public function checkLogin($email, $fcm) {
         $statement = sprintf("SELECT * FROM tbl_users WHERE `identifier` = '%s'", $email);
 
         $result = $this->conn->query($statement);
@@ -98,6 +98,9 @@ class api_queries
         if ($result->num_rows > 0) {
             // success, email exist
             $row = $result->fetch_assoc();
+            $dtnow = date("Y-m-d H:i:s");
+            $statement2 = sprintf("INSERT INTO tbl_notif_fcmkeys SET `user_ref` = '%s', `fcm_key` = '%s', `created_at` = '%s'", $row['id'], $fcm, $dtnow);
+            $this->conn->query($statement2);
             return array (
                 'data' => ["username" => $row['username'], "id" => $row['id'], "status" => true, "mode" => "user"],
                 'code' => 200
