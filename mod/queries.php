@@ -1,4 +1,6 @@
 <?php
+include_once "functions.php";
+
 class sdm_query
 {
 	private $c;
@@ -29,7 +31,7 @@ class sdm_query
 			}
 		}
 	}
-	public function login_app($username, $password)
+	public function login_app($username, $password, $fcm)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? OR identifier=? AND password=?", [$username, $username, $password], true));
 		$outx = json_decode($out, true);
@@ -38,6 +40,9 @@ class sdm_query
 			if (($outx[0]["username"] == $username || $outx[0]["identifier"] == $username)) {
 				if ($outx[0]["password"] == $password) {
 					echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+					
+					$dtnow = date("Y-m-d H:i:s");
+				    $this->QuickFire("INSERT INTO tbl_notif_fcmkeys SET user_ref=?, fcm_key=?, created_at=?",[$outx[0]['id'],$fcm,$dtnow]);
 				} else {
 					echo json_encode(["status" => false]);
 			}
@@ -46,72 +51,24 @@ class sdm_query
 	}
 	public function signup_app($email, $username, $password)
 	{
-		$id = uniqid();
-		if ($this->QuickFire("INSERT INTO tbl_users SET id=? , identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) {
-			return "1";
+        $result = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username = ? AND identifier = ?", [$username, $email], true));
+        $existingUser = json_decode($result, true);
+    
+        if (empty($existingUser)) {
+    		$id = uniqid();
+    		if ($this->QuickFire("INSERT INTO tbl_users SET id=?, identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) 
+    		{
+    			return "1";
+    	    }
+        } else {
+    		return "0";
 		}
 	}
-
-
   public function clearallnotif($userref) 
   {
 		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
 			return "0";
 		}
-	}
-  public function look_morepastnotif($userref, $idstoftech)
-	{
-		$thiday = date("Y-m-d H:i:s");
-		$tofetch = "";
-		$allid = explode(",", $idstoftech);
-		$cleanedallid = array();
-
-
-
-		for ($i = 0; $i < count($allid); $i++) {
-			if ($allid[$i] != "" && $allid[$i] != null) {
-				array_push($cleanedallid,  $allid[$i]);
-			}
-		}
-		$allid = 	$cleanedallid;
-
-		if (count($allid) != 0) {
-			$tofetch .= " AND (";
-		}
-
-		for ($i = 0; $i < count($allid); $i++) {
-			if ($allid[$i] != "" && $allid[$i] != null) {
-				$tofetch .= " id != '" . $allid[$i] . "'";
-
-
-				if (($i + 1) < count($allid)) {
-					$tofetch .= " AND ";
-				}
-			}
-		}
-		$lastvalue = "";
-		if (count($allid) != 0) {
-
-			$tofetch .= ")";
-		}
-
-		$q = "SELECT * FROM tbl_notifications WHERE
-		user_ref=? AND
-		scheduled <= ? " . $tofetch . " ORDER BY scheduled DESC LIMIT 25";
-		$out = json_decode(json_decode($this->QuickLook($q, [$userref, $thiday]), true), true);
-
-		for ($i = 0; $i < count($out); $i++) {
-
-			$out[$i]["scheduled"] = $this->DateExplainer($out[$i]["scheduled"])   . ";" . date("F d, Y g:i a", strtotime($out[$i]["scheduled"]));
-		}
-
-		return json_encode(json_encode($out));
-	}
-	public function look_passednotifications($userref)
-	{
-		$thiday = date("Y-m-d");
-		return $this->QuickLook("SELECT DATE_FORMAT(scheduled, '%b %e, %Y %l:%i %p') AS formatted_date, ndesc, title  FROM tbl_notifications WHERE
-		user_ref=? ORDER BY id DESC", [$userref]);
 	}
 	public function DateExplainer($thedate)
 	{
@@ -182,6 +139,12 @@ class sdm_query
 		$currdate = date("Y-m-d H:i:s");
 		return $this->QuickLook("SELECT *, UNIX_TIMESTAMP(scheduled) as unix_time FROM tbl_notifications WHERE scheduled>? AND user_ref=?", [$currdate,$user_ref]);
 	}
+	public function look_passednotifications($userref)
+	{
+		$thiday = date("Y-m-d");
+		return $this->QuickLook("SELECT DATE_FORMAT(scheduled, '%b %e, %Y %l:%i %p') AS formatted_date, ndesc, title  FROM tbl_notifications WHERE
+		user_ref=? ORDER BY id DESC", [$userref]);
+	}
   public function get_account($id)
 	{
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$id]), true), true);
@@ -198,6 +161,15 @@ class sdm_query
 	public function delete_account($id)
 	{
 		if ($this->QuickFire("DELETE FROM tbl_users WHERE id=?", [$id])) {
+		    $dorm = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE id=?", [$id]), true), true);
+		    $dormImagesPath = 'uploads/dormImages/' . $dorm[0]['id'] . '/';
+		    
+		    if (is_dir($dormImagesPath)) {
+                deleteDirectory($folderPath);
+            } else {
+               echo json_encode(["message" => "Folder does not exist"]);
+            }
+
 			return "1";
 		}
 	}
@@ -250,7 +222,9 @@ class sdm_query
 	public function post_review($dormref, $userref, $rating, $comment)
 	{
 		if ($this->QuickFire("INSERT INTO tbl_dormreviews SET dormref=?, userref=?, rating=?, comment=?, createdAt=now()", [$dormref, $userref, $rating, $comment])) {
-			return "1";
+		    if ($this->QuickLook("UPDATE tbl_transactions SET has_reviewed=? WHERE userref=? AND dormref=?", [1, $userref, $dormref])) {
+		        return "1";
+		    }
 		}
 	}
 	public function get_reviews($dormref)
@@ -260,7 +234,7 @@ class sdm_query
 	}
 	public function post_report($id, $dormref, $userref, $comment)
 	{
-		if ($this->QuickFire("INSERT INTO tbl_dormreports SET id=?, dormref=?, userref=?, comment=?, createdAt=now()", [$id, $dormref, $userref, $comment])) {
+		if ($this->QuickFire("INSERT INTO tbl_dormreports SET dormref=?, userref=?, comment=?, createdAt=now()", [$dormref, $userref, $comment])) {
 			return "1";
 		}
 	}
@@ -387,11 +361,31 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT is_verified FROM tbl_users WHERE id=?", [$userref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
-	public function forgot_password($email, $password) {
+  	public function forgot_password($email, $password) {
 		if ($this->QuickFire("UPDATE tbl_users SET `password`=?, updated_at=now() WHERE identifier=?", [$password, $email])) {
 			return "1";
 		}
 	}
+	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount) {
+	    $vtitle = "StudyHive";
+		$vdesc = "Received payment from {$token} for {$ownername} with amount: ₱{$amount}";
+		$vreferencestarter = uniqid();
+		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+		$current_time = date('Y-m-d H:i:s');
+	
+		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
+		{
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) 
+			{
+				return "1";
+			}
+		}
+	}
+	public function get_transactions($userref) {
+        $transactions = json_decode(json_decode($this->QuickLook("SELECT t.*, d.images FROM tbl_transactions t JOIN tbl_dorms d ON t.dormref = d.id WHERE t.userref=? ORDER BY t.timestamp DESC", [$userref]), true), true);
+    
+        return json_encode(json_encode($transactions));
+    }
 
 	// DB Actions
 	public function QuickLook($q, $par = array())

@@ -85,15 +85,15 @@ function sendEmail($email, $subject, $body, $altbody){
 		//Server settings
     $mail->isSMTP();
 		$mail->SMTPDebug = false;
-		$mail->Host       = 'smtp.gmail.com';
+		$mail->Host       = 'smtp.hostinger.com';
 		$mail->SMTPAuth   = true;
 		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 		$mail->Port       = 587;
-		$mail->Username   = 'info.studyhive@gmail.com';
-		$mail->Password   = 'gprtsweefwmrustr';
+		$mail->Username   = 'admin@studyhive.social';
+		$mail->Password   = 'pP1FRim0ZD9$';
 
 		//Recipients
-		$mail->setFrom('info.studyhive@gmail.com', 'StudyHive Admin');
+		$mail->setFrom('admin@studyhive.social', 'StudyHive Admin');
 		$mail->addAddress($email);
 
 		//Content

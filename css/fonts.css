@@ -1,0 +1,94 @@
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/17c55b27-e9ab-43cd-b948-d49f97480d68.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/17c55b27-e9ab-43cd-b948-d49f97480d68.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/fa19948e-5e38-4909-b31e-41acd170d6f2.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/6de0ce4d-9278-467b-b96f-c1f5f0a4c375.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/9fd4ea0c-b19a-4b21-9fdf-37045707dd78.svg#9fd4ea0c-b19a-4b21-9fdf-37045707dd78) format("svg");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://assets.build.acorns.com/email/1e9892c0-6927-4412-9874-1b82801ba47a.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/46cf1067-688d-4aab-b0f7-bd942af6efd8.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/52a192b1-bea5-4b48-879f-107f009b666f.svg#52a192b1-bea5-4b48-879f-107f009b666f) format("svg");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/d1fddef1-d940-4904-8f6c-17e809462301.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/d1fddef1-d940-4904-8f6c-17e809462301.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/92b66dbd-4201-4ac2-a605-4d4ffc8705cc.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/18839597-afa8-4f0b-9abb-4a30262d0da8.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/1de7e6f4-9d4d-47e7-ab23-7d5cf10ab585.svg#1de7e6f4-9d4d-47e7-ab23-7d5cf10ab585) format("svg");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://assets.build.acorns.com/email/f26faddb-86cc-4477-a253-1e1287684336.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/63a74598-733c-4d0c-bd91-b01bffcd6e69.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/a89d6ad1-a04f-4a8f-b140-e55478dbea80.svg#a89d6ad1-a04f-4a8f-b140-e55478dbea80) format("svg");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/3a2d1493-b5d5-47e3-99dd-d12ad2e86e36.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/3a2d1493-b5d5-47e3-99dd-d12ad2e86e36.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/eb27bc33-8abc-4ccd-bf84-9ae7cdbf9e8d.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/2fb4235a-0496-4c92-9408-e7369f4aeb3a.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/e5e19597-2d7e-430c-ad26-b56b0b32ab54.svg#e5e19597-2d7e-430c-ad26-b56b0b32ab54) format("svg");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://assets.build.acorns.com/email/91b50bbb-9aa1-4d54-9159-ec6f19d14a7c.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/a0f4c2f9-8a42-4786-ad00-fce42b57b148.ttf) format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/915c6c42-ce44-4322-bcbd-feb0debdaa9f.eot?#iefix);
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/2590cd9b-38fe-4d3b-a1d0-9e87660284ca.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/2590cd9b-38fe-4d3b-a1d0-9e87660284ca.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/42d51575-4ee5-4a9a-b9da-c7a1c2c238a9.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/5daf48db-21f1-45b1-a9d2-474fb651c27e.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/ecd2cd1a-3ab5-4047-9aa5-c63b25f9ec5d.svg#ecd2cd1a-3ab5-4047-9aa5-c63b25f9ec5d) format("svg");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/e08af3ae-1999-4459-abca-6293c76704ba.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/e08af3ae-1999-4459-abca-6293c76704ba.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/512846b4-5770-4c80-a801-66e0005ffcba.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/65016d4f-f9fc-4b61-8ae7-b054c56542fd.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/f0deaf60-c7e8-452a-92e7-945916aec133.svg#f0deaf60-c7e8-452a-92e7-945916aec133) format("svg");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/2ef1c301-57bd-4c59-b52d-42a91c2fc261.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/2ef1c301-57bd-4c59-b52d-42a91c2fc261.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/ab4b9296-8972-4fa7-9797-f1821d06b825.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/d0e3fe4e-bfc0-4985-9939-b0c3a5bdaa6c.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/bf2b9975-848d-4e9c-bc3d-4618882c3914.svg#bf2b9975-848d-4e9c-bc3d-4618882c3914) format("svg");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: url(https://sqy7rm.media.zestyio.com/1d98e9f4-b382-4be6-9248-fee5a8bb0ad1.eot?#iefix);
+    src: url(https://sqy7rm.media.zestyio.com/1d98e9f4-b382-4be6-9248-fee5a8bb0ad1.eot?#iefix) format("eot"), url(https://sqy7rm.media.zestyio.com/579bb070-4c42-4ff1-b2d2-b64a2e23b5b7.woff) format("woff"), url(https://sqy7rm.media.zestyio.com/c1b07137-511b-41e5-afe8-e44d0f22ee90.ttf) format("truetype"), url(https://sqy7rm.media.zestyio.com/f4f46c98-288a-4df1-8b4e-78838b9e5863.svg#f4f46c98-288a-4df1-8b4e-78838b9e5863) format("svg");
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap
+}

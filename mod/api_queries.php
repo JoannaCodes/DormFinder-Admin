@@ -19,7 +19,7 @@ class api_queries
     }
 
     public function getChatrooms($to_user) {
-        $statement = sprintf("SELECT tbl_users.id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
 
         $result = $this->conn->query($statement);
 
@@ -45,14 +45,14 @@ class api_queries
 
                     $username = ($row3['name'] ?? "");
                     $username .= (($row3['name'] ?? NULL) ? " - " : "");
-                    $username .= $row['username'];
+                    $username .= $row['username'] ?? "Deleted User";
                     $array[] = array(
                         'id' => $count,
                         'user_id' => $row['id'],
                         'username' => $username,
                         'unique_code' => $row['unique_code'],
                         'chatroom_code' => $row['chatroom_code'],
-                        'imageUrl' => $row['imageUrl'],
+                        'imageUrl' => $row['imageUrl'] ?? "https://studyhive.social/images/logo.png",
                         'message' => $whoFirst,
                         'time' => $row2['time'] ?? 0
                     );
@@ -63,14 +63,14 @@ class api_queries
 
                     $username = ($row3['name'] ?? "");
                     $username .= (($row3['name'] ?? NULL) ? " - " : "");
-                    $username .= $row['username'];
+                    $username .= $row['username'] ?? "Deleted User";
                     $array[] = array(
                         'id' => $count,
                         'user_id' => $row['id'],
                         'username' => $username,
                         'unique_code' => $row['unique_code'],
                         'chatroom_code' => $row['chatroom_code'],
-                        'imageUrl' => $row['imageUrl'],
+                        'imageUrl' => $row['imageUrl'] ?? "https://studyhive.social/images/logo.png",
                         'message' => "",
                         'time' => $row2['time'] ?? 0
                     );
@@ -209,12 +209,12 @@ class api_queries
         $getStatement = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $chatroom_code);
         $getResult = $this->conn->query($getStatement);
         $getRow = $getResult->fetch_assoc();
-
+        echo $getRow['itr'];
         if(strlen($image) != 0) {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), $getRow['itr'] ?? 0 + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), ($getRow['itr'] ?? 0) + 1);
             $this->conn->query($statement);
         } else {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), $getRow['itr'] ?? 0 + 1);
+            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), ($getRow['itr'] ?? 0) + 1);
             $this->conn->query($statement);
         }
         
@@ -350,7 +350,8 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 0)';
+            $sql .= ' tbl_dorms.hide = 0 AND';
+            $sql .= ' tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)';
 
             $result = $this->conn->query($sql);
 
@@ -422,7 +423,9 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             if($establishment_rules_sql != '' || $amenities_sql != '' ) {
-                $sql .= ' WHERE';
+                $sql .= ' WHERE tbl_dorms.hide = 0 AND';
+            } else {
+                $sql .= ' WHERE tbl_dorms.hide = 0';
             }
             
             if($establishment_rules_sql != '') {
@@ -449,7 +452,7 @@ class api_queries
             if($min_price != 0 && $max_price != 0) {
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
-
+            
             if($hei != "") {
                 $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
             }
@@ -499,7 +502,8 @@ class api_queries
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
-            $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
+            $sql .= " WHERE tbl_dorms.hide = 0";
+            $sql .= ' ORDER BY tbl_dorms.createdAt DESC';
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -570,9 +574,12 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             if($establishment_rules_sql != '' || $amenities_sql != '') {
-                $sql .= ' WHERE';
+                $sql .= ' WHERE tbl_dorms.hide = 0 AND';
+            } else {
+                $sql .= ' WHERE  tbl_dorms.hide = 0';
             }
-
+            
+            
             if($establishment_rules_sql != '') {
                 $sql .= '(';
                     $sql .= $establishment_rules_sql;
@@ -598,11 +605,11 @@ class api_queries
             if($min_price != 0 && $max_price != 0) {
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
-
+            
             if($hei != "") {
                 $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
             }
-
+            
             $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
             
             $result = $this->conn->query($sql);
@@ -646,13 +653,16 @@ class api_queries
             $rating == 0 &&
             $min_price == 0 &&
             $max_price == 0 &&
-            $hei == ""
+            $hei == "" &&
+            $latitude === "" &&
+            $longitude === ""
         ) {
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
-
+            $sql .= ' tbl_dorms.hide = 0 AND';
+            // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
+            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -723,7 +733,8 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
+            $sql .= ' tbl_dorms.hide = 0 AND';
+            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
             if($establishment_rules_sql != '') {
                 $sql .= ' AND ';
                 $sql .= '(';
@@ -749,11 +760,11 @@ class api_queries
             if($min_price != 0 && $max_price != 0) {
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
-
+            
             if($hei != "") {
                 $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
             }
-
+            
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -788,7 +799,7 @@ class api_queries
             $me_result = $this->conn->query($me_statement);
             $data['me'] = $me_result->fetch_assoc();
 
-            $other_statement = sprintf("SELECT tbl_users.username, tbl_users.imageUrl FROM `tbl_users` WHERE `id` = '%s'", $myid);
+            $other_statement = sprintf("SELECT tbl_users.username, tbl_users.imageUrl FROM `tbl_users` WHERE `id` = '%s'", $other_id);
             $other_result = $this->conn->query($other_statement);
             $data['other'] = $other_result->fetch_assoc();
 
@@ -813,7 +824,8 @@ class api_queries
             $me_statement = sprintf("SELECT * FROM `tbl_bookmarks` WHERE `dormref` = '%s' AND `userref` = '%s'", $dormref, $user_id);
             $me_result = $this->conn->query($me_statement);
             $data['myfavorite'] = ($me_result->num_rows > 0) ? 1 : 0;
-
+            $data['new_address'] = str_replace(" ","+",$data['address']);
+            
             return array(
                 'data' => $data,
                 'code' => 200
@@ -849,6 +861,58 @@ class api_queries
             return array(
                 'data' => 'Successfully added!',
                 'code' => 200
+            );
+        }
+    }
+    public function addRemoveHide($dormref, $user_id) {
+        $statement = sprintf("SELECT * FROM `tbl_dorms` WHERE `id` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // Success, exist
+            $data = $result->fetch_assoc();
+            
+            if($data['hide'] == 0) {
+                $me_statement = sprintf("UPDATE `tbl_dorms` SET `hide` = 1 WHERE `id` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+                $this->conn->query($me_statement);
+            } else {
+                $me_statement = sprintf("UPDATE `tbl_dorms` SET `hide` = 0 WHERE `id` = '%s' AND `userref` = '%s'", $dormref, $user_id);
+                $this->conn->query($me_statement);
+            }
+            
+            return array(
+                'data' => 'Successfully!',
+                'code' => 200
+            );
+
+        } else {
+            return array(
+                'data' => 'Error! Not exist data!',
+                'code' => 403
+            );
+        }
+    }
+    public function get_dorm($userref) {
+        $statement = sprintf("SELECT * FROM `tbl_dorms` WHERE `userref` = '%s'", $userref);
+        $result = $this->conn->query($statement);
+
+        if ($result->num_rows > 0) {
+            // Success, exist
+            $array = array();
+            while($row = $result->fetch_assoc()) {
+                $row['modal'] = false;
+                $array[] = $row;
+            }
+            
+            return array(
+                'data' => $array,
+                'code' => 200
+            );
+
+        } else {
+            return array(
+                'data' => 'Error! Not exist data!',
+                'code' => 403
             );
         }
     }
