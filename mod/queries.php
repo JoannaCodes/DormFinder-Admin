@@ -30,9 +30,12 @@ class sdm_query
 			$current_time = date('Y-m-d H:i:s');
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
-				if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
-					return "1";
+				if($this->push_notification($vtitle,$vdesc,$user_id)) {
+					if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
+						return "1";
+					}
 				}
+				
 			}
 		} else if ($btn_value == "2") {
 			$vtitle = "DormFinder";
@@ -42,12 +45,100 @@ class sdm_query
 			$current_time = date('Y-m-d H:i:s');
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
 			)) {
-				if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
-					return "0";
+				if($this->push_notification($vtitle,$vdesc,$user_id)) {
+					if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
+						// Specify the path to the folder
+						$folderPath = "uploads/user/" . $user_id;
+
+						// Function to recursively delete a directory and its contents
+
+
+						// Check if the folder exists
+						if (is_dir($folderPath)) {
+						    // Use the deleteDirectory() function to delete the folder and its contents
+						    try {
+						        $this->deleteDirectory($folderPath);
+						       return "0";
+						    } catch (Exception $e) {
+						        return "Unable to delete the folder: " . $e->getMessage();
+						    }
+						} else {
+						   return "Folder does not exist.";
+						}
+					}
 				}
 			}
 			
 		}
+	}
+	public function deleteDirectory($dir) {
+	    if (!is_dir($dir)) {
+	        return;
+	    }
+
+	    $files = array_diff(scandir($dir), array('.', '..'));
+
+	    foreach ($files as $file) {
+	        $filePath = $dir . '/' . $file;
+
+	        if (is_dir($filePath)) {
+	            deleteDirectory($filePath);
+	        } else {
+	            unlink($filePath);
+	        }
+	    }
+
+	    rmdir($dir);
+	}
+	public function push_notification($title,$message,$userref) {
+		// destination is either FCM Device Key or Topic
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_notif_fcmkeys WHERE user_ref=? GROUP BY fcm_key",[$userref]),true),true);
+		$destination = "";
+
+		$fcm_array=array();
+
+		for ($i=0; $i<count($out); $i++) {
+			array_push($fcm_array,$out[$i]['fcm_key']);
+		}
+
+
+		$fields = array
+		(
+		    // 'to'  => $destination,
+			'registration_ids' => $fcm_array,
+		    'priority' => 'high',
+		    'notification' => array(
+		        'body' => $message,
+		        'title' => $title,
+		        'sound' => 'default',
+		        'icon' => '',
+		       	'image'=> ''
+		    ),
+		    'data' => array(
+		        'message' => $message,
+		        'title' => $title,
+		        'sound' => 'default',
+		        'icon' => '',
+		        'image'=> ''
+		    )
+		);
+
+		    $API_ACCESS_KEY = 'AAAA6nLtQuQ:APA91bEKGMpkgZEFL4WBCB9O0_ESzPhTWOlEtAN57An3FZLn1Uf-bWvsIr5kxZgu4_xJAH81xDgcJpd0RaqqraoeouSjf__51ciCLjzErTyielULcBJgXivadnDTWVWC3csWl_JJt3OF';
+		    $headers = array
+		    (
+		        'Authorization: key=' . $API_ACCESS_KEY,
+		        'Content-Type: application/json'
+		    );
+		    $ch = curl_init();
+		    curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
+		    curl_setopt( $ch,CURLOPT_POST, true );
+		    curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		    curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		    curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
+		    $result = curl_exec($ch );
+		    curl_close( $ch );
+		    return $result;
 	}
 	public function open_document($user_id) {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id]), true), true);
@@ -85,22 +176,7 @@ class sdm_query
 	}
 	public function verify_document($id, $docvalue)
 	{
-		$vtitle = "DormFinder";
-		$vdesc = "Your documents have been verified! You can now publish your Dorm.";
-		$vreferencestarter = "1";
-		$current_timex = date('Y-m-d H:i:s', strtotime('+2 minute'));
-		$current_time = date('Y-m-d H:i:s');
-		if ($this->QuickFire(
-			"INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",
-			["1122", $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-		)) {
-			if ($this->QuickFire(
-				"UPDATE tbl_documents SET doc1_status=? WHERE id=?",
-				[$docvalue, $id]
-			)) {
-				return "1";
-			}
-		}
+		echo "deprecated";
 	}
 	public function get_submitdocuments()
 	{
@@ -207,12 +283,17 @@ class sdm_query
 	}
 
 	// App Queries
-	public function login_app($username, $password)
+	public function login_app($username, $password,$fcm)
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username=? AND password=?", [$username, $password], true));
 		$outx = json_decode($out, true);
 		if (count($outx) == 1) {
 			if ($outx[0]['password'] == $password) {
+				// register device fcm key for notification
+				$dtnow = date("Y-m-d H:i:s");
+				
+				$this->QuickFire("INSERT INTO tbl_notif_fcmkeys SET user_ref=?, fcm_key=?, created_at=?",[$outx[0]['id'],$fcm,$dtnow]);
+
 				echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => "true"]);
 			} else {
 				echo json_encode(["username" => "none", "id" => "none", "status" => "false"]);
