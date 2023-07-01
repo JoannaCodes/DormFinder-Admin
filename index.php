@@ -139,12 +139,11 @@ if (authenticate($authKey)) {
 				break;
 			case 'delete_account':
 			    $userref = _validate($_POST["userref"]);
-			    $dormImagesPath = 'uploads/dormImages/' . $dormref . '/';
 			    $userImagesPath = 'uploads/userImages/' . $userref . '/';
 			    $userDocsPath = 'uploads/userDocs/' . $userref . '/';
 		
-				if (is_dir($userImagesPath)) {
-					if (deleteDirectory($userImagesPath)) {
+				if (is_dir($userImagesPath) || is_dir($userDocsPath)) {
+					if (deleteDirectory($userImagesPath) || deleteDirectory($userDocsPath)) {
 						$out = sdmq()->delete_account($userref);
 						if ($out == "1") {
 							echo 'success';

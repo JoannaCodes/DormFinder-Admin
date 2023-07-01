@@ -8,56 +8,6 @@ class admin_query
 		$this->c = $db;
 	}
 
-	public function change_status($btn_value,$user_id) {
-		if($btn_value == "1") {
-			$vtitle = "StudyHive";
-			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
-			$vreferencestarter = "1";
-			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-			)) {
-			    if($this->push_notification($vtitle, $vdesc, $user_id)) {
-    			    if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
-    					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
-    						return "1";
-    					}
-    				}
-			    }
-			}
-		} else if ($btn_value == "2") {
-			$vtitle = "StudyHive";
-			$vdesc = "Your documents have not been verified! Please upload a new document.";
-			$vreferencestarter = "1";
-			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-			$current_time = date('Y-m-d H:i:s');
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
-			)) {
-			    if($this->push_notification($vtitle, $vdesc, $user_id)) {
-			        if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",["0",$user_id])) {
-			            if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
-					        return "0";
-				        }
-					}
-			    }
-			}
-			
-		}
-	}
-	public function open_document($user_id) {
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id]), true), true);
-		$toecho = "";
-		$doc_status = "";
-		for ($i = 0; $i < count($out); $i++) {
-			$toecho.="
-					<input type='hidden' id='user_id' value='".$out[$i]['user_id']."' />
-					<div class='d-flex mb-3'>
-						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
-						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='https://studyhive.social/uploads/userDocs/" .$out[$i]['user_id']. "/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
-					</div>";
-		}
-		return $toecho;
-	}
 	public function push_notification($title, $message, $userref) {
 		// destination is either FCM Device Key or Topic
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_notif_fcmkeys WHERE user_ref=? GROUP BY fcm_key",[$userref]),true),true);
@@ -107,6 +57,57 @@ class admin_query
 	    $result = curl_exec($ch );
 	    curl_close( $ch );
 	    return $result;
+	}
+
+	public function change_status($btn_value,$user_id) {
+		if($btn_value == "1") {
+			$vtitle = "StudyHive";
+			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
+			$vreferencestarter = "1";
+			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+			$current_time = date('Y-m-d H:i:s');
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			)) {
+			    if($this->push_notification($vtitle, $vdesc, $user_id)) {
+    			    if ($this->QuickFire("UPDATE tbl_documents SET doc1_status=? WHERE user_id=?",[$btn_value,$user_id])) {
+    					if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",[$btn_value,$user_id])) {
+    						return "1";
+    					}
+    				}
+			    }
+			}
+		} else if ($btn_value == "2") {
+			$vtitle = "StudyHive";
+			$vdesc = "Your documents have not been verified! Please upload a new document.";
+			$vreferencestarter = "1";
+			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+			$current_time = date('Y-m-d H:i:s');
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
+			)) {
+			    if($this->push_notification($vtitle, $vdesc, $user_id)) {
+			        if ($this->QuickFire("UPDATE tbl_users SET is_verified=? WHERE id=?",["0",$user_id])) {
+			            if ($this->QuickFire("DELETE FROM tbl_documents WHERE user_id=?",[$user_id])) {
+					        return "0";
+				        }
+					}
+			    }
+			}
+			
+		}
+	}
+	public function open_document($user_id) {
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id]), true), true);
+		$toecho = "";
+		$doc_status = "";
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho.="
+					<input type='hidden' id='user_id' value='".$out[$i]['user_id']."' />
+					<div class='d-flex mb-3'>
+						<label class='align-self-center flex-grow-1'>".$out[$i]['doc_1']."</label>
+						<a data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='Download' href='https://studyhive.social/uploads/userDocs/" .$out[$i]['user_id']. "/" . $out[$i]['doc_1'] . "' download='" . $out[$i]['doc_1'] . "' class='btn btn-transparent text-primary p-0 type='button'>Download <i class='fa-light fa-file-arrow-down fa-fw fa-lg'></i></a>
+					</div>";
+		}
+		return $toecho;
 	}
 	public function login_dormfinder($email, $password)
 	{

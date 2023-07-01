@@ -9,6 +9,57 @@ class sdm_query
 		$this->c = $db;
 	}
 
+	public function push_notification($title, $message, $userref) {
+		// destination is either FCM Device Key or Topic
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_notif_fcmkeys WHERE user_ref=? GROUP BY fcm_key",[$userref]),true),true);
+		$destination = "";
+
+		$fcm_array=array();
+
+		for ($i=0; $i<count($out); $i++) {
+			array_push($fcm_array,$out[$i]['fcm_key']);
+		}
+
+
+		$fields = array
+		(
+		    // 'to'  => $destination,
+			'registration_ids' => $fcm_array,
+		    'priority' => 'high',
+		    'notification' => array(
+		        'body' => $message,
+		        'title' => $title,
+		        'sound' => 'default',
+		        'icon' => '',
+		       	'image'=> ''
+		    ),
+		    'data' => array(
+		        'message' => $message,
+		        'title' => $title,
+		        'sound' => 'default',
+		        'icon' => '',
+		        'image'=> ''
+		    )
+		);
+
+	    $API_ACCESS_KEY = 'AAAA6nLtQuQ:APA91bEKGMpkgZEFL4WBCB9O0_ESzPhTWOlEtAN57An3FZLn1Uf-bWvsIr5kxZgu4_xJAH81xDgcJpd0RaqqraoeouSjf__51ciCLjzErTyielULcBJgXivadnDTWVWC3csWl_JJt3OF';
+	    $headers = array
+	    (
+	        'Authorization: key=' . $API_ACCESS_KEY,
+	        'Content-Type: application/json'
+	    );
+	    $ch = curl_init();
+	    curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
+	    curl_setopt( $ch,CURLOPT_POST, true );
+	    curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+	    curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	    curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
+	    $result = curl_exec($ch );
+	    curl_close( $ch );
+	    return $result;
+	}
+
 	public function check_ifsubmitted($user_id) 
 	{
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_documents WHERE user_id=?", [$user_id], true));
@@ -367,7 +418,7 @@ class sdm_query
 		}
 	}
 	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount) {
-	    $vtitle = "StudyHive";
+	  $vtitle = "StudyHive";
 		$vdesc = "Received payment from {$token} for {$ownername} with amount: ₱{$amount}";
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
@@ -375,16 +426,16 @@ class sdm_query
 	
 		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
 		{
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) 
-			{
-				return "1";
+			if($this->push_notification($vtitle, $vdesc, $userref)) {
+				if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+					return "1";
+				}
 			}
 		}
 	}
 	public function get_transactions($userref) {
-        $transactions = json_decode(json_decode($this->QuickLook("SELECT t.*, d.images FROM tbl_transactions t JOIN tbl_dorms d ON t.dormref = d.id WHERE t.userref=? ORDER BY t.timestamp DESC", [$userref]), true), true);
-    
-        return json_encode(json_encode($transactions));
+      $transactions = json_decode(json_decode($this->QuickLook("SELECT t.*, d.images FROM tbl_transactions t JOIN tbl_dorms d ON t.dormref = d.id WHERE t.userref=? ORDER BY t.timestamp DESC", [$userref]), true), true);
+      return json_encode(json_encode($transactions));
     }
 
 	// DB Actions
