@@ -667,10 +667,10 @@ class api_queries
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
             // $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
 
-            $sql = "SELECT tbl_dorms.*,";
-            $sql .= ' 111.045 * DEGREES(ACOS(COS(RADIANS('.$latitude.')) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS('.$longitude.')) + SIN(RADIANS('.$latitude.')) * SIN(RADIANS(latitude)))) AS distance FROM tbl_dorms';
-            $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.hide = 0';
+            $sql = 'SELECT tbl_dorms.*,';
+            $sql .= ' 111.045 * degrees(acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.$longitude.')) + sin(radians('.$latitude.')) * sin(radians(latitude)))) AS distance FROM tbl_dorms';
+            $sql .= ' INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref';
+            $sql .= ' WHERE tbl_dorms.hide = 0';
             $sql .= ' ORDER BY distance ASC';
             $result = $this->conn->query($sql);
 
@@ -746,10 +746,10 @@ class api_queries
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
             // $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
 
-            $sql = "SELECT tbl_dorms.*,";
-            $sql .= ' 111.045 * DEGREES(ACOS(COS(RADIANS('.$latitude.')) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS('.$longitude.')) + SIN(RADIANS('.$latitude.')) * SIN(RADIANS(latitude)))) AS distance FROM tbl_dorms';
-            $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.hide = 0';
+            $sql = 'SELECT tbl_dorms.*,';
+            $sql .= ' 111.045 * degrees(acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.$longitude.')) + sin(radians('.$latitude.')) * sin(radians(latitude)))) AS distance FROM tbl_dorms';
+            $sql .= ' INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref';
+            $sql .= ' WHERE tbl_dorms.hide = 0';
             $sql .= ' ORDER BY distance ASC';
             if($establishment_rules_sql != '') {
                 $sql .= ' AND ';
