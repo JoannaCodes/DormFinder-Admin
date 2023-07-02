@@ -115,8 +115,13 @@ class sdm_query
     		return "0";
 		}
 	}
-  public function clearallnotif($userref) 
-  {
+	public function logout_app($userref) {
+	    if ($this->QuickFire("DELETE FROM tbl_notif_fcmkeys WHERE user_ref=?",[$userref])) {
+			return "1";
+		}
+	}
+    public function clearallnotif($userref) 
+    {
 		if ($this->QuickFire("DELETE FROM tbl_notifications WHERE user_ref=?",[$userref])) {
 			return "0";
 		}
@@ -220,8 +225,6 @@ class sdm_query
             } else {
                echo json_encode(["message" => "Folder does not exist"]);
             }
-
-			return "1";
 		}
 	}
 	public function change_password($id, $currentpassword, $newpassword)
@@ -426,8 +429,8 @@ class sdm_query
 	
 		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
 		{
-			if($this->push_notification($vtitle, $vdesc, $userref)) {
-				if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+				if($this->push_notification($vtitle, $vdesc, $userref)) {
 					return "1";
 				}
 			}

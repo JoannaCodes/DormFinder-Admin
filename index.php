@@ -65,6 +65,9 @@ if (authenticate($authKey)) {
 			case 'signup_app':
 				echo sdmq()->signup_app(_validate($_POST["email"]), _validate($_POST["username"]), _validate($_POST["password"]));
 				break;	
+			case 'logout_app':
+			    echo sdmq()->logout_app(_validate($_POST['userref']));
+			    break;
 			case 'fetch_saved_notif':
 				echo sdmq()->look_usersavednotifs(_validate($_GET['user_ref']));
 				break;
@@ -139,6 +142,7 @@ if (authenticate($authKey)) {
 				break;
 			case 'delete_account':
 			    $userref = _validate($_POST["userref"]);
+			    $dormImagesPath = 'uploads/dormImages/' . $dormref . '/';
 			    $userImagesPath = 'uploads/userImages/' . $userref . '/';
 			    $userDocsPath = 'uploads/userDocs/' . $userref . '/';
 		
@@ -520,4 +524,3 @@ if (authenticate($authKey)) {
 } else {
     include('./pages/index.inc');
 }
-
