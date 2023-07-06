@@ -242,7 +242,7 @@ class sdm_query
 	}
 	public function get_dorms($userref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=? AND hide = 0", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
 	public function get_dorm_details($dormref)
@@ -252,7 +252,7 @@ class sdm_query
 	}
 	public function get_bookmarks($userref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT d.* FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=?", [$userref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT d.* FROM tbl_dorms d INNER JOIN tbl_bookmarks b ON d.id = b.dormref WHERE b.userref=? AND d.hide = 0", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
 	public function add_bookmarks($userref, $dormref)
