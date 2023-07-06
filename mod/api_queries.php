@@ -657,21 +657,19 @@ class api_queries
             $min_price == 0 &&
             $max_price == 0 &&
             $hei == "" &&
-            $latitude === "" &&
-            $longitude === ""
+            $latitude === "" || $latitude === 0 &&
+            $longitude === "" || $longitude === 0
         ) {
-            // $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
-            // $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
-            // $sql .= ' WHERE';
-            // $sql .= ' tbl_dorms.hide = 0 AND';
+            
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            $sql .= ' tbl_dorms.hide = 0 AND';
+            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
+            // $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
-            // $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
-
-            $sql = 'SELECT tbl_dorms.*,';
-            $sql .= ' 111.045 * degrees(acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.$longitude.')) + sin(radians('.$latitude.')) * sin(radians(latitude)))) AS distance FROM tbl_dorms';
-            $sql .= ' INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref';
-            $sql .= ' WHERE tbl_dorms.hide = 0';
-            $sql .= ' ORDER BY distance ASC';
+            
+            
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -693,6 +691,7 @@ class api_queries
                 );
             }
         } else {
+            
             $establishment_rules_array = array(
                 array('name' => 'pets','value' => $pet),
                 array('name' => 'visitors','value' => $visitor),
@@ -738,19 +737,15 @@ class api_queries
             }
 
             $amenities_sql .= implode(' AND ', $conditions2);
-
-            // $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
-            // $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
-            // $sql .= ' WHERE';
-            // $sql .= ' tbl_dorms.hide = 0 AND';
+            
+            $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
+            $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
+            $sql .= ' WHERE';
+            $sql .= ' tbl_dorms.hide = 0 AND';
+            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
+            // $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
-            // $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
-
-            $sql = 'SELECT tbl_dorms.*,';
-            $sql .= ' 111.045 * degrees(acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.$longitude.')) + sin(radians('.$latitude.')) * sin(radians(latitude)))) AS distance FROM tbl_dorms';
-            $sql .= ' INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref';
-            $sql .= ' WHERE tbl_dorms.hide = 0';
-            $sql .= ' ORDER BY distance ASC';
+            
             if($establishment_rules_sql != '') {
                 $sql .= ' AND ';
                 $sql .= '(';
