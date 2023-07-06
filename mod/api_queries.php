@@ -19,7 +19,7 @@ class api_queries
     }
 
     public function getChatrooms($to_user) {
-        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
 
         $result = $this->conn->query($statement);
 
@@ -34,7 +34,7 @@ class api_queries
                     $statement3 = sprintf("SELECT * FROM `tbl_dorms` WHERE `id` = '%s'", $row['unique_code']);
                     $result3 = $this->conn->query($statement3);
                     $row3 = $result3->fetch_assoc();
-
+                    
                     $whoFirst = ($to_user == $row2['user_id']) ?  'You' : $row['username'];
                     if(strlen($row2['image'])!=0) {
                         $whoFirst .= " sent a photo.";
@@ -46,6 +46,8 @@ class api_queries
                     $username = ($row3['name'] ?? "");
                     $username .= (($row3['name'] ?? NULL) ? " - " : "");
                     $username .= $row['username'] ?? "Deleted User";
+                    
+                    
                     $array[] = array(
                         'id' => $count,
                         'user_id' => $row['id'],
@@ -54,7 +56,9 @@ class api_queries
                         'chatroom_code' => $row['chatroom_code'],
                         'imageUrl' => $row['imageUrl'] ?? "https://studyhive.social/images/logo.png",
                         'message' => $whoFirst,
-                        'time' => $row2['time'] ?? 0
+                        'time' => $row2['time'] ?? 0,
+                        'ownerid' => $row3['userref'],
+                        'pay_rent' => (int) $row['pay_rent']
                     );
                 } else {
                     $statement3 = sprintf("SELECT * FROM `tbl_dorms` WHERE `id` = '%s'", $row['unique_code']);
@@ -72,7 +76,9 @@ class api_queries
                         'chatroom_code' => $row['chatroom_code'],
                         'imageUrl' => $row['imageUrl'] ?? "https://studyhive.social/images/logo.png",
                         'message' => "",
-                        'time' => $row2['time'] ?? 0
+                        'time' => $row2['time'] ?? 0,
+                        'ownerid' => $row3['userref'],
+                        'pay_rent' => (int) $row['pay_rent']
                     );
                 }
                 $count++;
@@ -926,6 +932,19 @@ class api_queries
                 'code' => 403
             );
         }
+    }
+    public function enable_disable_payment($chatroom_code) {
+        $statement = sprintf("SELECT * FROM `tbl_chatrooms` WHERE `chatroom_code` = '%s'", $chatroom_code);
+        $result = $this->conn->query($statement);
+        while($row = $result->fetch_assoc()) {
+            $statement2 = sprintf("UPDATE `tbl_chatrooms` SET `pay_rent` = '%d' WHERE `chatroom_code` = '%s'", $row['pay_rent'] == 0 ? 1 : 0, $chatroom_code);
+            $result2 = $this->conn->query($statement2);
+        }
+        
+        return array(
+            'data' => 'Successfully!',
+            'code' => 200
+        );
     }
 }
 ?>

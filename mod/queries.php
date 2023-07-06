@@ -27,6 +27,7 @@ class sdm_query
 			'registration_ids' => $fcm_array,
 		    'priority' => 'high',
 		    'notification' => array(
+		        'user_ref' => $userref,
 		        'body' => $message,
 		        'title' => $title,
 		        'sound' => 'default',
@@ -430,9 +431,9 @@ class sdm_query
 		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
 		{
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-				if($this->push_notification($vtitle, $vdesc, $userref)) {
-					return "1";
-				}
+				$this->push_notification($vtitle, $vdesc, $userref);
+				$this->push_notification($vtitle, $vdesc, $ownerref);
+				return "1";
 			}
 		}
 	}
