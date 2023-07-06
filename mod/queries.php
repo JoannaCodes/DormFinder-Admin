@@ -436,10 +436,11 @@ class sdm_query
 			}
 		}
 	}
-	public function get_transactions($userref) {
-      $transactions = json_decode(json_decode($this->QuickLook("SELECT t.*, d.images FROM tbl_transactions t JOIN tbl_dorms d ON t.dormref = d.id WHERE t.userref=? ORDER BY t.timestamp DESC", [$userref]), true), true);
-      return json_encode(json_encode($transactions));
-    }
+	public function get_transactions($userref, $isowner) {
+		$column = $isowner ? 't.ownerref' : 't.userref';
+		$transactions = json_decode(json_decode($this->QuickLook("SELECT t.*, d.images FROM tbl_transactions t JOIN tbl_dorms d ON t.dormref = d.id WHERE {$column}=? ORDER BY t.timestamp DESC", [$userref]), true), true);
+		return json_encode(json_encode($transactions));
+	}
 
 	// DB Actions
 	public function QuickLook($q, $par = array())

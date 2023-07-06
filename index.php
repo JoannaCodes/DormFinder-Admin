@@ -517,8 +517,9 @@ if (authenticate($authKey)) {
 			    break;
 			case "get_transactions":
 			    $userref = _validate($_GET['userref']);
-			    echo sdmq()->get_transactions($userref);
-			break;
+					$isowner = _validate($_GET['is_owner']);
+			    echo sdmq()->get_transactions($userref, $isowner);
+				break;
 		}
 	} 
 } else {
