@@ -243,7 +243,7 @@ class sdm_query
 	}
 	public function get_dorms($userref)
 	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=? AND hide = 0", [$userref]), true), true);
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE userref=?", [$userref]), true), true);
 		return json_encode(json_encode($out));
 	}
 	public function get_dorm_details($dormref)
@@ -264,7 +264,10 @@ class sdm_query
 	}
 	public function update_profile($userref, $username, $filename)
 	{
-		if ($this->QuickFire("UPDATE tbl_users SET username=?, imageUrl=?, updated_at=now() WHERE id=?", [$username, $filename, $userref])) {
+	    $profileQuery = empty($filename) ? "UPDATE tbl_users SET username=?, updated_at=now() WHERE id=?" : "UPDATE tbl_users SET username=?, imageUrl=?, updated_at=now() WHERE id=?";
+		$profileParams = empty($filename) ? [$username, $userref] : [$username, $filename, $userref];
+				
+		if ($this->QuickFire($profileQuery, $profileParams)) {
 			return "1";
 		}
 	}
@@ -416,12 +419,12 @@ class sdm_query
 		$out = json_decode(json_decode($this->QuickLook("SELECT is_verified FROM tbl_users WHERE id=?", [$userref]), true), true);
 		return json_encode(json_encode($out[0]));
 	}
-  	public function forgot_password($email, $password) {
-		if ($this->QuickFire("UPDATE tbl_users SET `password`=?, updated_at=now() WHERE identifier=?", [$password, $email])) {
+  	public function forgot_password($email, $forgotpass) {
+		if ($this->QuickFire("UPDATE tbl_users SET is_forgot=1,unique_forgot= ?, updated_at=now() WHERE identifier=?", [$forgotpass, $email])) {
 			return "1";
 		}
 	}
-	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount) {
+	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $paycount) {
 	  $vtitle = "StudyHive";
 		$vdesc = "Received payment from {$token} for {$ownername} with amount: ₱{$amount}";
 		$vreferencestarter = uniqid();
@@ -430,11 +433,14 @@ class sdm_query
 	
 		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
 		{
-			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-				$this->push_notification($vtitle, $vdesc, $userref);
-				$this->push_notification($vtitle, $vdesc, $ownerref);
-				return "1";
-			}
+		    if ($this->QuickFire("UPDATE tbl_chatrooms SET pay_count=? WHERE to_user=?", [$paycount, $userref])) {
+		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) 
+    			{
+    				$this->push_notification($vtitle, $vdesc, $userref);
+    				$this->push_notification($vtitle, $vdesc, $ownerref);
+    				return "1";
+			    }
+		    }
 		}
 	}
 	public function get_transactions($userref, $isowner) {

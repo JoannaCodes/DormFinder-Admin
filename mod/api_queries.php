@@ -19,7 +19,7 @@ class api_queries
     }
 
     public function getChatrooms($to_user) {
-        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_users.is_online, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent, tbl_chatrooms.pay_count FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
 
         $result = $this->conn->query($statement);
 
@@ -58,7 +58,9 @@ class api_queries
                         'message' => $whoFirst,
                         'time' => $row2['time'] ?? 0,
                         'ownerid' => $row3['userref'],
-                        'pay_rent' => (int) $row['pay_rent']
+                        'pay_rent' => (int) $row['pay_rent'],
+                        'pay_count' => (int) $row['pay_count'],
+                        'is_online' => $row['is_online']
                     );
                 } else {
                     $statement3 = sprintf("SELECT * FROM `tbl_dorms` WHERE `id` = '%s'", $row['unique_code']);
@@ -78,7 +80,9 @@ class api_queries
                         'message' => "",
                         'time' => $row2['time'] ?? 0,
                         'ownerid' => $row3['userref'],
-                        'pay_rent' => (int) $row['pay_rent']
+                        'pay_rent' => (int) $row['pay_rent'],
+                        'pay_count' => (int) $row['pay_count'],
+                        'is_online' => $row['is_online']
                     );
                 }
                 $count++;
@@ -218,13 +222,22 @@ class api_queries
         $getStatement = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $chatroom_code);
         $getResult = $this->conn->query($getStatement);
         $getRow = $getResult->fetch_assoc();
-        echo $getRow['itr'];
-        if(strlen($image) != 0) {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), ($getRow['itr'] ?? 0) + 1);
-            $this->conn->query($statement);
+        if ($getResult->num_rows > 0) {
+            if(strlen($image) != 0) {
+                $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), ($getRow['itr'] ?? 0) + 1);
+                $this->conn->query($statement);
+            } else {
+                $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), ($getRow['itr'] ?? 0) + 1);
+                $this->conn->query($statement);
+            }
         } else {
-            $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), ($getRow['itr'] ?? 0) + 1);
-            $this->conn->query($statement);
+            if(strlen($image) != 0) {
+                $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`image`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $this->base64ToImage($image, $chatroom_code), time(), 1);
+                $this->conn->query($statement);
+            } else {
+                $statement = sprintf("INSERT INTO tbl_chats (chatroom_code,user_id,`message`,`time`,`itr`) VALUES ('%s','%s','%s', %d, %d)", $chatroom_code, $myId, $message, time(), 1);
+                $this->conn->query($statement);
+            }
         }
         
         return array(
@@ -452,20 +465,37 @@ class api_queries
                 $sql .= ')';
             }
             
-            if($establishment_rules_sql != '' || $amenities_sql != '') {
-                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            if($rating != 0) {
+                if($establishment_rules_sql != '' || $amenities_sql != '') {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                } else {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                }
             } else {
-                $sql .= sprintf(" WHERE tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                if($establishment_rules_sql != '' || $amenities_sql != '') {
+                    $sql .= " AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)";
+                } else {
+                    $sql .= " AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= 3)";
+                }
             }
 
             if($min_price != 0 && $max_price != 0) {
                 $sql .= sprintf(" AND tbl_dorms.price >= %s && tbl_dorms.price <= %s", $min_price, $max_price);
             }
             
+            
+            
             if($hei != "") {
-                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
+                if (str_contains($hei, ',')) {
+                
+                    $explode = explode(',', $hei);
+                    for($i = 0; $i < count($explode); $i++) {
+                    	$sql .= " AND tbl_dorms.hei LIKE '%$explode[$i]%'";
+                    }
+                } else {
+                    $sql .= " AND tbl_dorms.hei LIKE '%$hei%'";
+                }
             }
-
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -604,11 +634,12 @@ class api_queries
                 $sql .= ')';
             }
             
-            
-            if($establishment_rules_sql != '' || $amenities_sql != '') {
-                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
-            } else {
-                $sql .= sprintf(" WHERE tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            if($rating != 0) {
+                if($establishment_rules_sql != '' || $amenities_sql != '') {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                } else {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                }
             }
 
             if($min_price != 0 && $max_price != 0) {
@@ -616,7 +647,15 @@ class api_queries
             }
             
             if($hei != "") {
-                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
+                if (str_contains($hei, ',')) {
+                
+                    $explode = explode(',', $hei);
+                    for($i = 0; $i < count($explode); $i++) {
+                    	$sql .= " AND tbl_dorms.hei LIKE '%$explode[$i]%'";
+                    }
+                } else {
+                    $sql .= " AND tbl_dorms.hei LIKE '%$hei%'";
+                }
             }
             
             $sql .= ' ORDER BY tbl_dorms.createdAt DESC LIMIT 50';
@@ -670,9 +709,9 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.hide = 0 AND';
-            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
-            // $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
+            $sql .= ' tbl_dorms.hide = 0';
+            //$sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
+             $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
             
             
@@ -747,9 +786,9 @@ class api_queries
             $sql = "SELECT tbl_dorms.* FROM tbl_dorms";
             $sql .= " INNER JOIN tbl_amenities ON tbl_dorms.id = tbl_amenities.dormref";
             $sql .= ' WHERE';
-            $sql .= ' tbl_dorms.hide = 0 AND';
-            $sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
-            // $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
+            $sql .= ' tbl_dorms.hide = 0';
+            //$sql .= ' (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude))))';
+            $sql .= ' ORDER BY (6371 * acos(cos(radians('.$latitude.')) * cos(radians(latitude)) * cos(radians('.$longitude.') - radians(longitude)) + sin(radians('.$latitude.')) * sin(radians(latitude)))) ASC';
             // $sql .= ' (6371 * acos(cos(radians(123.456)) * cos(radians(latitude)) * cos(radians(longitude) - radians(789.012)) + sin(radians(123.456)) * sin(radians(latitude))))';
             
             if($establishment_rules_sql != '') {
@@ -767,11 +806,13 @@ class api_queries
                     $sql .= $amenities_sql;
                 $sql .= ')';
             }
-
-            if($establishment_rules_sql != '' || $amenities_sql != '') {
-                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
-            } else {
-                $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+            
+            if($rating != 0) {
+                if($establishment_rules_sql != '' || $amenities_sql != '') {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                } else {
+                    $sql .= sprintf(" AND tbl_dorms.id IN (SELECT tbl_dormreviews.dormref FROM tbl_dormreviews WHERE tbl_dormreviews.rating >= %d)", $rating);
+                }
             }
 
             if($min_price != 0 && $max_price != 0) {
@@ -779,9 +820,16 @@ class api_queries
             }
             
             if($hei != "") {
-                $sql .= sprintf(" AND FIND_IN_SET('%s', tbl_dorms.hei) > 0", $hei);
+                if (str_contains($hei, ',')) {
+                
+                    $explode = explode(',', $hei);
+                    for($i = 0; $i < count($explode); $i++) {
+                    	$sql .= " AND tbl_dorms.hei LIKE '%$explode[$i]%'";
+                    }
+                } else {
+                    $sql .= " AND tbl_dorms.hei LIKE '%$hei%'";
+                }
             }
-            
             $result = $this->conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -937,12 +985,91 @@ class api_queries
         $statement = sprintf("SELECT * FROM `tbl_chatrooms` WHERE `chatroom_code` = '%s'", $chatroom_code);
         $result = $this->conn->query($statement);
         while($row = $result->fetch_assoc()) {
-            $statement2 = sprintf("UPDATE `tbl_chatrooms` SET `pay_rent` = '%d' WHERE `chatroom_code` = '%s'", $row['pay_rent'] == 0 ? 1 : 0, $chatroom_code);
+            $statement2 = sprintf("UPDATE `tbl_chatrooms` SET `pay_rent` = '%d', WHERE `chatroom_code` = '%s'", $row['pay_rent'] == 0 ? 1 : 0, $chatroom_code);
             $result2 = $this->conn->query($statement2);
         }
         
         return array(
             'data' => 'Successfully!',
+            'code' => 200
+        );
+    }
+    public function get_notification_count($user_ref) {
+        $statement = sprintf("SELECT * FROM `tbl_notifications` WHERE `user_ref` = '%s' AND `status` = 'unread'", $user_ref);
+        $result = $this->conn->query($statement);
+        $count = 0;
+        while($row = $result->fetch_assoc()) {
+            $count++;
+        }
+        
+        return array(
+            'data' => $count,
+            'code' => 200
+        );
+    }
+    
+    public function read_notification($user_ref) {
+        $statement = sprintf("UPDATE `tbl_notifications` SET `status` = 'read' WHERE `user_ref` = '%s'", $user_ref);
+        $result = $this->conn->query($statement);
+        return array(
+            'data' => 'Successfully!',
+            'code' => 200
+        );
+    }
+    
+    public function get_chat_count($to_user) {
+        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+
+        $result = $this->conn->query($statement);
+        
+        if ($result->num_rows > 0) {
+            $array = array();
+            $count = 0;
+            while($row = $result->fetch_assoc()) {
+                $statement2 = sprintf("SELECT * FROM `tbl_chats` WHERE `chatroom_code` = '%s' ORDER BY id DESC", $row['chatroom_code']);
+                $result2 = $this->conn->query($statement2);
+                $row2 = $result2->fetch_assoc();
+                if($row2) {
+                    if($to_user != $row2['user_id']) {
+                        $count++;
+                    }
+                }
+            }
+
+            return array(
+                'data' => $count,
+                'code' => 200
+            );
+        } else {
+            return array(
+                'data' => 'No results found.',
+                'code' => 403
+            );
+        }
+    }
+    
+    public function setOnlineOffline($id, $status) {
+        if($status == "online") {
+            $statement = sprintf("UPDATE `tbl_users` SET `is_online` = 1 WHERE `id` = '%s'", $id);
+        } else if($status == "offline") {
+            $statement = sprintf("UPDATE `tbl_users` SET `is_online` = 0 WHERE `id` = '%s'", $id);
+        }
+
+        $result = $this->conn->query($statement);
+
+        return array(
+            'data' => 'Successfully!',
+            'code' => 200
+        );
+    }
+    
+    public function checkStatus($id) {
+        $statement = sprintf("SELECT `is_online` FROM `tbl_users` WHERE `id` = '%s'", $id);
+        $result = $this->conn->query($statement);
+        $row = $result->fetch_assoc();
+        
+        return array(
+            'data' => (int) $row['is_online'],
             'code' => 200
         );
     }

@@ -2,7 +2,7 @@
     <div class="row">
 		<div class="col-12">
 			<div class="rounded shadow p-3 mb-5">
-				<h4 style="font-weight:bold;margin-bottom: 20px;">Dorm Listing(s)</h4>
+				<h4 style="font-weight:bold;margin-bottom: 20px;">Student Accommodation Listing(s)</h4>
 				<div style="overflow: scroll;">
 					<table data-page-length='5' class="table table-striped table-bordered table-responsive" id="dormsTable">
 						<thead style="background-color: white;">

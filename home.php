@@ -61,10 +61,12 @@
                         <a href="./home.php" class="nav_link <?=active('');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard"><i class="fa-solid fa-home"></i> <span class="nav_name">Dashboard</span> </a>
                         <a href="?page=admin_users" class="nav_link <?=active('admin_users');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Admin User(s)"><i class="fa-solid fa-lock"></i> <span class="nav_name">Admin User(s)</span> </a>
                         <a href="?page=users" class="nav_link <?=active('users');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="User(s)"><i class="fa-solid fa-user"></i> <span class="nav_name">User(s)</span> </a>
-                        <a href="?page=dorms" class="nav_link <?=active('dorms');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Dorm Listing(s)"><i class="fa-solid fa-house-building"></i> <span class="nav_name">Dorm Listing(s)</span> </a>
+                        <a href="?page=dorms" class="nav_link <?=active('dorms');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Listing(s)"><i class="fa-solid fa-house-building"></i> <span class="nav_name">Listing(s)</span> </a>
                         <a href="?page=reports" class="nav_link <?=active('reports');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Report(s)"><i class="fa-solid fa-flag"></i> <span class="nav_name">Report(s)</span> </a>
                         <a href="?page=notification_form" class="nav_link <?=active('notification_form');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Notification Form"><i class="fa-solid fa-envelope"></i> <span class="nav_name">Notification Form</span> </a>
                         <a href="?page=document_verifier" class="nav_link <?=active('document_verifier');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Document Verifier"><i class="fa-solid fa-file"></i> <span class="nav_name">Document Verifier</span> </a>
+                        <a href="?page=payment_transaction_history" class="nav_link <?=active('payment_transaction_history');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Payment Transaction History"><i class="fa-solid fa-money-simple-from-bracket"></i> <span class="nav_name">Payment Transaction History</span> </a>
+                        <a href="?page=settings" class="nav_link <?=active('settings');?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Settings"><i class="fa-solid fa-gear"></i> <span class="nav_name">Settings</span> </a>
                     </div>
                 </div>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#logoutModal" class="nav_link logout"><i class="fa-solid fa-right-from-bracket"></i> <span class="nav_name">Log Out</span></a>
@@ -91,6 +93,12 @@
                     break;
                     case 'document_verifier':
                         include('./pages/document_verifier.inc');
+                    break;
+                    case 'payment_transaction_history':
+                        include('./pages/payment_transaction_history.inc');
+                    break;
+                    case 'settings':
+                        include('./pages/settings.inc');
                     break;
                     default:
                         include('./pages/dashboard.inc');

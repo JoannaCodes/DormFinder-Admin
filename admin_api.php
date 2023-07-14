@@ -7,7 +7,7 @@ include_once "inc/conn.php";
 include_once "functions.php";
 include_once "mod/admin_queries.php";
 
-$domain = 'http://studyhive.social/';
+$domain = 'http://studyhive.social/admin.php';
 $tag = '';
 
     
@@ -199,6 +199,10 @@ switch ($tag) {
         access();
         echo adminq()->get_reports();
     break;
+    case 'get_payment_transaction_history':
+        access();
+        echo adminq()->get_payment_transaction_history();
+    break;
     case 'resolve_report_admin':
         access();
         $reportid = $_POST["reportid"];
@@ -230,6 +234,10 @@ switch ($tag) {
         access();
         echo json_encode(adminq()->get_user_statistics());
     break;
+    case 'get_transaction_statistics':
+        access();
+        echo json_encode(adminq()->get_transaction_statistics());
+    break;
     case 'top_reviews_in_dorm':
         access();
         echo json_encode(adminq()->top_reviews_in_dorm());
@@ -242,6 +250,10 @@ switch ($tag) {
         } else {
           echo json_encode(["message" => "Failed to remove admin user"]);
         }
+    break;
+    case 'changePass':
+        access();
+        echo adminq()->changePass($_POST["currentpass"], $_POST["newpass"], $_POST["retypenewpass"]);
     break;
     default:
         access();

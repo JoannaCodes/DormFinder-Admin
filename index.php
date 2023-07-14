@@ -27,6 +27,13 @@ function sdmq()
 	return $sdm_q;
 }
 
+function conn()
+{
+	$c = new connection();
+	$c = $c->mysqli_connect();
+	return $c;
+}
+
 
 $authKey = $_SERVER['HTTP_AUTH_KEY'] ?? '';
 
@@ -107,8 +114,8 @@ if (authenticate($authKey)) {
 				}
 		
 				// Allow certain file formats
-				if ($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx") {
-					echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
+				if ($imageFileType != "pdf" && $imageFileType != "doc" && $imageFileType != "docx" && $imageFileType != "jpg" && $imageFileType != "png") {
+					echo "Sorry, only PDF, DOC, DOCX, JPG, and PNG files are allowed.";
 					$uploadOk = 0;
 				}
 		
@@ -177,26 +184,34 @@ if (authenticate($authKey)) {
 				echo sdmq()->get_bookmarks(_validate($_GET["userref"]));
 				break;
 			case "update_profile":
-				$image = $_FILES['image'];
-				$userref = _validate($_POST["userref"]);
-				$username = _validate($_POST["username"]);
-		
-				$uploadDir = 'uploads/userImages/' . $userref . '/';
-				$uploadFile = $uploadDir . basename($image['name']);
-				$fileName = $uploadDir . basename($image['name']);
-		
-				// Check if the folder already exists
-				if (!is_dir($uploadDir)) {
-					mkdir($uploadDir, 0777, true);
-				}
-		
-				$out = sdmq()->update_profile($userref, $username, $domain . $fileName);
-				if (move_uploaded_file($image['tmp_name'], $uploadFile) || $out == "1") {
-					echo 'success';
-				} else {
-					echo 'failed';
-				}
-				break;
+                $userref = _validate($_POST["userref"]);
+                $username = _validate($_POST["username"]);
+                $imageUrl = '';
+            
+                if (isset($_FILES['image'])) {
+                    $image = $_FILES['image']['name'];
+                    $uploadDir = 'uploads/userImages/' . $userref . '/';
+                    $uploadFile = $uploadDir . basename($image);
+                    $fileName = $uploadDir . basename($image);
+            
+                    // Check if the folder already exists
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+            
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
+                        $imageUrl = $domain . $fileName;
+                    }
+                }
+            
+                $out = sdmq()->update_profile($userref, $username, $imageUrl);
+            
+                if ($out == "1") {
+                    echo 'success';
+                } else {
+                    echo 'failed';
+                }
+                break;
 			case 'post_review':
 				$out = sdmq()->post_review(_validate($_POST["dormref"]), _validate($_POST["userref"]), _validate($_POST["rating"]), _validate($_POST["comment"]));
 				if ($out == "1") {
@@ -292,7 +307,7 @@ if (authenticate($authKey)) {
 				$dormImages = '';
 		
 				// Address Geocoding
-				$coordinates = getAddressCoordinates($address);
+				$coordinates = getAddressCoordinates($address . ", Philippines");
 				if ($coordinates) {
 					$latitude = $coordinates['latitude'];
 					$longitude = $coordinates['longitude'];
@@ -381,7 +396,7 @@ if (authenticate($authKey)) {
 				$dormImages = '';
 		
 				// Address Geocoding
-				$coordinates = getAddressCoordinates($address);
+				$coordinates = getAddressCoordinates($address . ", Philippines");
 				if ($coordinates) {
 					$latitude = $coordinates['latitude'];
 					$longitude = $coordinates['longitude'];
@@ -436,6 +451,7 @@ if (authenticate($authKey)) {
 			case 'forgot_password':
 				$email = _validate($_POST['email']);
 				$password = generatePassword();
+				$forgotpass = md5(md5(uniqid(rand(), true)));
 				
 				$subject = "Forgot Password - Login Credentials Inside";
 				$body = '<!DOCTYPE html>
@@ -461,10 +477,8 @@ if (authenticate($authKey)) {
                                             <div>
                                                 <p class="p-space">
                                                     <h1>Forgot Password - StudyHive</h1>
-                                                    <p>You have requested to reset your password. Here is your temporary password:</p>
-                                                    <p><strong>New Password:</strong>'.$password.'</p>
-                                                    <p>You can use this temporary password to login and then change your password to a more secure one or you can use this as your new password.</p>
-                                                    <p>If you did not request a password reset, please disregard this email.</p>
+                                                    <p>You can view this to change your password</p>
+                                                    <a href="https://studyhive.social/?forgotpass='.$forgotpass.'">StudyHive |  Change Password</a>
                                                     <p>Thank you,</p>
                                                     <p>The StudyHive Team</p>
                                                 </p>
@@ -486,14 +500,11 @@ if (authenticate($authKey)) {
                         </html>';
 				$altBody = "
 					Forgot Password - StudyHive
-					You have requested to reset your password. Here is your temporary password:
-					- New Password: {$password}
-					You can use this temporary password to login and then change your password to a more secure one.
-					If you did not request a password reset, please disregard this email.
+					You can view this to change your password.
 					Thank you,
 					The StudyHive Team
 				";
-				if (sdmq()->forgot_password($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+				if (sdmq()->forgot_password($email, $forgotpass) == "1" && sendEmail($email, $subject, $body, $altBody)) {
 						echo "success";
 				} else {
 						echo "failed";
@@ -507,8 +518,11 @@ if (authenticate($authKey)) {
 			    $ownername = _validate($_POST['ownername']);
 			    $dormref = _validate($_POST['dormref']);
 			    $amount = _validate($_POST['amount']);
+			    $paycount = _validate($_POST['paycount']);
 			    
-			    $out = sdmq()->payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount);
+			    $paycount = (int)$paycount + 1;
+			    
+			    $out = sdmq()->payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $paycount);
 				if ($out == "1") {
 					echo 'success';
 				} else {
@@ -517,11 +531,43 @@ if (authenticate($authKey)) {
 			    break;
 			case "get_transactions":
 			    $userref = _validate($_GET['userref']);
-					$isowner = _validate($_GET['is_owner']);
+				$isowner = _validate($_GET['is_owner']);
 			    echo sdmq()->get_transactions($userref, $isowner);
 				break;
 		}
 	} 
 } else {
-    include('./pages/index.inc');
+    if (isset($_GET["forgotpass"])) {
+        $forgotpass = $_GET["forgotpass"];
+        include_once "inc/conn.php";
+        $statement = sprintf("SELECT * FROM `tbl_users` WHERE `unique_forgot` = '%s' AND `is_forgot` = 1", $forgotpass);
+        $result = conn()->query($statement);
+        
+        if ($result->num_rows > 0) {
+            // exist
+            if(isset($_POST['submit'])) {
+                $post_pass = $_POST['pass'];
+                $post_forgotpass = $_POST['forgotpass'];
+                
+                $statement2 = sprintf("SELECT * FROM `tbl_users` WHERE `unique_forgot` = '%s' AND `is_forgot` = 1", $post_forgotpass);
+                $result2 = conn()->query($statement2);
+                
+                if ($result->num_rows > 0) {
+                    $statement2 = sprintf("UPDATE `tbl_users` SET `password` = '%s', `unique_forgot` = NULL, `is_forgot` = 0 WHERE `unique_forgot` = '%s' AND `is_forgot` = 1", $post_pass, $post_forgotpass);
+                    $result2 = conn()->query($statement2);
+                    echo json_encode(['message'=>'Successfully', 'error'=> 200]);
+                } else {
+                    echo json_encode(['message'=>'Error, the code is expired!', 'error'=> 400]);
+                }
+            } else {
+                include('./pages/forgotpass.inc');
+            }
+        } else {
+            // not exist
+            include('./pages/error_forgotpass.inc');
+        }
+    } else {
+        include('./pages/index.inc');
+    }
 }
+

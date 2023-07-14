@@ -27,10 +27,10 @@
     <body style="background:#e1e6e9;">
         <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background:#fff!important;">
     		<div class="container">
-    			<a class="navbar-brand" href="#" style="font-family:'Avenir Next';">
-    			    <img src="./images/logo.png" style="width: 30px;height: 30px;margin-right: 10px;margin-top: -10px;">
-    			    Study<font style="color:#007f7f;">Hive</font>
-    			</a>
+                 <a class="navbar-brand" href="#" style="font-family: 'Poppins', sans-serif;">
+                    <img src="./images/logo.png" style="width: 30px; height: 30px; margin-right: 10px; margin-top: -10px;">
+                    Study<font style="color:#007f7f;">Hive</font>
+                </a>
     		</div>
     	</nav>
     	<section id="intro">
@@ -39,15 +39,16 @@
                     <div class="container-lg">
                         <div class="row g-4 justify-content-center align-items-center">
                             <div class="col-md-5 text-center text-md-start">
-                                <h1 style="user-select:none;">
-                                    <div class="display-2" style="font-family: 'Avenir Next'; font-weight: 600; color: #363e41!important;">Study<font style="color:#007f7f;">Hive</font></div>
-                                    <div class="display-6 text-muted" style="font-family: 'Avenir Next'; font-weight: 600; font-size: 34px; color: #363e41!important;">Your Home Away From Home</div>
-                                </h1>
-                                <p class="lead my-4 text-muted" style="font-family: 'Avenir Next'; font-weight: 400; font-size: 17px; color: #363e41!important;user-select:none;">
-                                    Discover convenience, comfort, and community, all at your fingertips. Simplify your accommodation search with StudyHive.
-                                </p>
-                                <a href="#">
-                                    <img src="./images/googleplay.png" style="width: 200px;"/>
+                                        <h1 style="user-select: none;">
+                                            <div class="display-2" style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #363e41!important;">Study<font style="color: #007f7f;">Hive</font></div>
+                                            <div class="display-6 text-muted" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 34px; color: #363e41!important;">Your Home Away From Home</div>
+                                        </h1>
+                                        <p class="lead my-4 text-muted" style="font-family: 'Poppins', sans-serif; font-weight: 400; font-size: 17px; color: #363e41!important; user-select: none;">
+                                            Discover convenience, comfort, and community, all at your fingertips. Simplify your accommodation search with StudyHive.
+                                        </p>
+
+                                <a href="https://drive.google.com/file/d/1JIWcLfT16Jw6zxCGiieyhDzx9a9yiiuW/view?usp=drive_link">
+                                    <img src="./images/apk.png" style="width: 200px;"/>
                                 </a>
                             </div>
                             <div class="col-md-5 text-center d-none d-md-block">
@@ -68,14 +69,14 @@
                         <img src="./images/logo_white.png" class="img-fluid" style="padding: 50px;"/>
                     </div>
                     <div class="col-12 col-xs-12 col-sm-12 col-md-8 col-lg-8 col-xl-8" style="user-select:none;">
-                        <h1 style="color:#fff;font-weight: 600;">About StudyHive</h1>
-                        <p style="color:#fff;font-weight: 500;">
+                       <h1 style="color:#fff;font-weight: 600; font-family: 'Poppins', sans-serif;">About StudyHive</h1>
+                       <p style="color:#fff;font-weight: 500; font-family: 'Poppins', sans-serif;">
                             StudyHive believes that finding the right accommodation is crucial for students to thrive academically and personally. We aim to provide a user-friendly platform that streamlines the entire process, making it easier, faster, and more efficient.<br/><br/>
     
                             <span style="font-size: 22px; font-weight: 600;">For Students:</span><br/>
-                            Our app offers features allowing students to explore a wide range of housing options that suit their needs. Whether you're looking for a cozy apartment, a shared house, or a dormitory, StudyHive got you covered.<br/><br/>
+                            Our application provides various functionalities that enable students to discover a diverse selection of housing choices tailored to their preferences. Whether you're looking for a cozy apartment, a shared house, or a dormitory, StudyHive got you covered.<br/><br/>
                             
-                            <span style="font-size: 22px; font-weight: 600;">For Student Accommodation Establishment Owners</span><br/>
+                            <span style="font-size: 22px; font-weight: 600;">For Student Accommodation Owners</span><br/>
                             StudyHive is not just for students; it's also a platform for business owners or landlords to connect with potential tenants. If you own a student accommodation facility, our app provides you with a convenient and efficient way to post and manage your listings, and interact with interested students.
                         </p>
                     </div>
@@ -86,41 +87,41 @@
             <div class="container">
                 <div class="row mb-5">
                     <div class="col-12">
-                        <h1 style="font-weight: 600;text-align:center;user-select:none;">Our <font style="color:#007f7f;">Services</font></h1>
+                        <h1 style="font-weight: 600;text-align:center;user-select:none; font-family: 'Poppins', sans-serif;">Our <font style="color:#007f7f;">Services</font></h1>
                     </div>
                 </div>
                 <div class="row px-5">
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-house"></i>
-                            Student Accommodation Listing
+                            Student Accommodation
                         </div>
                     </div>
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-list"></i>
                             Listing Management
                         </div>
                     </div>
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-credit-card"></i>
                             Easy Payment
                         </div>
                     </div>
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-ballot-check"></i>
-                            Choose your Type
+                            Choose your type
                         </div>
                     </div>
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-comments"></i>
-                            Real-time Chatbox
+                            Real-time Messaging
                         </div>
                     </div>
-                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="col-12 col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4" style="font-family: 'Poppins', sans-serif;">
                         <div class="services-box">
                             <i class="fa-solid fa-phone"></i>
                             Support

@@ -7,6 +7,15 @@ class admin_query
 	{
 		$this->c = $db;
 	}
+	
+	public function _validateXSS($data)
+    {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+
+        return $data;
+    }
 
 	public function push_notification($title, $message, $userref) {
 		// destination is either FCM Device Key or Topic
@@ -63,7 +72,7 @@ class admin_query
 		if($btn_value == "1") {
 			$vtitle = "StudyHive";
 			$vdesc = "Your documents have been verified! You can now publish your Dorm.";
-			$vreferencestarter = "1";
+			$vreferencestarter = uniqid();
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 			$current_time = date('Y-m-d H:i:s');
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
@@ -79,7 +88,7 @@ class admin_query
 		} else if ($btn_value == "2") {
 			$vtitle = "StudyHive";
 			$vdesc = "Your documents have not been verified! Please upload a new document.";
-			$vreferencestarter = "1";
+			$vreferencestarter = uniqid();
 			$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 			$current_time = date('Y-m-d H:i:s');
 			if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$user_id, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time]
@@ -145,7 +154,7 @@ class admin_query
 			}
 			$toecho .= "<tr>
 				<td class='align-middle'><button class='btn btn-link text-primary' data-user_id='".$out[$i]['user_id']."' data-doc_status='".$out[$i]['doc1_status']."' onclick='open_userdoc(this)'>" . $out[$i]['user_id'] . "</button></td>
-				<td class='align-middle'>" . $doc_status . "</td>
+				<td class='align-middle'>" . $this->_validateXSS($doc_status) . "</td>
 	        </tr>";
 		}
 		return $toecho;
@@ -170,8 +179,8 @@ class admin_query
 			$toecho .= "<tr>
 				<td class='align-middle'>".$out[$i]['id']."</td>
 				<td class='align-middle'>".$out[$i]['userref']."</td>
-				<td class='align-middle'>".$out[$i]['name']."</td>
-				<td class='align-middle'>".$out[$i]['address']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['name'])."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['address'])."</td>
 				<td class='align-middle'>".$out[$i]['createdAt']."</td>
 				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
 				<td class='align-middle'>
@@ -198,7 +207,7 @@ class admin_query
 			}
 			$toecho .= "<tr>
 				<td class='align-middle'>".$out[$i]['id']."</td>
-				<td class='align-middle'>".$out[$i]['username']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['username'])."</td>
 				<td width='25%' class='align-middle'>{$status}</td>
 	  	</tr>";
 		}
@@ -213,7 +222,7 @@ class admin_query
 		    $del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
 			$toecho .= "<tr>
 				<td class='align-middle'>".$out[$i]['id']."</td>
-				<td class='align-middle'>".$out[$i]['email']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['email'])."</td>
 				<td width='25%' class='align-middle'>".$out[$i]['date_created']."</td>
 				<td class='align-middle'>
 				    <button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Admin User' onclick='delete_admin_user(this)' data-id='".$out[$i]['id']."'>".$del_icon."</button>
@@ -233,11 +242,11 @@ class admin_query
 
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$userref], true));
 		$outx = json_decode($out, true);
-		if (count($outx) == 1) {
-		    if($this->push_notification($vtitle, $vdesc, $userref)) {
-		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-				    return "1";
-			    }
+	    if (count($outx) == 1) {
+		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+    		    if($this->push_notification($vtitle, $vdesc, $userref)) {
+    				return "1";
+    			}
 		    }
 		} else {
 			return "0";
@@ -267,8 +276,8 @@ class admin_query
 		$current_time = date('Y-m-d H:i:s');
 
 		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=?", [$dormref])) {
-		    if($this->push_notification($vtitle, $vdesc, $userref)) {
-		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		        if($this->push_notification($vtitle, $vdesc, $userref)) {
 				    return "1";
 			    }
 		    }
@@ -283,11 +292,32 @@ class admin_query
 		$vreferencestarter = uniqid();
 		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
 		$current_time = date('Y-m-d H:i:s');
-		if($this->push_notification($vtitle, $vdesc, $userref)) {
-		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		    if($this->push_notification($vtitle, $vdesc, $userref)) {
     			return "1";
     		}
 		}
+	}
+	public function get_payment_transaction_history()
+	{
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_transactions", []), true), true);
+		$toecho = "";
+		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
+		for ($i = 0; $i < count($out); $i++) {
+		    $customer = json_decode(json_decode($this->QuickLook("SELECT username FROM tbl_users WHERE id = ?", [$out[$i]['userref']]), true), true);
+		    $tenant = json_decode(json_decode($this->QuickLook("SELECT username FROM tbl_users WHERE id = ?", [$out[$i]['ownerref']]), true), true);
+		    $tenant_name = strlen($tenant[0]['username']) != NULL ? $tenant[0]['username'] : "Deleted User";
+		    $customer_name = strlen($customer[0]['username']) != NULL ? $customer[0]['username'] : "Deleted User";
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$out[$i]['token']."</td>
+				<td class='align-middle'>".$this->_validateXSS($customer_name)."</td>
+				<td class='align-middle'>".$this->_validateXSS($tenant_name)."</td>
+				<td class='align-middle'>P".$out[$i]['amount']."</td>
+				<td class='align-middle'>".$out[$i]['timestamp']."</td>
+	  	</tr>";
+		}
+		return $toecho;
 	}
 	public function get_reports()
 	{
@@ -299,7 +329,7 @@ class admin_query
 				<td class='align-middle'>".$out[$i]['id']."</td>
 				<td class='align-middle'>".$out[$i]['userref']."</td>
 				<td class='align-middle'>".$out[$i]['dormref']."</td>
-				<td class='align-middle'>".$out[$i]['comment']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['comment'])."</td>
 				<td class='align-middle'>".$out[$i]['createdAt']."</td>
 				<td class='align-middle'>
 					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Resolve Report' onclick='resolve_report_admin(this)' data-reportid='".$out[$i]['id']."'>".$del_icon."</button>
@@ -319,8 +349,8 @@ class admin_query
 		$current_time = date('Y-m-d H:i:s');
 
 		if ($this->QuickFire("DELETE FROM `tbl_dormreports` WHERE id=?", [$reportid])) {
-		    if($this->push_notification($vtitle, $vdesc, $out[0]['userref'])) {
-		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$out[0]['userref'], $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$out[0]['userref'], $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+		        if($this->push_notification($vtitle, $vdesc, $out[0]['userref'])) {
 			    	return "1";
 			    }
 		    }
@@ -338,8 +368,8 @@ class admin_query
 		$current_time = date('Y-m-d H:i:s');
         
 		if ($this->QuickFire("UPDATE tbl_dorms SET `hide`=? WHERE id=?", [$out[0]['hide'] == 0 ? 1 : 0, $dormref])) {
-		    if($this->push_notification($vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $userref)) {
-		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$userref, $vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $vreferencestarter, $current_timex, $current_time])) {
+		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$userref, $vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $vreferencestarter, $current_timex, $current_time])) {
+		        if($this->push_notification($vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $userref)) {
 				    return "1";
 			    }
 		    }
@@ -358,11 +388,19 @@ class admin_query
 		$reports = json_decode($this->QuickLook("SELECT * FROM tbl_dormreports", [], true));
 		$reportsx = json_decode($reports, true);
 		
+		$online = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE is_online = 1", [], true));
+		$onlinex = json_decode($online, true);
+		
+		$admins = json_decode($this->QuickLook("SELECT * FROM tbl_adminusers", [], true));
+		$adminsx = json_decode($admins, true);
+		
 		return array(
 		    'not_verified' => count($notverifiedx),
 		    'verified' => count($verifiedx),
 		    'dorms' => count($dormsx),
 		    'reports' => count($reportsx),
+		    'online' => count($onlinex),
+		    'admins' => count($adminsx)
 		);
 	}
 	
@@ -379,6 +417,19 @@ class admin_query
 		);
 	}
 	
+	public function get_transaction_statistics() {
+	    $user_statistics = json_decode($this->QuickLook("SELECT timestamp FROM tbl_transactions GROUP BY DATE( timestamp ) ORDER BY timestamp  DESC LIMIT 7;", [], true));
+		$user_statisticsx = json_decode($user_statistics, true);
+		
+	    $user_statistics2 = json_decode($this->QuickLook("SELECT timestamp as t, COUNT(*) as y FROM tbl_transactions GROUP BY DATE( timestamp ) ORDER BY timestamp  DESC LIMIT 7 ;", [], true));
+		$user_statistics2x = json_decode($user_statistics2, true);
+		
+		return array(
+		    'transactions_statistics' => array_reverse($user_statisticsx),
+		    'transactions_statistics2' => array_reverse($user_statistics2x),
+		);
+	}
+	
 	public function top_reviews_in_dorm() {
 	    $dorms = json_decode($this->QuickLook("SELECT tbl_dorms.name, AVG(r.rating) AS average_rating FROM tbl_dormreviews r INNER JOIN tbl_dorms ON r.dormref = tbl_dorms.id GROUP BY r.dormref ORDER BY average_rating DESC LIMIT 5;", [], true));
 		$dormsx = json_decode($dorms, true);
@@ -392,6 +443,25 @@ class admin_query
 	    $dorms = json_decode($this->QuickLook("DELETE FROM tbl_adminusers WHERE id = ?", [$user_id], true));
 		$dormsx = json_decode($dorms, true);
 		return "1";
+	}
+	
+	public function changePass($currentpass, $newpass, $retypenewpass) {
+	    $check = json_decode($this->QuickLook("SELECT * FROM `tbl_adminusers` WHERE `id` = ? AND `password` = ?", [$_SESSION['id'], $currentpass], true));
+		$checkx = json_decode($check, true);
+		if (count($checkx) == 1) {
+		    if(empty($newpass) && empty($retypenewpass)) {
+		        return json_encode(['message'=>"Error! Please input the fields.", 'status' => 400]);
+		    }
+		    
+		    if($newpass === $retypenewpass) {
+		        $this->QuickFire("UPDATE tbl_adminusers SET password=? WHERE id=?",[$newpass,$_SESSION['id']]);
+		        return json_encode(['message'=>"Successfully changed.", 'status' => 200]);
+		    } else {
+		        return json_encode(['message'=>"Your new password and re-type new password doesn't match.", 'status' => 400]);
+		    }
+		} else {
+		    return json_encode(['message'=>"Invalid current password.", 'status' => 400]);
+		}
 	}
   
 	// DB Actions

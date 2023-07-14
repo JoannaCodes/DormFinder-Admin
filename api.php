@@ -142,6 +142,30 @@
                         $result = conn()->get_dorm(_validate($_POST['userref'] ?? NULL));
                         statusCode($result['code'], $result['data']);
                     break;
+                    case "enable_disable_payment":
+                        $result = conn()->enable_disable_payment(_validate($_POST['chatroom_code'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "get_notification_count":
+                        $result = conn()->get_notification_count(_validate($_POST['user_ref'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "get_chat_count":
+                        $result = conn()->get_chat_count(_validate($_POST['user_ref'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "read_notification":
+                        $result = conn()->read_notification(_validate($_POST['user_ref'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "setOnlineOffline":
+                        $result = conn()->setOnlineOffline(_validate($_POST['id'] ?? NULL), _validate($_POST['status'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
+                    case "checkStatus":
+                        $result = conn()->checkStatus(_validate($_POST['id'] ?? NULL));
+                        statusCode($result['code'], $result['data']);
+                    break;
                     default:
                         statusCode(200, "Welcome to DormFinder API");
                     break;
