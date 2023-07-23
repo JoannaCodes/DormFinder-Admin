@@ -3,13 +3,11 @@ session_start();
 class admin_query
 {
 	private $c;
-	public function __construct($db)
-	{
+	public function __construct($db) {
 		$this->c = $db;
 	}
 	
-	public function _validateXSS($data)
-    {
+	public function _validateXSS($data) {
         $data = trim($data);
         $data = stripslashes($data);
         $data = htmlspecialchars($data);
@@ -118,8 +116,7 @@ class admin_query
 		}
 		return $toecho;
 	}
-	public function login_dormfinder($email, $password)
-	{
+	public function login_dormfinder($email, $password) {
 		$out = json_decode($this->QuickLook("SELECT * FROM tbl_adminusers WHERE email=? AND password=?", [$email, $password], true));
 		$outx = json_decode($out, true);
 		if (count($outx) == 1) {
@@ -138,8 +135,7 @@ class admin_query
 		    echo json_encode(["email" => "none", "id" => "none", "status" => "false"]);
 		}
 	}
-	public function get_submitdocuments()
-	{
+	public function get_submitdocuments() {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_documents GROUP BY user_id", []), true), true);
 		$toecho = "";
 		$doc_status = "";
@@ -147,20 +143,21 @@ class admin_query
 			switch ($out[$i]['doc1_status']) {
 				case '0':
 					$doc_status = "Unverified";
+					$style = "bg-danger";
 				break;
 				case '1':
 					$doc_status = "Verified";
+					$style = "bg-success";
 				break;
 			}
 			$toecho .= "<tr>
 				<td class='align-middle'><button class='btn btn-link text-primary' data-user_id='".$out[$i]['user_id']."' data-doc_status='".$out[$i]['doc1_status']."' onclick='open_userdoc(this)'>" . $out[$i]['user_id'] . "</button></td>
-				<td class='align-middle'>" . $this->_validateXSS($doc_status) . "</td>
+				<td class='align-middle'><span class='badge ".$style."'>" . $this->_validateXSS($doc_status) . "</span></td>
 	        </tr>";
 		}
 		return $toecho;
 	}
-	public function get_dormlisting()
-	{
+	public function get_dormlisting() {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms", []), true), true);
 		$toecho = "";
 		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
@@ -170,39 +167,82 @@ class admin_query
 		for ($i = 0; $i < count($out); $i++) {
 		    switch ($out[$i]['hide']) {
 				case '0':
-					$display = "<i class='fa-light fa-eye-slash fa-fw fa-lg'></i>";
+					$display = "<span class='badge bg-success'>Active</span>";
+					$style = "text-success";
 				break;
 				case '1':
-					$display = "<i class='fa-light fa-eye fa-fw fa-lg'></i>";
+					$display = "<span class='badge bg-info'>Hidden</span>";
+					$style = "text-info";
 				break;
 			}
 			$toecho .= "<tr>
+			    <td>
+				    <div class='form-check'>
+                      <input class='form-check-input' type='checkbox' value='".$out[$i]['name']."' id='checkbox' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>
+                    </div>
+				</td>
 				<td class='align-middle'>".$out[$i]['id']."</td>
 				<td class='align-middle'>".$out[$i]['userref']."</td>
 				<td class='align-middle'>".$this->_validateXSS($out[$i]['name'])."</td>
 				<td class='align-middle'>".$this->_validateXSS($out[$i]['address'])."</td>
 				<td class='align-middle'>".$out[$i]['createdAt']."</td>
 				<td class='align-middle'>".$out[$i]['updatedAt']."</td>
-				<td class='align-middle'>
-					<button class='btn btn-primary p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Send Update Notification' onclick='send_dorm_notif(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$notif_icon."</button>
-					<button class='btn btn-danger p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Delete Dorm Listing' onclick='delete_dorm_admin(this)' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$del_icon."</button>
-					<button class='btn btn-info p-1' data-bs-toggle='tooltip' data-bs-placement='top' title='Hide/Show Dorm Listing' onclick='showhide_dorm_admin(this)' data-display='".$out[$i]['hide']."' data-dormref='".$out[$i]['id']."' data-userref='".$out[$i]['userref']."'>".$display."</button>
-				</td>
+				<td class='align-middle ".$style."'>".$display."</td>
 	  	</tr>";
 		}
 		return $toecho;
 	}
-	public function get_users()
-	{
+	public function get_duedatelisting() {
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms WHERE who_own_this_dorm != ''", []), true), true);
+		$toecho = "";
+		if(count($out) == 0) {
+		    $toecho .= "<tr>
+				<td class='align-middle' colspan='6'>No results found</td>
+	  	</tr>";
+	  	    return $toecho;
+		}
+		for ($i = 0; $i < count($out); $i++) {
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$out[$i]['userref']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['name'])."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['address'])."</td>
+				<td class='align-middle'>".$out[$i]['paid_time']."</td>
+				<td class='align-middle'>".$out[$i]['end_time']."</td>
+	  	</tr>";
+		}
+		return $toecho;
+	}
+	public function get_report_dormlisting() {
+		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_dorms", []), true), true);
+		$toecho = "";
+		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
+		$notif_icon="<i class='fa-light fa-bell fa-fw fa-lg'></i>";
+		$hide_icon="<i class='fa-light fa-eye-slash fa-fw fa-lg'></i>";
+		$show_icon="<i class='fa-light fa-eye-slash fa-fw fa-lg'></i>";
+		for ($i = 0; $i < count($out); $i++) {
+			$outs = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE `id` = ?", [$out[$i]['userref']]), true), true);
+			$toecho .= "<tr>
+				<td class='align-middle'>".$out[$i]['id']."</td>
+				<td class='align-middle'>".$outs[0]['username']."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['name'])."</td>
+				<td class='align-middle'>".$this->_validateXSS($out[$i]['address'])."</td>
+				<td class='align-middle'>".$out[$i]['createdAt']."</td>
+				<td class='align-middle ".$style."'>".($out[$i]['who_own_this_dorm'] != '' ? "<span class='badge bg-danger'>Unavailable</span>" : "<span class='badge bg-success'>Available</span>")."</td>
+	  	</tr>";
+		}
+		return $toecho;
+	}
+	public function get_users() {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_users", []), true), true);
 		$toecho = "";
 		for ($i = 0; $i < count($out); $i++) {
 		    switch ($out[$i]['is_verified']) {
 				case '0':
-					$status = "Unverified";
+					$status = "<span class='badge bg-danger'>Unverified</span>";
 				break;
 				case '1':
-					$status = "Verified";
+					$status = "<span class='badge bg-success'>Verified</span>";
 				break;
 			}
 			$toecho .= "<tr>
@@ -213,9 +253,7 @@ class admin_query
 		}
 		return $toecho;
 	}
-	
-	public function get_adminusers()
-	{
+	public function get_adminusers() {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_adminusers", []), true), true);
 		$toecho = "";
 		for ($i = 0; $i < count($out); $i++) {
@@ -231,9 +269,7 @@ class admin_query
 		}
 		return $toecho;
 	}
-	
-	public function send_custom_notif($userref, $message)
-	{
+	public function send_custom_notif($userref, $message) {
 		$vtitle = "StudyHive";
 		$vdesc = $message;
 		$vreferencestarter = uniqid();
@@ -252,8 +288,7 @@ class admin_query
 			return "0";
 		}
 	}
-	public function new_admin($email, $password)
-	{
+	public function new_admin($email, $password) {
 	    $out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_adminusers WHERE email = ?", [$email]), true), true);
 	    if (count($out) == 0) {
     		if ($this->QuickFire("INSERT INTO tbl_adminusers SET email=?, `password`=?, date_created=now()", [$email, $password])){
@@ -265,41 +300,61 @@ class admin_query
 	        return "1";
 	    }
 	}
-	public function delete_dorm_admin($userref, $dormref)
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT `name` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
+	public function delete_dorm_admin($items) {
+	    foreach ($items as $item) {
+            $userref = $item["userref"];
+            $dormref = $item["dormref"];
+            
+            $out = json_decode(json_decode($this->QuickLook("SELECT `name` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
 
-		$vtitle = "StudyHive";
-		$vdesc = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been removed. If you believe this removal was a mistake, kindly reach out to our team for assistance.";
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-
-		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=?", [$dormref])) {
-		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-		        if($this->push_notification($vtitle, $vdesc, $userref)) {
-				    return "1";
-			    }
-		    }
-		}
-	}
-	public function send_dorm_notif($userref, $dormref)
-	{
-		$out = json_decode(json_decode($this->QuickLook("SELECT name FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
-
-		$vtitle = "StudyHive";
-		$vdesc = "This is a reminder to update your listing named '" . $out[0]['name'] . "', for the upcoming semester. Please ensure your listing is up to date. If your listing is already current, you may disregard this message.";
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-		if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
-		    if($this->push_notification($vtitle, $vdesc, $userref)) {
-    			return "1";
+    		$vtitle = "StudyHive";
+    		$vdesc = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been removed. If you believe this removal was a mistake, kindly reach out to our team for assistance.";
+    		$vreferencestarter = uniqid();
+    		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+    		$current_time = date('Y-m-d H:i:s');
+    
+    		if ($this->QuickFire("DELETE FROM `tbl_dorms` WHERE id=?", [$dormref])) {
+    		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+    		        if($this->push_notification($vtitle, $vdesc, $userref)) {
+    				    return "1";
+    			    }
+    		    }
     		}
-		}
+	    }
+	    
+	    if ($successCount > 0 && $successCount == count($items)) {
+            return "1";
+        }
 	}
-	public function get_payment_transaction_history()
-	{
+	public function send_dorm_notif($items) {
+	    foreach ($items as $item) {
+            $userref = $item["userref"];
+            $dormref = $item["dormref"];
+            
+            $out = json_decode(json_decode($this->QuickLook("SELECT name FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
+        
+            $vtitle = "StudyHive";
+            $vdesc = "This is a reminder to update your listing named '" . $out[0]['name'] . "', for the upcoming semester. Please ensure your listing is up to date. If your listing is already current, you may disregard this message.";
+            $vreferencestarter = uniqid();
+            $current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+            $current_time = date('Y-m-d H:i:s');
+        
+            $out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$userref], true));
+            $outx = json_decode($out, true);
+            if (count($outx) == 1) {
+              if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$userref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) {
+                if ($this->push_notification($vtitle, $vdesc, $userref)) {
+                  $successCount++;
+                }
+              }
+            }
+        }
+        
+        if ($successCount > 0 && $successCount == count($items)) {
+            return "1";
+        }
+	}
+	public function get_payment_transaction_history() {
 		$out = json_decode(json_decode($this->QuickLook("SELECT * FROM tbl_transactions", []), true), true);
 		$toecho = "";
 		$del_icon="<i class='fa-light fa-trash fa-fw fa-lg'></i>";
@@ -356,24 +411,33 @@ class admin_query
 		    }
 		}
 	}
-	public function showhide_dorm_admin($userref, $dormref)
+	public function showhide_dorm_admin($items)
 	{
-	    $out = json_decode(json_decode($this->QuickLook("SELECT `name`,`hide` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
+	    foreach ($items as $item) {
+            $userref = $item["userref"];
+            $dormref = $item["dormref"];
+            
+            $out = json_decode(json_decode($this->QuickLook("SELECT `name`,`hide` FROM tbl_dorms WHERE id=? AND userref=?", [$dormref, $userref]), true), true);
 
-		$vtitle = "StudyHive";
-		$vdeschide = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been set to be hidden due to being inactive. If you believe this action was a mistake, kindly reach out to our team for assistance.";
-		$vdescshow = "We would like to notify you that your listing named '" . $out[0]['name'] . "' has been set to be unhidden. As a result, your listing is now visible and available for viewing. If you did not request this action or believe it was a mistake, please don't hesitate to contact our team immediately. ";
-		$vreferencestarter = uniqid();
-		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
-		$current_time = date('Y-m-d H:i:s');
-        
-		if ($this->QuickFire("UPDATE tbl_dorms SET `hide`=? WHERE id=?", [$out[0]['hide'] == 0 ? 1 : 0, $dormref])) {
-		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$userref, $vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $vreferencestarter, $current_timex, $current_time])) {
-		        if($this->push_notification($vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $userref)) {
-				    return "1";
-			    }
-		    }
-		}
+    		$vtitle = "StudyHive";
+    		$vdeschide = "We would like to notify you that your listing named '" . $out[0]['name'] . "', has been set to be hidden due to being inactive. If you believe this action was a mistake, kindly reach out to our team for assistance.";
+    		$vdescshow = "We would like to notify you that your listing named '" . $out[0]['name'] . "' has been set to be unhidden. As a result, your listing is now visible and available for viewing. If you did not request this action or believe it was a mistake, please don't hesitate to contact our team immediately. ";
+    		$vreferencestarter = uniqid();
+    		$current_timex = date('Y-m-d H:i:s', strtotime('+1 minute'));
+    		$current_time = date('Y-m-d H:i:s');
+            
+    		if ($this->QuickFire("UPDATE tbl_dorms SET `hide`=? WHERE id=?", [$out[0]['hide'] == 0 ? 1 : 0, $dormref])) {
+    		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?", [$userref, $vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $vreferencestarter, $current_timex, $current_time])) {
+    		        if($this->push_notification($vtitle, $out[0]['hide'] == 0 ? $vdeschide : $vdescshow, $userref)) {
+    				    return "1";
+    			    }
+    		    }
+    		}
+	    }
+		
+		if ($successCount > 0 && $successCount == count($items)) {
+            return "1";
+        }
 	}
 	public function statistics() {
 	    $notverified = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE is_verified = 0", [], true));

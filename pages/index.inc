@@ -47,7 +47,7 @@
                                             Discover convenience, comfort, and community, all at your fingertips. Simplify your accommodation search with StudyHive.
                                         </p>
 
-                                <a href="https://drive.google.com/file/d/1JIWcLfT16Jw6zxCGiieyhDzx9a9yiiuW/view?usp=drive_link">
+                                <a href="https://drive.google.com/file/d/1MVAcMlGin9yJ20kD4SGqlAGBMPP97NKI/view?usp=drive_link">
                                     <img src="./images/apk.png" style="width: 200px;"/>
                                 </a>
                             </div>

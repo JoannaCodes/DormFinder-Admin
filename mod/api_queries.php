@@ -19,7 +19,7 @@ class api_queries
     }
 
     public function getChatrooms($to_user) {
-        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_users.is_online, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent, tbl_chatrooms.pay_count FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
+        $statement = sprintf("SELECT tbl_chatrooms.from_user as id, tbl_users.username, tbl_users.is_online, tbl_chatrooms.unique_code, tbl_chatrooms.chatroom_code, tbl_users.imageUrl, tbl_chatrooms.pay_rent FROM tbl_chatrooms INNER JOIN tbl_users ON tbl_chatrooms.from_user = tbl_users.id  WHERE to_user = '%s' ORDER BY tbl_chatrooms.id DESC", $to_user);
 
         $result = $this->conn->query($statement);
 
@@ -59,7 +59,6 @@ class api_queries
                         'time' => $row2['time'] ?? 0,
                         'ownerid' => $row3['userref'],
                         'pay_rent' => (int) $row['pay_rent'],
-                        'pay_count' => (int) $row['pay_count'],
                         'is_online' => $row['is_online']
                     );
                 } else {
@@ -81,7 +80,6 @@ class api_queries
                         'time' => $row2['time'] ?? 0,
                         'ownerid' => $row3['userref'],
                         'pay_rent' => (int) $row['pay_rent'],
-                        'pay_count' => (int) $row['pay_count'],
                         'is_online' => $row['is_online']
                     );
                 }

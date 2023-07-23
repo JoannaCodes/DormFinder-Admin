@@ -144,32 +144,36 @@ switch ($tag) {
     break;
     case 'delete_dorm_admin':
         access();
-        $userref = $_POST["userref"];
-        $dormref = $_POST["dormref"];
+        $items = $_POST["items"]; // Retrieve the selected items from the AJAX request
     
-          $folderPath = 'uploads/dormImages/' . $dormref . '/';
+        foreach ($items as $item) {
+            $userref = $item['userref'];
+            $dormref = $item['dormref'];
     
-        if (is_dir($folderPath)) {
-          if (deleteDirectory($folderPath)) {
-            $out = adminq()->delete_dorm_admin($userref, $dormref);
-            if ($out == "1") {
-              echo json_encode(["message" => "Dorm deleted, notification sent to owner"]);
+            // Your code to delete the dorm directory and perform other operations using $userref and $dormref
+            $folderPath = 'uploads/dormImages/' . $dormref . '/';
+    
+            if (is_dir($folderPath)) {
+                if (deleteDirectory($folderPath)) {
+                    $out = adminq()->delete_dorm_admin($userref, $dormref);
+                    if ($out == "1") {
+                        echo json_encode(["message" => "Dorm deleted, notification sent to owner"]);
+                    } else {
+                        echo json_encode(["message" => "Failed to delete dorm listing"]);
+                    }
+                } else {
+                    echo 'failed.';
+                }
             } else {
-              echo json_encode(["message" => "Failed to deleted dorm listing"]);
+                echo json_encode(["message" => "Folder does not exist"]);
             }
-          } else {
-            echo 'failed.';
-          }
-        } else {
-          echo json_encode(["message" => "Folder does not exist"]);
         }
     break;
     case 'send_dorm_notif':
         access();
-        $userref = $_POST["userref"];
-        $dormref = $_POST["dormref"];
+        $items = $_POST["items"];
     
-        $out = adminq()->send_dorm_notif($userref, $dormref);
+        $out = adminq()->send_dorm_notif($items);
         if ($out == "1") {
               echo json_encode(["message" => "Notification sent to dorm owner"]);
         } else {
@@ -186,6 +190,14 @@ switch ($tag) {
     case 'get_dormlisting':
         access();
         echo adminq()->get_dormlisting();
+    break;
+    case 'get_duedatelisting':
+        access();
+        echo adminq()->get_duedatelisting();
+    break;
+    case 'get_report_dormlisting':
+        access();
+        echo adminq()->get_report_dormlisting();
     break;
     case 'get_users':
         access();
@@ -216,12 +228,11 @@ switch ($tag) {
     break;
     case 'showhide_dorm_admin':
         access();
-        $userref = $_POST["userref"];
-        $dormref = $_POST["dormref"];
+        $items = $_POST["items"]; 
     
-        $out = adminq()->showhide_dorm_admin($userref, $dormref);
+        $out = adminq()->showhide_dorm_admin($items);
         if ($out == "1") {
-          echo json_encode(["message" => "A notification has been sent to the owner regarding this action."]);
+          echo json_encode(["message" => "Notification has been sent to the owner(s) regarding this action."]);
         } else {
           echo json_encode(["message" => "Failed to do hide dorm"]);
         }

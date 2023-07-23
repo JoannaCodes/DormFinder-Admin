@@ -91,7 +91,7 @@ class sdm_query
 		if (count($outx) == 1) {
 			if (($outx[0]["username"] == $username || $outx[0]["identifier"] == $username)) {
 				if ($outx[0]["password"] == $password) {
-					echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user"]);
+					echo json_encode(["username" => $outx[0]['username'], "id" => $outx[0]['id'], "status" => true, "mode" => "user", "is_email_verified" => (int)$outx[0]['is_email_verified']]);
 					
 					$dtnow = date("Y-m-d H:i:s");
 				    $this->QuickFire("INSERT INTO tbl_notif_fcmkeys SET user_ref=?, fcm_key=?, created_at=?",[$outx[0]['id'],$fcm,$dtnow]);
@@ -101,21 +101,20 @@ class sdm_query
 		}
 	  }
 	}
-	public function signup_app($email, $username, $password)
-	{
-        $result = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username = ? AND identifier = ?", [$username, $email], true));
-        $existingUser = json_decode($result, true);
+	public function signup_app($id, $email, $username, $password, $verifyKey)
+    {
+    	$result = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE username = ? AND identifier = ?", [$username, $email], true));
+    	$existingUser = json_decode($result, true);
     
-        if (empty($existingUser)) {
-    		$id = uniqid();
-    		if ($this->QuickFire("INSERT INTO tbl_users SET id=?, identifier=?, username=?, password=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password])) 
+    	if (empty($existingUser)) {
+    		if ($this->QuickFire("INSERT INTO tbl_users SET id=?, identifier=?, username=?, `password`=?, unique_verifykey=?, updated_at=now(), created_at=now()", [$id, $email, $username, $password, $verifyKey])) 
     		{
     			return "1";
-    	    }
-        } else {
+    		}
+    	} else {
     		return "0";
-		}
-	}
+    	}
+    }
 	public function logout_app($userref) {
 	    if ($this->QuickFire("DELETE FROM tbl_notif_fcmkeys WHERE user_ref=?",[$userref])) {
 			return "1";
@@ -325,6 +324,8 @@ class sdm_query
 		$longitude,
 		$latitude,
 		$price,
+		$payduration, 
+		$paypolicy,
 		$slots,
 		$desc,
 		$hei,
@@ -348,12 +349,12 @@ class sdm_query
 		$wifi
 		){
 		$dormQuery = empty($dormImages)
-				? "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?"
-				: "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?";
+				? "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, payment_duration=?, payment_policy=?, slots=?, `desc`=?, hei=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?"
+				: "UPDATE tbl_dorms SET `name`=?, `address`=?, longitude=?, latitude=?, price=?, payment_duration=?, payment_policy=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, updatedAt=NOW() WHERE id=? AND userref=?";
 
 		$dormParams = empty($dormImages)
-				? [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref]
-				: [$name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref];
+				? [$name, $address, $longitude, $latitude, $price, $payduration, $paypolicy, $slots, $desc, $hei, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref]
+				: [$name, $address, $longitude, $latitude, $price, $payduration, $paypolicy, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advDep, $secDep, $util, $minStay, $dormref, $userref];
 
 		$amenitiesQuery = "UPDATE tbl_amenities SET aircon=?, elevator=?, beddings=?, kitchen=?, laundry=?, lounge=?, parking=?, `security`=?, study_room=?, wifi=? WHERE dormref=?";
 		$amenitiesParams = [$aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $studyRoom, $wifi, $dormref];
@@ -376,6 +377,8 @@ class sdm_query
 		$longitude,
 		$latitude,
 		$price,
+		$payduration, 
+		$paypolicy,
 		$slots,
 		$desc,
 		$hei,
@@ -398,8 +401,8 @@ class sdm_query
 		$studyRoom,
 		$wifi
 		){
-		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
-		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
+		$dormquery = "INSERT INTO tbl_dorms SET id=?, userref=?, `name`=?, `address`=?, longitude=?, latitude=?, price=?, payment_duration=?, payment_policy=?, slots=?, `desc`=?, hei=?, images=?, visitors=?, pets=?, curfew=?, adv_dep=?, sec_dep=?, util=?, min_stay=?, createdAt=now(), updatedAt=now()";
+		$dormparams = [$id, $userref, $name, $address, $longitude, $latitude, $price, $payduration, $paypolicy, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay];
 
 		$amenitiesQuery = "INSERT INTO tbl_amenities SET dormref=?, aircon=?, elevator=?, beddings=?, kitchen=?, laundry=?, lounge=?, parking=?, security=?, study_room=?, wifi=?";
     $amenitiesParams = [$id, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $studyRoom, $wifi];
@@ -424,7 +427,7 @@ class sdm_query
 			return "1";
 		}
 	}
-	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $paycount) {
+	public function payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $payment_duration, $chatroom_code) {
 	  $vtitle = "StudyHive";
 		$vdesc = "Received payment from {$token} for {$ownername} with amount: ₱{$amount}";
 		$vreferencestarter = uniqid();
@@ -433,13 +436,96 @@ class sdm_query
 	
 		if ($this->QuickFire("INSERT INTO tbl_transactions SET `id`=?, token=?, userref=?, ownerref=?, ownername=?, dormref=?, amount=?", [$id, $token, $userref, $ownerref, $ownername, $dormref, $amount])) 
 		{
-		    if ($this->QuickFire("UPDATE tbl_chatrooms SET pay_count=? WHERE to_user=?", [$paycount, $userref])) {
-		        if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) 
-    			{
-    				$this->push_notification($vtitle, $vdesc, $userref);
-    				$this->push_notification($vtitle, $vdesc, $ownerref);
-    				return "1";
+		    if ($this->QuickFire("INSERT INTO tbl_notifications SET user_ref=?,title=?,ndesc=?,notif_uniqid=?,scheduled=?,created=?",[$ownerref, $vtitle, $vdesc, $vreferencestarter, $current_timex, $current_time])) 
+			{
+			    if($payment_duration == "monthly") {
+			        $date = date('Y-m-d', strtotime("+1 month"));
+			    } else if($payment_duration == "quarterly") {
+			        $date = date('Y-m-d', strtotime("+4 months"));
+			    } else if($payment_duration == "annually") {
+			        $date = date('Y-m-d', strtotime("+12 months"));
 			    }
+			    $this->QuickFire("UPDATE tbl_dorms SET who_own_this_dorm=?, paid_time=now(), end_time=? WHERE id=?", [$userref, $date, $dormref]);
+			    $this->QuickFire("UPDATE tbl_chatrooms SET pay_rent = 2 WHERE chatroom_code = ?", [$chatroom_code]);
+				$this->push_notification($vtitle, $vdesc, $userref);
+				$this->push_notification($vtitle, $vdesc, $ownerref);
+				
+		        
+		        $out = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$userref], true));
+		        $outx = json_decode($out, true);
+		        
+		        $out1 = json_decode($this->QuickLook("SELECT * FROM tbl_users WHERE id=?", [$ownerref], true));
+		        $out1x = json_decode($out1, true);
+		
+				$subject = "StudyHive Detailed Payment";
+				$body = '<!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <link rel="stylesheet" href="https://use.typekit.net/pua2gnh.css">
+                                <title>StudyHive</title>
+                                <style>.container{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-color: #F4F7F9; } .email{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-repeat: repeat; height: auto; width: auto; padding-top: 40px; padding-bottom: 40px; margin-left: auto; margin-right: auto; } .content{ text-decoration: none; font-family: "proxima-nova", sans-serif !important; background-color: #ffffff; padding: 80px; width: 680px; margin-left: auto; margin-right: auto; } .footer{ text-decoration: none; padding: 32px 80px; width: 680px; text-align: center; align-items: center; margin-left: auto; margin-right: auto; } .footer .git{ margin-top: 10px; } .icons{ margin: 0 15.75px; } .content .logo{ margin-bottom: 50.52px; } .p-space{ margin-bottom: 40px; } .btn{ margin-left: 25%; width: 328px; } .blue-btn{ margin-bottom: 8px; padding: 0px; } .link{ background-color: #F4F7F9; border-radius: 5px; padding: 8px 16px; cursor: pointer; word-break: break-all; } .link a{ color: #0B6B9F; } .copyright{ color: #566376; text-align: center; } .copyright-first{ margin-left: auto; margin-right: auto; font-size: 13px; width: 519px; } .small-italic{ font-size: 12px; font-style: italic; } .copyright a{ color: #566376; } .t-p a{ text-decoration: underline; cursor: pointer; } p{ font-size: 19px; } button{ background-color: #0E898B; border: none; color: #fff; letter-spacing: 2px; border-radius: 5px; padding: 17px 34px; cursor: pointer; transition: .1s ease; width: 328px; } .button{ padding: 17px 0px; } button:hover { background-color: #0b6768; } .program-details{ padding: 8px 56px 32px 56px; border: 1px solid #E6EAED; border-radius: 10px; margin-bottom: 24px; } .program-details-header{ text-align: center; } .program-details-header p{ margin: 0px; } .program-details-body{ margin-top: 32px; } .program-details-body div{ margin-bottom: 16px; } .program-details-body p{ margin: 0px; } .sm-bold{ font-size: 14px; font-weight: 600; } .sm-normal{ font-size: 14px; font-weight: 14px; } .ul{ margin: 0px; } .table-td{ width: 204px; padding: 24px 24px 24px 0px; } table tr th{ text-align: left; } .support{ color: #0E898B; text-decoration: none; cursor: pointer; }
+                                </style>
+                            </head>
+                        
+                            <body>
+                                <div class="container">
+                                    <div class="email">
+                                        <div class="content">
+                                            <div class="logo" style="font-weight: bold; font-size: 25px;">
+                                                StudyHive
+                                            </div>
+                        
+                                            <div>
+                                                <p class="p-space">
+                                                    Payment Detailed Receipt
+                                                    <table style="width:100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <td>Name</td>
+                                                                <td>'.$outx[0]['username'].'</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>Paid Time</td>
+                                                                <td>'.date("M d, Y h:iA", time()).'</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>End Time</td>
+                                                                <td>'.$date.'</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Total</td>
+                                                                <td>'.$amount.'</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </p>
+                                            </div>
+                        
+                                            <br><div class="copyright">
+                                                <p class="copyright-first">
+                                                    © 2023 StudyHive. All rights reserved.
+                                                </p>
+                                                <p class="small-italic">
+                                                    This is a system generated email. We might not be able to read your message if you respond here.
+                                                </p><br>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </body>
+                        </html>';
+				$altBody = "
+					StudyHive Detailed Payment
+				";
+				sendEmail($out1x[0]['identifier'], $subject, $body, $altBody);
+				sendEmail($outx[0]['identifier'], $subject, $body, $altBody);
+				return "1";
 		    }
 		}
 	}

@@ -102,6 +102,7 @@
                     break;
                     default:
                         include('./pages/dashboard.inc');
+                        include('./pages/report_generation.inc');
                     break;
                 }
             ?>

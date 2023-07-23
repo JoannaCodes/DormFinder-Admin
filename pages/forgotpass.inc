@@ -60,6 +60,7 @@
                 			alert("An error occurred: " + error);
                 		},
                 	})
+                	return false;
                 } else {
                     alert("Password and Confirm Password doesn\'t match!");
                     return false;

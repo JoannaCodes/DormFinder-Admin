@@ -70,7 +70,68 @@ if (authenticate($authKey)) {
 				echo json_encode(["username" => 'guest', "id" => uniqid(), "status" => true, "mode" => "guest"]);
 				break;
 			case 'signup_app':
-				echo sdmq()->signup_app(_validate($_POST["email"]), _validate($_POST["username"]), _validate($_POST["password"]));
+			    $id = uniqid();
+				$email = _validate($_POST['email']);
+				$username = _validate($_POST["username"]);
+				$password = _validate($_POST["password"]);
+				$verifykey = md5(md5(uniqid(rand(), true)));
+				
+				$subject = "StudyHive Registration - Verify Email Address";
+				$body = '<!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <link rel="stylesheet" href="https://use.typekit.net/pua2gnh.css">
+                                <title>StudyHive</title>
+                                <style>.container{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-color: #F4F7F9; } .email{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-repeat: repeat; height: auto; width: auto; padding-top: 40px; padding-bottom: 40px; margin-left: auto; margin-right: auto; } .content{ text-decoration: none; font-family: "proxima-nova", sans-serif !important; background-color: #ffffff; padding: 80px; width: 680px; margin-left: auto; margin-right: auto; } .footer{ text-decoration: none; padding: 32px 80px; width: 680px; text-align: center; align-items: center; margin-left: auto; margin-right: auto; } .footer .git{ margin-top: 10px; } .icons{ margin: 0 15.75px; } .content .logo{ margin-bottom: 50.52px; } .p-space{ margin-bottom: 40px; } .btn{ margin-left: 25%; width: 328px; } .blue-btn{ margin-bottom: 8px; padding: 0px; } .link{ background-color: #F4F7F9; border-radius: 5px; padding: 8px 16px; cursor: pointer; word-break: break-all; } .link a{ color: #0B6B9F; } .copyright{ color: #566376; text-align: center; } .copyright-first{ margin-left: auto; margin-right: auto; font-size: 13px; width: 519px; } .small-italic{ font-size: 12px; font-style: italic; } .copyright a{ color: #566376; } .t-p a{ text-decoration: underline; cursor: pointer; } p{ font-size: 19px; } button{ background-color: #0E898B; border: none; color: #fff; letter-spacing: 2px; border-radius: 5px; padding: 17px 34px; cursor: pointer; transition: .1s ease; width: 328px; } .button{ padding: 17px 0px; } button:hover { background-color: #0b6768; } .program-details{ padding: 8px 56px 32px 56px; border: 1px solid #E6EAED; border-radius: 10px; margin-bottom: 24px; } .program-details-header{ text-align: center; } .program-details-header p{ margin: 0px; } .program-details-body{ margin-top: 32px; } .program-details-body div{ margin-bottom: 16px; } .program-details-body p{ margin: 0px; } .sm-bold{ font-size: 14px; font-weight: 600; } .sm-normal{ font-size: 14px; font-weight: 14px; } .ul{ margin: 0px; } .table-td{ width: 204px; padding: 24px 24px 24px 0px; } table tr th{ text-align: left; } .support{ color: #0E898B; text-decoration: none; cursor: pointer; }
+                                </style>
+                            </head>
+                        
+                            <body>
+                                <div class="container">
+                                    <div class="email">
+                                        <div class="content">
+                                            <div class="logo" style="font-weight: bold; font-size: 25px;">
+                                                StudyHive
+                                            </div>
+                        
+                                            <div>
+                                                <p class="p-space">
+                                                    <h1>Verify email address - StudyHive</h1>
+                                                    <p>You can view this to verify your email address</p>
+                                                    <a href="https://studyhive.social/?email_verification='.$verifykey.'">StudyHive | Account Registration</a>
+                                                    <p>Thank you,</p>
+                                                    <p>The StudyHive Team</p>
+                                                </p>
+                                            </div>
+                        
+                                            <br><div class="copyright">
+                                                <p class="copyright-first">
+                                                    © 2023 StudyHive. All rights reserved.
+                                                </p>
+                                                <p class="small-italic">
+                                                    This is a system generated email. We might not be able to read your message if you respond here.
+                                                </p><br>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </body>
+                        </html>';
+				$altBody = "
+					StudyHive Registration - Verify Email Address
+					You can view this to verify your email address.
+					Thank you,
+					The StudyHive Team
+				";
+				if (sdmq()->signup_app($id, $email, $username, $password, $verifykey) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+					echo "success";
+				} else {
+					echo "failed";
+				}
 				break;	
 			case 'logout_app':
 			    echo sdmq()->logout_app(_validate($_POST['userref']));
@@ -276,6 +337,9 @@ if (authenticate($authKey)) {
 				$security = _validate($_POST['security']);
 				$study_room = _validate($_POST['study_room']);
 				$wifi = _validate($_POST['wifi']);
+				
+				$payduration = _validate($_POST['payment_duration']);
+				$paypolicy = _validate($_POST['payment_policy']);
 
 				$advdep = _validate($_POST["advance_deposit"]);
 				$secdep = _validate($_POST["security_deposit"]);
@@ -333,7 +397,7 @@ if (authenticate($authKey)) {
 				}
 		
 				$dormImages = implode(',', $filenames);
-				$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
+				$out = sdmq()->post_dorm($id, $userref, $name, $address, $longitude, $latitude, $price, $payduration, $paypolicy, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 				if ($uploadStatus && $out == "1") {
 					echo 'success';
 				} else {
@@ -370,6 +434,9 @@ if (authenticate($authKey)) {
 				$secdep = _validate($_POST["security_deposit"]);
 				$util = _validate($_POST["utilities"]);
 				$minstay = _validate($_POST["minimum_stay"]);
+				
+				$payduration = _validate($_POST['payment_duration']);
+				$paypolicy = _validate($_POST['payment_policy']);
 		
 				// Convert to boolean
 				$visitors = (int)filter_var($visitors, FILTER_VALIDATE_BOOLEAN);
@@ -436,7 +503,7 @@ if (authenticate($authKey)) {
 					$dormImages = implode(',', $filenames);
 				}
 				
-				$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
+				$out = sdmq()->update_dorm($dormref, $userref, $name, $address, $longitude, $latitude, $price, $payduration, $paypolicy, $slots, $desc, $hei, $dormImages, $visitors, $pets, $curfew, $advdep, $secdep, $util, $minstay, $aircon, $elevator, $beddings, $kitchen, $laundry, $lounge, $parking, $security, $study_room, $wifi);
 				if ($uploadStatus && $out == "1") {
 					echo 'success';
 				} else {
@@ -518,11 +585,11 @@ if (authenticate($authKey)) {
 			    $ownername = _validate($_POST['ownername']);
 			    $dormref = _validate($_POST['dormref']);
 			    $amount = _validate($_POST['amount']);
-			    $paycount = _validate($_POST['paycount']);
 			    
-			    $paycount = (int)$paycount + 1;
+			    $payment_duration = _validate($_POST['payment_duration']);
+			    $chatroom_code = _validate($_POST['chatroom_code']);
 			    
-			    $out = sdmq()->payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $paycount);
+			    $out = sdmq()->payment($id, $token, $userref, $ownerref, $ownername, $dormref, $amount, $payment_duration, $chatroom_code);
 				if ($out == "1") {
 					echo 'success';
 				} else {
@@ -537,7 +604,35 @@ if (authenticate($authKey)) {
 		}
 	} 
 } else {
-    if (isset($_GET["forgotpass"])) {
+    if (isset($_GET["email_verification"])) {
+        $email_verification = $_GET["email_verification"];
+        include_once "inc/conn.php";
+        $statement = sprintf("SELECT * FROM `tbl_users` WHERE `unique_verifykey` = '%s' AND `is_email_verified` = 0", $email_verification);
+        $result = conn()->query($statement);
+        
+        if ($result->num_rows > 0) {
+            // exist
+            if(isset($_POST['submit'])) {
+                $post_verifykey = $_POST['verifykey'];
+                
+                $statement2 = sprintf("SELECT * FROM `tbl_users` WHERE `unique_verifykey` = '%s' AND `is_email_verified` = 0", $post_verifykey);
+                $result2 = conn()->query($statement2);
+                
+                if ($result2->num_rows > 0) {
+                    $statement3 = sprintf("UPDATE `tbl_users` SET `unique_verifykey` = NULL, `is_email_verified` = 1 WHERE `unique_verifykey` = '%s' AND `is_email_verified` = 0", $post_verifykey);
+                    $result3 = conn()->query($statement3);
+                    echo json_encode(['message'=>'Successfully', 'error'=> 200]);
+                } else {
+                    echo json_encode(['message'=>'Error, the code is expired!', 'error'=> 400]);
+                }
+            } else {
+                include('./pages/email_verification.inc');
+            }
+        } else {
+            // not exist
+            include('./pages/error_forgotpass.inc');
+        }
+    } else if (isset($_GET["forgotpass"])) {
         $forgotpass = $_GET["forgotpass"];
         include_once "inc/conn.php";
         $statement = sprintf("SELECT * FROM `tbl_users` WHERE `unique_forgot` = '%s' AND `is_forgot` = 1", $forgotpass);
