@@ -6,7 +6,8 @@ require 'plugins/PHPMailer/src/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-function getAddressCoordinates($address) {
+function getAddressCoordinates($address) 
+{
 	// Encode the address
 	$encodedAddress = urlencode($address);
 	
@@ -34,7 +35,8 @@ function getAddressCoordinates($address) {
 	return null;
 }
 
-function deleteDirectory($dir) {
+function deleteDirectory($dir) 
+{
 	if (!file_exists($dir)) {
 		return true;
 	}
@@ -56,7 +58,8 @@ function deleteDirectory($dir) {
 	return rmdir($dir);
 }
 
-function generatePassword() {
+function generatePassword() 
+{
 	// Define the character set for the password
 	$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
 
@@ -68,17 +71,18 @@ function generatePassword() {
 
 	// Generate the password
 	for ($i = 0; $i <= 8; $i++) {
-			// Get a random index within the character set
-			$randomIndex = mt_rand(0, $characterCount - 1);
+		// Get a random index within the character set
+		$randomIndex = mt_rand(0, $characterCount - 1);
 
-			// Append the randomly selected character to the password string
-			$password .= $characters[$randomIndex];
+		// Append the randomly selected character to the password string
+		$password .= $characters[$randomIndex];
 	}
 
 	return $password;
 }
 
-function sendEmail($email, $subject, $body, $altbody){
+function sendEmail($email, $subject, $body, $altbody)
+{
 	$mail = new PHPMailer(true);
 
 	try {

@@ -50,6 +50,7 @@
         <header class="header" id="header">
             <div class="header_toggle"><i class='fa-regular fa-bars' id="header-toggle"></i></div>
         </header>
+
         <div class="l-navbar" id="nav-bar">
             <nav class="nav">
                 <div>
@@ -72,9 +73,9 @@
                 <a href="#" data-bs-toggle="modal" data-bs-target="#logoutModal" class="nav_link logout"><i class="fa-solid fa-right-from-bracket"></i> <span class="nav_name">Log Out</span></a>
             </nav>
         </div>
+
         <div class="py-5">
             <?php
-                
                 switch($page) {
                     case 'admin_users':
                         include('./pages/admin_users.inc');
@@ -106,7 +107,9 @@
                     break;
                 }
             ?>
+
             <div style="clear:both;"></div>
+
             <div class="container mt-4 mx-auto ps-5 pe-5 mt-5">
                 <div class="row">
                     <div class="col-12">
@@ -115,8 +118,8 @@
                 </div>
             </div>
         </div>
-        <script>
-            
+
+        <script> 
             $(document).ready(function() {
                 function showNavbar(toggleId, navId, bodyId, headerId) {
                     const toggle = $('#' + toggleId);
@@ -153,6 +156,7 @@
                 linkColor.on('click', colorLink);
             });
         </script>
+
         <!-- Modal -->
         <div class="modal fade" id="logoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         	<div class="modal-dialog modal-dialog-centered">
@@ -167,6 +171,7 @@
         		</div>
         	</div>
         </div>
+
         <script type="text/javascript">
             function logout() {
             	window.location.href="./logout.php";

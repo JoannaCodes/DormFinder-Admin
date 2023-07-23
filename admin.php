@@ -10,11 +10,11 @@
     <head>
     	<title>StudyHive</title>
     	<meta charset="UTF-8" />
-        <meta name="description" content="StudyHive" />
-        <meta name="keywords" content="StudyHive" />
-        <meta name="author" content="StudyHive" />
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" type="image/png" href="./images/logo.png" />
+			<meta name="description" content="StudyHive" />
+			<meta name="keywords" content="StudyHive" />
+			<meta name="author" content="StudyHive" />
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<link rel="icon" type="image/png" href="./images/logo.png" />
     	<!-- jQuery -->
     	<script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
     	<!-- Bootstrap -->
@@ -31,15 +31,16 @@
     	<nav class="navbar navbar-expand-lg navbar-light bg-light">
     		<div class="container">
     			<a class="navbar-brand" href="#">
-    			    <img src="./images/logo.png" style="width: 30px;height: 30px;margin-right: 10px;margin-top: -10px;">
-    			    StudyHive
+						<img src="./images/logo.png" style="width: 30px;height: 30px;margin-right: 10px;margin-top: -10px;">
+						StudyHive
     			</a>
     		</div>
     	</nav>
+
     	<div class="container mt-5">
     		<div class="row">
     		    <div class="col-0 col-xs-0 col-sm-0 col-md-9 col-lg-9 col-lg-9">
-    		        <img src="./images/undraw_Login_re_4vu2.png" class="img-fluid"/>
+    		      <img src="./images/undraw_Login_re_4vu2.png" class="img-fluid"/>
     		    </div>
     			<div class="col-12 col-xs-12 col-sm-12 col-md-3 col-lg-3 col-lg-3 mt-4">
     				<h2 class="mb-4">Login to StudyHive</h2>
@@ -59,17 +60,19 @@
     			</div>
     		</div>
     	</div>
+
     	<div class="container mt-5 w-50">
     		<div class="row justify-content-center">
-    		    &copy; 2023 - <b style="color: #0E898B;display:contents;">StudyHive</b>
+    		  &copy; 2023 - <b style="color: #0E898B;display:contents;">StudyHive</b>
     		</div>
-        </div>
+      </div>
+
     	<script>
         	$(document).ready(function() {
         		$("#login-form").submit(function(event) {
         			event.preventDefault(); // prevent form from submitting normally
                   
-                 	var btn = $('#login-btn');
+            	var btn = $('#login-btn');
         
         			btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
         			btn.prop('disabled', true);
@@ -91,10 +94,10 @@
         			}).done(function(data) {
         				if(data['status'] === true || data['status'] === "true") {
         				    Swal.fire({
-                              icon: 'success',
-                              title: 'Good job!',
-                              text: 'Successfully login! Wait for 5 seconds to redirect you in main page.',
-                            })
+											icon: 'success',
+											title: 'Good job!',
+											text: 'Successfully login! Wait for 5 seconds to redirect you in main page.',
+										})
                             
         				    setTimeout(() => {
         				        window.location.href="./home.php";
@@ -102,12 +105,13 @@
         					
         				} else {
         				    Swal.fire({
-                              icon: 'error',
-                              title: 'Oops...',
-                              text: 'Invalid email/password.',
-                            })
+											icon: 'error',
+											title: 'Oops...',
+											text: 'Invalid email/password.',
+										})
         				}
-                      	btn.html('Login');
+
+                btn.html('Login');
         				btn.prop('disabled', false);
         			})
         			.fail(function(data) {

@@ -27,7 +27,7 @@ function access() {
     }
 }
 switch ($tag) {
-  // Admin Queries
+    // Admin Queries
     case 'change_status':
         access();
         $out = adminq()->change_status($_POST["btn_value"],$_POST['user_id']);
@@ -63,84 +63,84 @@ switch ($tag) {
     break;
     case 'add_admin':
         access();
-    $email = $_POST["email"];
-    $password = generatePassword();
-    $subject = "Invitation to Admin Website - Login Credentials Inside";
-    $body = '
-      <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="https://use.typekit.net/pua2gnh.css">
-            <title>StudyHive</title>
-            <style>
-                .container{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-color: #F4F7F9; } .email{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-repeat: repeat; height: auto; width: auto; padding-top: 40px; padding-bottom: 40px; margin-left: auto; margin-right: auto; } .content{ text-decoration: none; font-family: "proxima-nova", sans-serif !important; background-color: #ffffff; padding: 80px; width: 680px; margin-left: auto; margin-right: auto; } .footer{ text-decoration: none; padding: 32px 80px; width: 680px; text-align: center; align-items: center; margin-left: auto; margin-right: auto; } .footer .git{ margin-top: 10px; } .icons{ margin: 0 15.75px; } .content .logo{ margin-bottom: 50.52px; } .p-space{ margin-bottom: 40px; } .btn{ margin-left: 25%; width: 328px; } .blue-btn{ margin-bottom: 8px; padding: 0px; } .link{ background-color: #F4F7F9; border-radius: 5px; padding: 8px 16px; cursor: pointer; word-break: break-all; } .link a{ color: #0B6B9F; } .copyright{ color: #566376; text-align: center; } .copyright-first{ margin-left: auto; margin-right: auto; font-size: 13px; width: 519px; } .small-italic{ font-size: 12px; font-style: italic; } .copyright a{ color: #566376; } .t-p a{ text-decoration: underline; cursor: pointer; } p{ font-size: 19px; } button{ background-color: #0E898B; border: none; color: #fff; letter-spacing: 2px; border-radius: 5px; padding: 17px 34px; cursor: pointer; transition: .1s ease; width: 328px; } .button{ padding: 17px 0px; } button:hover { background-color: #0b6768; } .program-details{ padding: 8px 56px 32px 56px; border: 1px solid #E6EAED; border-radius: 10px; margin-bottom: 24px; } .program-details-header{ text-align: center; } .program-details-header p{ margin: 0px; } .program-details-body{ margin-top: 32px; } .program-details-body div{ margin-bottom: 16px; } .program-details-body p{ margin: 0px; } .sm-bold{ font-size: 14px; font-weight: 600; } .sm-normal{ font-size: 14px; font-weight: 14px; } .ul{ margin: 0px; } .table-td{ width: 204px; padding: 24px 24px 24px 0px; } table tr th{ text-align: left; } .support{ color: #0E898B; text-decoration: none; cursor: pointer; }
-            </style>
-        </head>
-    
-        <body>
-            <div class="container">
-                <div class="email">
-                    <div class="content">
-                        <div class="logo" style="font-weight: bold; font-size: 25px;">
-                            StudyHive
-                        </div>
-    
-                        <div>
-                            <p class="p-space">
-                                <h1>Welcome to the StudyHive Team</h1>
-                                <p>Congratulations! You have been invited as a new admin.</p>
-                                <p>Please use the following login credentials to access the admin website:</p>
-                                <ul>
-                                    <li><strong>Email:</strong> '.$email.'</li>
-                                    <li><strong>Password:</strong> '.$password.'</li>
-                                </ul>
-                            </p>
-                        </div>
-                        <div class="btn">
-                            <div class="blue-btn">
-                                <a href="'.$domain.'"><button class="button">LOG IN</button>
-                                </a>
+        $email = $_POST["email"];
+        $password = generatePassword();
+        $subject = "Invitation to Admin Website - Login Credentials Inside";
+        $body = '
+        <!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <link rel="stylesheet" href="https://use.typekit.net/pua2gnh.css">
+                    <title>StudyHive</title>
+                    <style>
+                        .container{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-color: #F4F7F9; } .email{ font-family: "proxima-nova", sans-serif !important; align-items: center; background-repeat: repeat; height: auto; width: auto; padding-top: 40px; padding-bottom: 40px; margin-left: auto; margin-right: auto; } .content{ text-decoration: none; font-family: "proxima-nova", sans-serif !important; background-color: #ffffff; padding: 80px; width: 680px; margin-left: auto; margin-right: auto; } .footer{ text-decoration: none; padding: 32px 80px; width: 680px; text-align: center; align-items: center; margin-left: auto; margin-right: auto; } .footer .git{ margin-top: 10px; } .icons{ margin: 0 15.75px; } .content .logo{ margin-bottom: 50.52px; } .p-space{ margin-bottom: 40px; } .btn{ margin-left: 25%; width: 328px; } .blue-btn{ margin-bottom: 8px; padding: 0px; } .link{ background-color: #F4F7F9; border-radius: 5px; padding: 8px 16px; cursor: pointer; word-break: break-all; } .link a{ color: #0B6B9F; } .copyright{ color: #566376; text-align: center; } .copyright-first{ margin-left: auto; margin-right: auto; font-size: 13px; width: 519px; } .small-italic{ font-size: 12px; font-style: italic; } .copyright a{ color: #566376; } .t-p a{ text-decoration: underline; cursor: pointer; } p{ font-size: 19px; } button{ background-color: #0E898B; border: none; color: #fff; letter-spacing: 2px; border-radius: 5px; padding: 17px 34px; cursor: pointer; transition: .1s ease; width: 328px; } .button{ padding: 17px 0px; } button:hover { background-color: #0b6768; } .program-details{ padding: 8px 56px 32px 56px; border: 1px solid #E6EAED; border-radius: 10px; margin-bottom: 24px; } .program-details-header{ text-align: center; } .program-details-header p{ margin: 0px; } .program-details-body{ margin-top: 32px; } .program-details-body div{ margin-bottom: 16px; } .program-details-body p{ margin: 0px; } .sm-bold{ font-size: 14px; font-weight: 600; } .sm-normal{ font-size: 14px; font-weight: 14px; } .ul{ margin: 0px; } .table-td{ width: 204px; padding: 24px 24px 24px 0px; } table tr th{ text-align: left; } .support{ color: #0E898B; text-decoration: none; cursor: pointer; }
+                    </style>
+                </head>
+            
+                <body>
+                    <div class="container">
+                        <div class="email">
+                            <div class="content">
+                                <div class="logo" style="font-weight: bold; font-size: 25px;">
+                                    StudyHive
+                                </div>
+            
+                                <div>
+                                    <p class="p-space">
+                                        <h1>Welcome to the StudyHive Team</h1>
+                                        <p>Congratulations! You have been invited as a new admin.</p>
+                                        <p>Please use the following login credentials to access the admin website:</p>
+                                        <ul>
+                                            <li><strong>Email:</strong> '.$email.'</li>
+                                            <li><strong>Password:</strong> '.$password.'</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                                <div class="btn">
+                                    <div class="blue-btn">
+                                        <a href="'.$domain.'"><button class="button">LOG IN</button>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+            
+                                <br><div class="copyright">
+                                    <p class="copyright-first">
+                                        © 2023 StudyHive. All rights reserved.
+                                    </p>
+                                    <p class="small-italic">
+                                        This is a system generated email. We might not be able to read your message if you respond here.
+                                    </p><br>
+                                </div>
+                                
                             </div>
                         </div>
-                        
-    
-                        <br><div class="copyright">
-                            <p class="copyright-first">
-                                © 2023 StudyHive. All rights reserved.
-                            </p>
-                            <p class="small-italic">
-                                This is a system generated email. We might not be able to read your message if you respond here.
-                            </p><br>
-                        </div>
-                        
                     </div>
-                </div>
-            </div>
-        </body>
-    </html>
-    ';
+                </body>
+            </html>
+        ';
 
-    $altBody = "
-        Welcome to the Admin Website
+        $altBody = "
+            Welcome to the Admin Website
 
-        Congratulations! You have been invited as a new admin.
+            Congratulations! You have been invited as a new admin.
 
-        Please use the following login credentials to access the admin website:
+            Please use the following login credentials to access the admin website:
 
-        - Username: {$email}
-        - Password: {$password}
+            - Username: {$email}
+            - Password: {$password}
 
-        Visit the Admin Website ({$domain}) to log in.
-    ";
+            Visit the Admin Website ({$domain}) to log in.
+        ";
 
-    if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
-        echo json_encode(["message" => "New admin added"]);
-    } else {
-        echo json_encode(["message" => "Failed to add admin"]);
-    }
+        if (adminq()->new_admin($email, $password) == "1" && sendEmail($email, $subject, $body, $altBody)) {
+            echo json_encode(["message" => "New admin added"]);
+        } else {
+            echo json_encode(["message" => "Failed to add admin"]);
+        }
     break;
     case 'delete_dorm_admin':
         access();
@@ -175,9 +175,9 @@ switch ($tag) {
     
         $out = adminq()->send_dorm_notif($items);
         if ($out == "1") {
-              echo json_encode(["message" => "Notification sent to dorm owner"]);
+            echo json_encode(["message" => "Notification sent to dorm owner"]);
         } else {
-              echo json_encode(["message" => "Failed to send notification"]);
+            echo json_encode(["message" => "Failed to send notification"]);
         }
     break;
     case 'login':
@@ -271,8 +271,7 @@ switch ($tag) {
     break;
 }
 
-function adminq()
-{
+function adminq() {
 	$c = new connection();
 	$c = $c->sdm_connect();
 	$admin_q = new admin_query($c);
